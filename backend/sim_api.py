@@ -247,3 +247,30 @@ async def gravity_deploy_recommendation() -> Dict[str, Any]:
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
 
+
+# Optional integration with separate dawsos-auth-prototype (kept outside CivForge)
+# For demo: protect a governance action with token from the auth proto
+import requests
+from fastapi import Header, HTTPException
+
+AUTH_PROTO_BASE = "http://localhost:8081"
+
+def require_govern_token(authorization: str = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401, "Auth token required (from dawsos-auth-prototype)")
+    token = authorization.split(" ")[1]
+    try:
+        r = requests.get(f"{AUTH_PROTO_BASE}/verify", params={"token": token}, timeout=5)
+        if not r.json().get("valid"):
+            raise HTTPException(401, "Invalid token")
+        claims = r.json().get("claims", {})
+        if "govern" not in claims.get("scope", ""):
+            raise HTTPException(403, "Insufficient scope for governance action")
+        return claims
+    except Exception as e:
+        raise HTTPException(401, f"Auth verification failed: {str(e)}")
+
+@app.post("/governance/protected_advance")
+async def protected_advance(claims: dict = Depends(require_govern_token)):
+    # Example: only allow if valid 'govern' token from the separate auth proto
+    return {"status": "advanced with auth", "claims": claims, "note": "This uses the separate dawsos-auth-prototype (http://localhost:8081) via HTTP only - no code merge with CivForge."}
