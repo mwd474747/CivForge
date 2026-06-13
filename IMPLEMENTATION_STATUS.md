@@ -14,8 +14,9 @@ CivForge = **local Python FastAPI governance backend** running on `0.0.0.0:8080`
 - core/ fully wired with persistence (SQLite gravity_backend.db for state + receipts that survive restarts)
 - bridge/grok_macstudio_bridge.py — direct Grok / swarm control of the 8080 backend
 - tools/civforge_cli.py + tools/gravity_advisor.py — terminal-first drivers and safety layer
-- receipts/ — growing set of real governance-cycle and work-pack markdown artifacts
+- receipts/ — growing set of real governance-cycle and work-pack markdown artifacts (including auth-prototype-push receipts)
 - Gravity deploy tool untouched and canonical for the separate project
+- dawsos-auth-prototype (separate repo https://github.com/mwd474747/dawsos-auth-prototype) — pushed after literal verification; only thin client integration in CivForge/tools/dawsos_auth_client.py + optional protected_advance demo
 
 **Persistence**: Enabled (ReceiptStore now supports db_path). State snapshots + receipts load on startup.
 **MCP readiness**: Stub upgraded in CLI + bridge (ready for full MCP server wrapper when requested).

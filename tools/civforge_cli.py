@@ -13,9 +13,14 @@ Commands:
   python tools/civforge_cli.py propose-deploy
   python tools/civforge_cli.py gate <proposal-id>
   python tools/civforge_cli.py run-deploy   # shows the strict command (does not auto-execute)
+  python tools/civforge_cli.py auth status
+  python tools/civforge_cli.py auth start
+  python tools/civforge_cli.py auth register-device my-device pk123
+  python tools/civforge_cli.py auth token <id> govern
 
 All real changes to the *separate* gravity-mosaic project still require running
 the verified deploy.sh manually after governance receipts.
+Auth prototype (separate) is enabled via tools/auth-prototype/{clone.sh,start.sh} and the thin client.
 """
 
 import argparse
@@ -94,6 +99,13 @@ def main():
     sub.add_parser("mcp-stub", help="MCP compatibility stub — shows how endpoints can be exposed as MCP tools later")
     sub.add_parser("advisor", help="Safe gravity advisor (proposal-only, never auto-executes deploy.sh)")
 
+    # Auth prototype integration (thin client to the separate dawsos-auth-prototype)
+    auth_p = sub.add_parser("auth", help="Auth prototype commands (separate project). Enables protected governance via tokens on :8081")
+    auth_p.add_argument("action", nargs="?", default="status", choices=["status", "start", "register-device", "token", "verify"])
+    auth_p.add_argument("arg1", nargs="?", default=None)
+    auth_p.add_argument("arg2", nargs="?", default=None)
+    auth_p.add_argument("arg3", nargs="?", default=None)
+
     args = p.parse_args()
 
     if args.cmd == "status":
@@ -123,6 +135,46 @@ def main():
         print("  3. Make literal changes ONLY in the separate gravity-mosaic repo")
         print("  4. Then (and only then) run: ./tools/deploy-gravity-mosaic/deploy.sh")
         print("Separation is strictly enforced. CivForge governs; deploy.sh executes under receipts.")
+
+    elif args.cmd == "auth":
+        # Delegate to the thin client for the separate dawsos-auth-prototype (enables protected governance)
+        auth_script = str(ROOT / "tools" / "dawsos_auth_client.py")
+        if args.action in ("register-device", "token", "verify"):
+            cmd = ["python3", auth_script, args.action]
+            if args.arg1:
+                cmd.append(args.arg1)
+            if args.arg2:
+                cmd.append(args.arg2)
+            if args.arg3:
+                cmd.append(args.arg3)
+            subprocess.run(cmd)
+        elif args.action == "start":
+            print("=== Enabling auth function (separate prototype on :8081) ===")
+            print("Recommended: run the dedicated bridge script for literal verification + clone safety")
+            print("  ./tools/auth-prototype/start.sh")
+            print("")
+            print("Direct (if you already have the clone):")
+            print("  cd /Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype")
+            print("  python3 -m uvicorn backend.auth_api:app --reload --host 0.0.0.0 --port 8081")
+            print("")
+            print("After it is running, use this CLI or the client directly to get tokens.")
+            print("Example protected CivForge call requires a 'govern' scope token from the prototype.")
+        elif args.action == "status":
+            print("Auth prototype (separate dawsos-auth-prototype) status:")
+            print("  Canonical location: /Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype")
+            print("  Expected port: 8081")
+            print("  GitHub: https://github.com/mwd474747/dawsos-auth-prototype")
+            print("")
+            print("To enable:")
+            print("  ./tools/auth-prototype/clone.sh")
+            print("  ./tools/auth-prototype/start.sh   # (in another terminal or background)")
+            print("")
+            print("Then obtain tokens and call CivForge /governance/protected_advance with Authorization: Bearer ...")
+            print("Use: python tools/civforge_cli.py auth register-device <id> [pk]")
+            print("     python tools/civforge_cli.py auth token <identity_id> govern")
+            print("See tools/auth-prototype/README.md and HANDOFF_CONTEXT.md for full steps.")
+        else:
+            print("Unknown auth action. Try: status, start, register-device, token, verify")
     else:
         p.print_help()
 
