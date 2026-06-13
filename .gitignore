@@ -1,13 +1,44 @@
 
-# Local runtime state (CivForge backend only)
-gravity_backend.db
-*.log
 __pycache__/
+.DS_Store
+.eggs/
+.export/
+.idea/
+.installed.cfg
+.Python
+.vscode/
+*.db
+*.egg
+*.egg-info/
+*.godot
+*.import
+*.log
 *.pyc
-
-# Archived history (intentional)
-
-# Local receipts that may be ephemeral during active work
+*.pyd
+*.pyo
+*.swo
+*.swp
+*~
 # (keep committed governance receipts, but allow ignoring temp ones if needed)
+# Archived history (intentional)
+# dawsOS-borrowed hygiene
+# Godot legacy (already archived)
+# Local receipts that may be ephemeral during active work
+# Local runtime / generated
+# Local runtime state (CivForge backend only)
+# OS / editor
 # receipts/governance-cycle-*.md
 # receipts/work-pack-*.md
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+gravity_backend.db
+lib/
+lib64/
+parts/
+sdist/
+Thumbs.db
+var/
+wheels/
