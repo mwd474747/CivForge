@@ -1,0 +1,1 @@
+Proposal-first. Quiet-by-default. Receipts mandatory. Grok is trusted federated agent #001.
