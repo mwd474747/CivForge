@@ -1,0 +1,1 @@
+CivForge is the execution layer where DawsOS governance, receipts, and Grok-augmented intelligence are tested in a living simulation.

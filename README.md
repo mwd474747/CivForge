@@ -1,7 +1,7 @@
-# CivForge - Your Civ-Inspired Game
+# CivForge
 
-Repo created successfully! All sprint code and demos are here.
+**Intelligent Civilization Simulator** — A governed, receipt-driven 4X strategy game prototype in Godot 4.
 
-Clone: git clone https://github.com/mwd474747/CivForge.git
+Hybrid Architecture: **DawsOS Planning + OpenClaw Local Runtime + Grok Intelligence + Godot Simulation Layer**
 
-Everything from our conversation is ready.
+This is now the **primary standalone workspace** for the entire game project.
