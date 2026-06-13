@@ -16,12 +16,15 @@ This proposal is **valid** as a clear, honest assessment of the current local re
 - Acknowledgment of zero current public exposure and GitHub vs. local divergence is truthful.
 
 **Honest gaps / caveats surfaced during review** (these must be addressed before any production push):
-- deploy.sh contains hard-coded local paths (`/Users/michaeldawson/...`). It requires abstraction (env vars, config, or wrapper) before it can be safely invoked from a remote backend.
-- Current stack is local-first: no auth, basic logging, no secrets management, limited error handling. "Production-ready governance kernel" is aspirational until these are added.
-- SQLite persistence (just added) is a good start but needs auto-backup, migration strategy, and possibly Postgres for multi-user.
-- No public hosting, domain, or exposure mechanism exists yet (ngrok/Tailscale mentioned as testing options only).
-- MCP cross-web access for other agents remains non-trivial and should be gated behind auth + explicit policy (see previous MCP assessment).
-- FunForge scoring is powerful internally; making it user-facing "game score" requires UI and careful UX design.
+- deploy.sh contains hard-coded local paths (`/Users/michaeldawson/...`). It requires abstraction (env vars, config, or wrapper) before it can be safely invoked from a remote backend. **This is now REQUIRED for all deployment paths.**
+- Current stack is local-first: no auth, basic logging, no secrets management, limited error handling. "Production-ready governance kernel" is aspirational until these are added. **All items below are now REQUIRED (no optionals).**
+- SQLite persistence (just added) is a good start but needs auto-backup, migration strategy, and possibly Postgres for multi-user. **REQUIRED.**
+- No public hosting, domain, or exposure mechanism exists yet (ngrok/Tailscale mentioned as testing options only). **Full hosting + exposure (gated by auth) is REQUIRED.**
+- MCP cross-web access for other agents remains non-trivial and should be gated behind auth + explicit policy (see previous MCP assessment). **REQUIRED for agent-play end goal.**
+- FunForge scoring is powerful internally; making it user-facing "game score" requires UI and careful UX design. **Gamified UI is REQUIRED.**
+- **New Required: Simulation layer for game mechanics** (simple, pure-Python, infinitely extendible dynamics/yields/events/end-conditions feeding the orchestrator/receipts/gate, without any legacy Godot code).
+- **New Required: Expanded agent registry** with specialists for game mechanics design, player AI, UI coordination, infra governance, handoff (per dawsOS-inspired AGENTS.md updates).
+- **New Required: Civ Game Layer** – simple core mechanics (turns, resources, work packs, FunForge quality/fun scoring) that are infinitely extendible via governed proposals. End goal: Humans play via dashboard, or build/run agents to play via API/MCP/auth. All extensions developed through the governed play loop itself (propose → FunForge gate → receipt). No revival of old legacy Godot MVP items or pre-pivot intent.
 
 **Verdict**: Proposal accepted as the authoritative production/deployment assessment. Locked below and into ROADMAP.md, extension_roadmap_v2.md, and IMPLEMENTATION_STATUS.md.
 
@@ -49,18 +52,29 @@ This proposal is **valid** as a clear, honest assessment of the current local re
 
 **Important boundary**: Any dashboard or interactive layer built in CivForge is part of the *CivForge* governance tooling, not part of the gravity-mosaic project. If a public viewer/explorer is desired for gravity-mosaic itself, it should live in the gravity-mosaic repo (or a dedicated viewer repo), with CivForge only providing governance receipts and recommendations via the deploy bridge.
 
-## Immediate Next Steps (Locked)
-Reply with letter (or custom) to trigger execution:
+## Immediate Next Steps (Locked) — All Previous Optionals Elevated to REQUIRED
+Reply with letter (or custom) to trigger execution. All items are now mandatory to achieve the locked end goal (playable Civ game for humans or agent-builders, with simple but infinitely extendible mechanics governed by the system itself).
 
-**A)** Push Dockerfile + docker-compose + Railway/Render-ready config + starter HTMX/Streamlit dashboard (live production instance + game-like UI).
+**A)** Push Dockerfile + docker-compose + Railway/Render-ready config + starter HTMX/Streamlit dashboard (live production instance + game-like UI) — **REQUIRED**. Include initial simple Civ game core (turns/resources/work-packs/FunForge scoring) + simulation extension point.
 
-**B)** Add auth + persistence hardening + run first autonomous deploy recommendation cycle for gravity-mosaic (using the live Grok bridge).
+**B)** Add auth + persistence hardening + run first autonomous deploy recommendation cycle for gravity-mosaic (using the live Grok bridge) — **REQUIRED**. Plus first governed mechanics extension proposal (e.g. basic dynamics/yields as pluggable module).
 
-**C)** Generate full production roadmap + choose primary hosting + set up test exposure (ngrok/Tailscale) with security notes.
+**C)** Generate full production roadmap + choose primary hosting + set up test exposure (ngrok/Tailscale) with security notes — **REQUIRED**. Add MCP wrapper (auth-gated) for agent players.
 
-**D)** Make gravity-mosaic the visible product first — simple public web viewer + CivForge as governed backend.
+**D)** Make gravity-mosaic the visible product first — simple public web viewer + CivForge as governed backend — **OPTIONAL but parallel track allowed** (CivForge game layer remains primary for human/agent play).
 
-**E)** Custom (e.g. "Keep fully local: launchd auto-start + daily summary receipts emailed" or "Turn FunForge into visible user-facing quality game score on the dashboard").
+**E)** Custom (e.g. "Keep fully local: launchd auto-start + daily summary receipts emailed" or "Turn FunForge into visible user-facing quality game score on the dashboard") — **Base local setup REQUIRED** as foundation before any hosting.
+
+**F) NEW — Civ Game Development Track (REQUIRED)**: 
+- Implement simple core mechanics in a clean extension layer (core/game/ or pluggable modules): Turn cycles (via existing advance), resource economy, founding actions, FunForge as core "fun/quality" scoring and engagement mechanic.
+- Infinite extendibility: MechanicsRegistry + proposal system. Humans/agents propose new mechanics (new resources, events, strategy modules, victory conditions, AI player behaviors). Governed: FunForge gate on "emergence of new playstyles + pacing + juice". If passed, added as extendible module. All development happens through the governed play loop (advance cycles as "turns", propose improvements, receipt history).
+- Human play: Full gamified dashboard (Path A) with civ metaphors (resources as yields, work packs as cities/foundings, fun_score as player fun/score, agent decisions visible).
+- Agent play: Complete support via API + MCP (auth-gated) + CLI + handoff. External agents can register (auth), participate in cycles, propose extensions, "play" autonomously.
+- No legacy: Pure new simple Python mechanics. No Godot, no pre-pivot 4X code revival. Extensions feed the existing orchestrator/receipts/gate without mutating separate projects (gravity/auth).
+- Agents: Expand role registry (per AGENTS.md) with required GameMechanicDesigner, PlayerAgent (for AI play/strategy), MechanicsSimulator, UICoordinator, InfraGovernor.
+- Governance: Every mechanic extension or game feature is a governed work pack. Use the system to develop the game (as simulated in prior governed play: advance → propose mechanics → FunForge gate → receipt).
+
+**Quality Gates (Non-Negotiable)**: All extensions (including Civ Game mechanics) must pass FunForge ≥80 (target ≥88 for player-facing). Strict separation maintained. Receipts first-class. Mac Studio (or deployed equivalent) 8080 + core/ is truth. Literal verification on all changes.
 
 ## Locked References
 - This file: `planning/production_deployment_assessment.md`
