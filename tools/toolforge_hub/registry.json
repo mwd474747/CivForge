@@ -1,0 +1,10 @@
+{
+  "tools": [
+    {"name": "run_full_simulation", "params": ["turns", "civs"]},
+    {"name": "adjust_balance", "params": ["param", "value"]},
+    {"name": "generate_event", "params": ["type", "intensity"]},
+    {"name": "export_html5", "params": []},
+    {"name": "score_fun", "params": []},
+    // + 20 more from the table
+  ]
+}
