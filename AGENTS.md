@@ -47,6 +47,12 @@ Before doing anything else (no mental notes, text > brain):
 
 The FastAPI (backend/sim_api.py) + core/ (AgentBrain, FunForge, GovernanceOrchestrator, ReceiptStore) is the persistent Mac Studio truth (8080). CLI + grok_macstudio_bridge.py + tools/auth-prototype/ + deploy.sh are the drivers. Auth prototype and gravity-mosaic are separate (see SEPARATION.md). The deploy tool (and auth bridge) are sacred.
 
-**Current Reality Tie-in (post 6d55d97 push)**: Auth bridge live, handoff package + context prompt for other agents, governed syncs with receipts, full literal process on CivForge itself. Update this file only after impact check + propose/gate in the 8080 surface.
+**Current Reality Tie-in (post recent locks + Git tools work + orphan cleanup)**: 
+- Auth bridge live, handoff package + context prompt for other agents, governed syncs with receipts, full literal process on CivForge itself.
+- Locked Civ Game plan (see receipts/LOCKED-CIV-GAME-PLAN-*.md and planning/): All prior optionals (simulation layer, dashboard, MCP, expanded agents, Docker/hosting) now REQUIRED. Simple base mechanics + infinite extendibility via governed proposals.
+- Git lanes active via docs/GIT_LANES_POLICY.md (worktrees + gh + Draft PRs for parallel Civ Game tracks: mechanics, simulation, dashboard, agent-play, infra). Use for safe multi-lane development without violating separation.
+- Pre-realign orphans cleaned (moved to _archive/pre-realign-orphans/ and receipts/_archive/); see receipts/orphan-cleanup-*.md and docs/CIV_GAME_MECHANICS_INSPIRATION.md (abstract concepts only, e.g., emergent dynamics for the required simulation layer).
+- agents/role_registry.json created as machine-readable registry (dawsOS-inspired; keep synced with this doc and core/orchestrator.py).
+- Update this file only after impact check (grep/wc or GitNexus-style) + propose/gate in the 8080 surface + new receipt.
 
 (No more Godot MVP references in active agent behavior — archived.)

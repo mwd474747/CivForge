@@ -43,11 +43,28 @@ These patterns are designed to be repeatable and borrowable for governing other 
 - .gitignore: db, logs, pyc, _archive (optional), ephemeral receipts.
 - Keep committed receipts/ as audit trail.
 
+## 9. Civ Game Layer as Governed Extension (Locked)
+- Simple core mechanics (turns, resources/yields, founding actions, FunForge fun/quality scoring) that are infinitely extendible via pluggable modules (MechanicsRegistry, strategies, events, victory conditions).
+- All extensions developed through the governed play loop (propose as work packs → FunForge gate on emergence/pacing/juice → integrate).
+- Human play: Required gamified Command Center dashboard (agent avatars, receipt timeline, workstream map, propose/gate/quality HUD).
+- Agent play: Full API/MCP (auth-gated)/CLI/handoff support — external agents register and participate.
+- See: planning/production_deployment_assessment.md (required elements), ROADMAP.md (Civ Game track), AGENTS.md (expanded role registry: GameMechanicDesigner, PlayerAgent, MechanicsSimulator, UICoordinator, InfraGovernor; plus agents/role_registry.json), docs/GIT_LANES_POLICY.md (parallel lanes), docs/CIV_GAME_MECHANICS_INSPIRATION.md (abstract historical concepts only for the required simulation layer), receipts/LOCKED-CIV-GAME-PLAN-*.md and orphan-cleanup-*.md.
+- No legacy: Pure new Python; feeds existing orchestrator/receipts/gate. Separation preserved. Pre-realign artifacts consolidated to _archive/.
+
+## 10. Git Lanes for Parallel Development (Governed Meta)
+- Use Git Worktrees + gh CLI + Draft PRs for safe parallel lanes (e.g., lane/civ-game-mechanics, lane/simulation-layer, lane/dashboard, lane/agent-play, lane/infra-required).
+- All lane work follows literal verification, propose/gate/receipt.
+- Policy doc: docs/GIT_LANES_POLICY.md (do not edit SEPARATION.md for this).
+- Policy: docs/GIT_LANES_POLICY.md (do not put branching rules in SEPARATION.md).
+- See AGENTS.md (governed meta-actions, bootstrap), ORCHESTRATION_PATTERNS.md.
+
 ## Usage for Other Projects
 1. Copy/adapt core/ patterns into new governance workspace.
 2. Create SEPARATION.md.
 3. Build deploy-*/ bridge with literal rules specific to target.
 4. Run backend + CLI for governance.
 5. Use receipts/ for all history.
+6. For game-like layers: Adopt Civ Game patterns (simple extendible mechanics + governed proposals + role registry + lanes).
+7. Cross-workspace: Use HANDOFF_CONTEXT.md + prompts/other_grok_context_update.md for bootstrap.
 
-These keep workspaces clean, projects separate, and work auditable/low-waste.
+These keep workspaces clean, projects separate, and work auditable/low-waste. Extend the patterns for "Civ Game as first-class governed playable layer".

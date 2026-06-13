@@ -13,10 +13,11 @@ CivForge = **local Python FastAPI governance backend** running on `0.0.0.0:8080`
 - backend/sim_api.py (earlier FastAPI shape preserved: /state, /found_city with detailed receipt, /advance_turn, /integrate + new /governance/*)
 - core/ fully wired with persistence (SQLite gravity_backend.db for state + receipts that survive restarts)
 - bridge/grok_macstudio_bridge.py — direct Grok / swarm control of the 8080 backend
-- tools/civforge_cli.py + tools/gravity_advisor.py — terminal-first drivers and safety layer
-- receipts/ — growing set of real governance-cycle and work-pack markdown artifacts (including auth-prototype-push receipts)
+- tools/civforge_cli.py + tools/gravity_advisor.py + tools/auth-prototype/ — terminal-first drivers, safety layer, and auth enablement bridge
+- receipts/ — growing set of real governance-cycle and work-pack markdown artifacts (including auth-prototype-push, git-tools, LOCKED-CIV-GAME-PLAN, mechanics-extension-sim receipts)
 - Gravity deploy tool untouched and canonical for the separate project
 - dawsos-auth-prototype (separate repo https://github.com/mwd474747/dawsos-auth-prototype) — pushed after literal verification; only thin client integration in CivForge/tools/dawsos_auth_client.py + optional protected_advance demo
+- **Civ Game Layer (Locked, Required)**: Planning for simple core mechanics + simulation layer + gamified Command Center (Path A) + expanded agents (GameMechanicDesigner, PlayerAgent, etc.) + required infra (Docker, hosting, MCP, auth). All extensions governed via the kernel. See planning/production_deployment_assessment.md, ROADMAP.md, AGENTS.md (role registry + agents/role_registry.json), docs/GIT_LANES_POLICY.md, docs/CIV_GAME_MECHANICS_INSPIRATION.md, receipts/LOCKED-CIV-GAME-PLAN-*.md and orphan-cleanup-*.md. Pre-realign orphans consolidated to _archive/pre-realign-orphans/ and receipts/_archive/. No implementation yet; kernel ready for governed development.
 
 **Persistence**: Enabled (ReceiptStore now supports db_path). State snapshots + receipts load on startup.
 **MCP readiness**: Stub upgraded in CLI + bridge (ready for full MCP server wrapper when requested).

@@ -37,7 +37,7 @@ python tools/civforge_cli.py propose-deploy
 ./tools/deploy-gravity-mosaic/deploy.sh
 ```
 
-See `setup_hybrid.sh --start-backend` for a one-command local activation.
+See direct FastAPI start in Quick Start above, or `python tools/civforge_cli.py status` once backend is running. (setup_hybrid.sh and other pre-realign artifacts moved to _archive/pre-realign-orphans/ or receipts/_archive/ during governed cleanup; see receipts/orphan-cleanup-*.md and docs/CIV_GAME_MECHANICS_INSPIRATION.md for history and extracted concepts.)
 
 ## What CivForge Actually Is (initial intent, now dominant)
 
@@ -49,7 +49,19 @@ See `setup_hybrid.sh --start-backend` for a one-command local activation.
 - governance/ and receipts/ as first-class artifacts.
 - All "simulation" now means governance cycles over real work on the gravity physics knowledge graph (Biefeld-Brown models, precision porting, transcript extensions, etc.).
 
-The 4X/civ metaphor is retained only as an internal model for workstreams, attention budgets ("resources"), quality ("fun_score"), and "founding" work items. The product is governed deployments and agentic process improvement for the separate project.
+The 4X/civ metaphor is retained as an internal model for workstreams, attention budgets ("resources"), quality ("fun_score"), and "founding" work items — and as the foundation for the **Civ Game Layer** (see locked planning docs).
+
+**Civ Game Layer (Locked End Goal)**: A playable game with simple core mechanics (turns/cycles, resources/yields from work packs, founding/propose actions, FunForge as central fun/quality/engagement scoring) that is infinitely extendible. Humans play directly via the required gamified Command Center dashboard. Humans or agents can build and run AI players (full support via API, MCP (auth-gated), CLI, handoff). All extensions (new mechanics, simulation layer, strategies, victory conditions) are developed through the governed play loop itself (propose as work packs → FunForge gate → pluggable modules feeding the orchestrator/receipts/gate). No legacy Godot or pre-pivot revival.
+
+See:
+- planning/production_deployment_assessment.md and planning/extension_roadmap_v2.md (locked required elements: simulation layer, dashboard, expanded agents, Docker/hosting/MCP, etc.)
+- ROADMAP.md (Civ Game track)
+- AGENTS.md (role registry including GameMechanicDesigner, PlayerAgent, MechanicsSimulator; bootstrap with HANDOFF + prompts/other_grok_context_update.md)
+- docs/GIT_LANES_POLICY.md (parallel lanes for mechanics, simulation, dashboard, agent-play, infra)
+- docs/patterns/borrowable-governance-patterns.md (core patterns + Civ Game extensions)
+- receipts/LOCKED-CIV-GAME-PLAN-*.md
+
+The delivered value is high-fidelity, low-waste, fully receipted, agent-orchestrated governance — with the Civ game as a first-class, governed, playable layer for human enjoyment and agent co-creation on top of the same kernel used for gravity work.
 
 ## Structure (post-aggressive realign)
 

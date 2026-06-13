@@ -14,12 +14,13 @@
 **Agent Role Registry Reference** (see AGENTS.md for full; keep aligned with `backend/sim_api.py` + core/orchestrator.py):
 - grok, harper (memory/systems), sebastian (governance/safety). Capabilities: govern, auth, handoff, deploy-advisor, literal-verify.
 
-**Current Priorities** (post realign + auth/handoff):
+**Current Priorities** (post realign + auth/handoff + locked Civ Game):
 1. Core Python patterns (AgentBrain, FunForge, Governance, Orchestrator, ReceiptStore with SQLite — done and live).
 2. FastAPI workspace (state shape + /state /found_city /advance_turn + /governance/* + protected auth demo — done).
 3. CLI + bridges + auth-prototype/ as drivers (auth subcommands, clone/start for :8081, gravity advisor, deploy.sh).
 4. Handoff / cross-agent support (HANDOFF_CONTEXT.md, context update prompt, bootstrap in AGENTS — done + pushed).
 5. Governed meta + self-gov (literal process on CivForge itself, receipts for syncs/configs, role registry).
 6. All work on separate targets (gravity-mosaic, auth-prototype) remains under literal disk + verification contract + bridges only. Receipts mandatory.
+7. **Civ Game Layer (REQUIRED, locked)**: Implement simple core mechanics + simulation layer + pluggable extensions (MechanicsRegistry) as governed work. Use lanes (docs/GIT_LANES_POLICY.md) for parallel development of mechanics, simulation, dashboard (human play), agent player support. All via the existing loop (agents decide/propose in cycles → FunForge gate → receipt → integrate). See planning/ docs and receipts/LOCKED-CIV-GAME-PLAN-*.md. Kernel is ready; actual layer is the next governed extension target.
 
 **Borrowed from dawsOS sister patterns**: Receipt-first evidence (reconstructable), proposal/dispatch-only for mutations, GitNexus-style impact before config changes, registries for role alignment, write-it-down discipline, specialized bootstrap for handoff contexts, three-roots separation hygiene. See docs/patterns/borrowable-governance-patterns.md for reuse.

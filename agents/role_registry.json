@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "updated": "2026-06-13",
+  "description": "Machine-readable agent role registry for CivForge (dawsOS-inspired). Keep in sync with AGENTS.md, sim_api.py registrations, and core/orchestrator.py. Used for dynamic swarm, lanes, and Civ Game extensions.",
+  "roles": [
+    {
+      "id": "grok",
+      "name": "Grok (Main Orchestrator / ForgeMaster-Grok)",
+      "capabilities": ["govern", "handoff", "meta-config", "auth-tokens", "deploy-advice", "lane-coordination"],
+      "description": "Lead for governance cycles, proposals, bootstrap of other agents, and meta-work (including Civ Game lanes)."
+    },
+    {
+      "id": "harper",
+      "name": "Harper (Agentic Systems & Memory)",
+      "capabilities": ["memory", "research", "verify", "reflection"],
+      "description": "AgentBrain receipt memory + goal stack + reflection. Drives research/verify in Civ Game mechanics extensions."
+    },
+    {
+      "id": "sebastian",
+      "name": "Sebastian (Governance & Safety)",
+      "capabilities": ["funforge-gate", "proposal-first", "separation-enforce", "literal-verify"],
+      "description": "FunForge scoring and GovernanceGate. Enforces quality and rules for all Civ Game and gravity work."
+    },
+    {
+      "id": "game-mechanic-designer",
+      "name": "GameMechanicDesigner",
+      "capabilities": ["mechanics-propose", "simulation-layer", "pluggable-modules", "extendibility"],
+      "description": "Specialist for proposing and refining simple but infinitely extendible Civ Game mechanics (yields, events, strategies, victory conditions). Works in lane/civ-game-mechanics."
+    },
+    {
+      "id": "player-agent",
+      "name": "PlayerAgent",
+      "capabilities": ["agent-play", "strategy-builder", "mcp-participation", "handoff-bootstrap"],
+      "description": "Enables external agents (or simulated) to play the Civ game or build strategies. Supports human/agent play end goal via API/MCP/auth."
+    },
+    {
+      "id": "mechanics-simulator",
+      "name": "MechanicsSimulator",
+      "capabilities": ["what-if", "funforge-scoring", "extension-testing"],
+      "description": "Runs simulations of proposed mechanics extensions before FunForge gate. Feeds the governed play loop."
+    },
+    {
+      "id": "ui-coordinator",
+      "name": "UICoordinator",
+      "capabilities": ["dashboard", "human-play-ui", "workstream-map", "fun-score-hud"],
+      "description": "Coordinates the required gamified Command Center for human play of the Civ game."
+    },
+    {
+      "id": "infra-governor",
+      "name": "InfraGovernor",
+      "capabilities": ["docker", "hosting", "mcp-exposure", "auth-hardening"],
+      "description": "Governs the required infra (Docker, hosting, MCP, auth) for the Civ Game and overall system."
+    }
+  ],
+  "notes": "Update this file + AGENTS.md + sim_api.py in a single governed work pack. Reference in bootstrap (AGENTS.md). Use for lane assignment and Civ Game development."
+}
