@@ -1,1 +1,1 @@
-**Receipt WP-001** ✅ Outcome: Scaffold pushed. Status: Success
+**Receipt WP-001** ✅ Outcome: Repo realigned. Godot MVP removed. FastAPI + core Python governance workspace active for the separate gravity-mosaic project. Status: Success

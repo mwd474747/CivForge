@@ -1,1 +1,3 @@
-CivForge is the execution layer where DawsOS governance, receipts, and Grok-augmented intelligence are tested in a living simulation.
+CivForge is the local execution + governance layer on this machine where DawsOS receipt-first patterns, AgentBrains, FunForge quality gates, and Grok intelligence are used to safely and efficiently drive all work on the *separate* gravity-mosaic-knowledge-graph project (and future projects).
+
+The Godot 4X playable MVP has been removed. The persistent FastAPI workspace (matching the earlier backend the user requested) + pure Python core/ is now the center. All real changes to gravity-mosaic are executed exclusively through the literal-verification deploy tool under governance receipts.
