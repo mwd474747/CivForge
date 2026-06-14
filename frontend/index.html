@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<html><head><title>CivForge Empire • Live</title><script src="https://unpkg.com/htmx.org"></script></head><body>
+<h1>CivForge Live Dashboard</h1>
+<button onclick="fetch('http://localhost:8080/advance_turn').then(()=>location.reload())">Advance Turn</button>
+<div id="state">Loading...</div>
+<script>fetch('http://localhost:8080/state').then(r=>r.text()).then(t=>document.getElementById('state').innerHTML=t);</script>
+</body></html>
