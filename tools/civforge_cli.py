@@ -98,6 +98,7 @@ def main():
     # === New commands added per Mac Studio backend lock-in receipt (swarm execution) ===
     sub.add_parser("mcp-stub", help="MCP compatibility stub — shows how endpoints can be exposed as MCP tools later")
     sub.add_parser("advisor", help="Safe gravity advisor (proposal-only, never auto-executes deploy.sh)")
+    sub.add_parser("nexus-poll", help="Poll dawsos-nexus (8082) for pending commands and surface as governed proposals (thin bridge, commands propose not execute). Supports --once/--loop.")
 
     # Auth/control via dawsos-nexus (8082) thin client (replaces archived prototype)
     auth_p = sub.add_parser("auth", help="Auth prototype commands (separate project). Enables protected governance via tokens on :8081")
@@ -135,6 +136,13 @@ def main():
         print("  3. Make literal changes ONLY in the separate gravity-mosaic repo")
         print("  4. Then (and only then) run: ./tools/deploy-gravity-mosaic/deploy.sh")
         print("Separation is strictly enforced. CivForge governs; deploy.sh executes under receipts.")
+
+    elif args.cmd == "nexus-poll":
+        poller_script = str(ROOT / "tools" / "nexus_command_poller.py")
+        print("=== dawsos-nexus Command Poller (thin bridge) ===")
+        print("Commands from nexus are surfaced as 8080 proposals (never auto-executed).")
+        print("Run directly with --loop for continuous: python tools/nexus_command_poller.py --loop")
+        subprocess.run(["python3", poller_script, "--once"])
 
     elif args.cmd == "auth":
         # Delegate to the thin client for the separate dawsos-auth-prototype (enables protected governance)
