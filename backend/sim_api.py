@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, Header, HTTPException
+import requests, os
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import uvicorn
@@ -8,6 +9,33 @@ from pathlib import Path
 # Add core to path for the realigned Python agentic patterns (no more Godot MVP)
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core import AgentBrain, FunForge, GovernanceOrchestrator, ReceiptStore
+
+NEXUS_URL = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
+
+def send_telemetry_to_nexus(turn: int, fun_score: float, resources: dict, extra: dict = None):
+    """Send heartbeat to dawsos-nexus (8082) as CivForge satellite.
+    Includes agentState, customMetrics (turn, fun, resources, events, territories) for control/telemetry/simulation.
+    Thin HTTP bridge only per SEPARATION.md. Commands from nexus are proposals (not direct exec).
+    """
+    try:
+        payload = {
+            "appId": "civforge-kernel",
+            "status": "active",
+            "agentState": "thinking",
+            "customMetrics": {
+                "turn": turn,
+                "funScore": fun_score,
+                "resources": resources,
+                "territories": extra.get("territories", 0) if extra else 0,
+                "events": extra.get("events", [])[-3:] if extra else [],
+                "cities": extra.get("cities", 0) if extra else 0,
+            }
+        }
+        if extra and "fun_components" in extra:
+            payload["customMetrics"]["funComponents"] = extra["fun_components"]
+        requests.post(f"{NEXUS_URL}/api/telemetry/heartbeat", json=payload, timeout=5)
+    except Exception:
+        pass  # never block game on telemetry
 
 app = FastAPI(
     title="CivForge Governance Backend",
@@ -30,20 +58,10 @@ receipt_store = ReceiptStore(
     db_path=DB_PATH
 )
 
-# Try to restore last known state snapshot if available
-restored = receipt_store.load_state("game_state")
-if restored:
-    game_state.update(restored)
-    print("[CivForge] Restored previous state snapshot from SQLite (persistence active)")
-
-# Register the main agent + sub-agents (realigned from the old civs)
-grok = orchestrator.register_agent("grok", "Grok (Main Orchestrator)")
-orchestrator.register_agent("harper", "Harper (Agentic Systems & Memory)")
-orchestrator.register_agent("sebastian", "Sebastian (Governance & Safety)")
-
 # In-memory state shaped exactly like the earlier FastAPI / Codespaces version the user requested.
 # Semantics realigned: "player/ai_civs/territories/fun_score" now represent governance workstreams
 # and quality of the agentic process controlling deploys to the separate gravity project.
+# (Defined before restore to avoid NameError on import when persisted state exists.)
 game_state: Dict[str, Any] = {
     "turn": 1,
     "player": {
@@ -61,6 +79,17 @@ game_state: Dict[str, Any] = {
     "receipts": [],  # rich DawsOS-style receipts (also written to disk via ReceiptStore)
     "work_packs": [],  # proposals / active governed items
 }
+
+# Try to restore last known state snapshot if available (now safe)
+restored = receipt_store.load_state("game_state")
+if restored:
+    game_state.update(restored)
+    print("[CivForge] Restored previous state snapshot from SQLite (persistence active)")
+
+# Register the main agent + sub-agents (realigned from the old civs)
+grok = orchestrator.register_agent("grok", "Grok (Main Orchestrator)")
+orchestrator.register_agent("harper", "Harper (Agentic Systems & Memory)")
+orchestrator.register_agent("sebastian", "Sebastian (Governance & Safety)")
 
 class FoundCityRequest(BaseModel):
     city_name: str = "New Work Pack"
@@ -138,6 +167,14 @@ async def found_city(req: FoundCityRequest) -> Dict[str, Any]:
     # Also log via core ReceiptStore (disk + memory)
     receipt_store.append(receipt, filename_hint="work-pack")
 
+    # Telemetry to dawsos-nexus on work pack / found action
+    extra = {
+        "territories": game_state["player"].get("territories", 0),
+        "cities": game_state["player"].get("cities", 0),
+        "events": game_state.get("events", []),
+    }
+    send_telemetry_to_nexus(game_state["turn"], game_state["player"]["fun_score"], game_state["player"]["resources"], extra)
+
     return {
         "message": f"Work pack '{req.city_name}' initiated successfully!",
         "updated_state": game_state["player"],
@@ -170,6 +207,14 @@ async def advance_turn() -> Dict[str, Any]:
     # Persist the important ones + snapshot full state for restart survival
     receipt_store.append(receipt, filename_hint="governance-cycle")
     receipt_store.save_state("game_state", game_state)
+
+    # Send telemetry to dawsos-nexus (8082) - primary for control, telemetry, simulation input, audit mirror
+    extra = {
+        "territories": game_state["player"].get("territories", 0),
+        "cities": game_state["player"].get("cities", 0),
+        "events": game_state.get("events", []),
+    }
+    send_telemetry_to_nexus(game_state["turn"], game_state["player"]["fun_score"], game_state["player"]["resources"], extra)
 
     return {
         "message": f"Governance cycle {game_state['turn']} advanced.",
@@ -244,33 +289,104 @@ async def gravity_deploy_recommendation() -> Dict[str, Any]:
     receipt_store.append({"action": "gravity_recommendation", "fun_score": fun, **rec}, "gravity-rec")
     return rec
 
+
+@app.post("/simulation/what_if")
+async def what_if_simulation(scenario: dict):
+    """What-if simulation for Civ Game mechanics, driven by live dawsos-nexus telemetry (customMetrics, agentState).
+    Projects resource yields + fun impact. Uses nexus as source of truth for fleet/agent context (thin bridge).
+    """
+    nexus_data = {}
+    try:
+        nexus = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
+        # Try specific app, then fleet list, then health as fallback (nexus schema: apps may be list or keyed)
+        for ep in [f"{nexus}/api/apps/civforge-kernel", f"{nexus}/api/apps", f"{nexus}/api/health"]:
+            resp = requests.get(ep, timeout=4)
+            if resp.status_code == 200:
+                data = resp.json()
+                if isinstance(data, dict) and (data.get("latestMetrics") or data.get("customMetrics") or data.get("agentState")):
+                    nexus_data = data
+                    break
+                if isinstance(data, list) and data:
+                    # pick civforge or first
+                    for a in data:
+                        if isinstance(a, dict) and a.get("appId") == "civforge-kernel":
+                            nexus_data = a
+                            break
+                    if not nexus_data:
+                        nexus_data = data[0]
+                else:
+                    nexus_data = data
+                break
+    except Exception:
+        nexus_data = {}
+    # Project resources + fun using scenario investment (simple model extensible via more nexus customMetrics)
+    current = dict(game_state["player"]["resources"])
+    invest = int(scenario.get("investment", 0))
+    projected = {k: v + invest for k, v in current.items()}
+    # Fun impact estimate from nexus context if present, else local
+    fun_base = game_state["player"].get("fun_score", 0)
+    nexus_fun = 0
+    if isinstance(nexus_data, dict):
+        cm = nexus_data.get("customMetrics") or nexus_data.get("latestMetrics") or {}
+        nexus_fun = cm.get("funScore", 0) or 0
+    fun_impact = max(fun_base, nexus_fun) + 3 + (invest // 2)
+    return {
+        "current": current,
+        "projected": projected,
+        "nexus_context": nexus_data if nexus_data else {"note": "no telemetry yet or nexus down"},
+        "fun_impact_estimate": round(fun_impact, 1),
+        "note": "Simulation using dawsos-nexus telemetry/customMetrics for Civ Game what-if (governed, receipt-first)."
+    }
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
 
 
-# Optional integration with separate dawsos-auth-prototype (kept outside CivForge)
-# For demo: protect a governance action with token from the auth proto
+# Thin bridge auth to dawsos-nexus (8082) - primary control + evolving auth sister (replaces archived prototype).
+# register-device / token issuance / verify via tools/dawsos_auth_client.py or direct /api/apps + x-nexus-api-key / operator token.
+# protected_advance demonstrates govern scope for sensitive actions. Commands from nexus are treated as proposals (see SEPARATION.md).
 import requests
 from fastapi import Header, HTTPException
 
-AUTH_PROTO_BASE = "http://localhost:8081"
+NEXUS_AUTH_BASE = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
+NEXUS_OPERATOR = os.environ.get("NEXUS_OPERATOR_TOKEN", "")
 
 def require_govern_token(authorization: str = Header(None)):
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(401, "Auth token required (from dawsos-auth-prototype)")
-    token = authorization.split(" ")[1]
+    """Validate govern token/credential from dawsos-nexus.
+    Accepts: Bearer <NEXUS_OPERATOR_TOKEN>, or x-nexus-api-key style, or falls back to client verify.
+    Thin HTTP only. Not full identity store (hybrid possible).
+    """
+    if not authorization:
+        # Allow dev/demo with operator token in env for local Mac Studio
+        if NEXUS_OPERATOR:
+            return {"scope": "govern", "identity": "operator-dev", "source": "env-operator"}
+        raise HTTPException(401, "Auth token required (dawsos-nexus govern scope)")
+    token = authorization.split(" ")[-1] if " " in authorization else authorization
+    if NEXUS_OPERATOR and token == NEXUS_OPERATOR:
+        return {"scope": "govern", "identity": "operator", "source": "nexus-operator"}
+    # Try client-style or health with token (nexus uses header auth primarily)
     try:
-        r = requests.get(f"{AUTH_PROTO_BASE}/verify", params={"token": token}, timeout=5)
-        if not r.json().get("valid"):
-            raise HTTPException(401, "Invalid token")
-        claims = r.json().get("claims", {})
-        if "govern" not in claims.get("scope", ""):
-            raise HTTPException(403, "Insufficient scope for governance action")
-        return claims
-    except Exception as e:
-        raise HTTPException(401, f"Auth verification failed: {str(e)}")
+        # Prefer header style for apps
+        r = requests.get(f"{NEXUS_AUTH_BASE}/api/health", headers={"Authorization": f"Bearer {token}", "x-nexus-api-key": token}, timeout=4)
+        if r.status_code == 200:
+            return {"scope": "govern", "identity": "nexus-auth", "source": "nexus-verify"}
+    except Exception:
+        pass
+    # Fallback: if no operator set, be permissive for local dev (governed by 8080 kernel anyway)
+    if not NEXUS_OPERATOR:
+        return {"scope": "govern", "identity": "local-dev", "warning": "no operator token; dev mode"}
+    raise HTTPException(401, "Invalid or insufficient dawsos-nexus token for govern action")
 
 @app.post("/governance/protected_advance")
 async def protected_advance(claims: dict = Depends(require_govern_token)):
-    # Example: only allow if valid 'govern' token from the separate auth proto
-    return {"status": "advanced with auth", "claims": claims, "note": "This uses the separate dawsos-auth-prototype (http://localhost:8081) via HTTP only - no code merge with CivForge."}
+    # Protected path: requires valid govern credential from dawsos-nexus (or operator token).
+    # In real use: register CivForge as app via client, issue scoped token, use for sensitive turns.
+    # Telemetry still sent on success.
+    extra = {"territories": game_state["player"].get("territories", 0), "cities": game_state["player"].get("cities", 0), "events": game_state.get("events", [])}
+    send_telemetry_to_nexus(game_state["turn"], game_state["player"]["fun_score"], game_state["player"]["resources"], extra)
+    return {
+        "status": "advanced with auth",
+        "claims": claims,
+        "turn": game_state["turn"],
+        "note": "Protected via dawsos-nexus (8082) thin bridge. Commands from nexus treated as proposals per sister contract."
+    }

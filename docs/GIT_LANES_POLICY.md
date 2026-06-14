@@ -8,7 +8,6 @@ Enable safe parallel development ("lanes") for required Civ Game elements while 
 - Literal verification before any change
 - Receipt-first + FunForge gate (≥80)
 - Mac Studio 8080 + core/ as truth
-- No direct mutation of separate projects (gravity-mosaic, dawsos-auth-prototype)
 
 ## Allowed Lanes (Mapped to Locked Civ Game Plan)
 - lane/civ-game-mechanics: Simple core + infinite extensions (yields, events, strategies)
@@ -46,3 +45,4 @@ This doc itself is a governed meta-action. Update only after propose → gate �
 - References: AGENTS.md, ORCHESTRATION_PATTERNS.md, production assessment (all required), HANDOFF_CONTEXT.md.
 
 All lanes must produce receipts. Literal verification is non-negotiable.
+# nexus_ctrl reference (dawsos-nexus local) added as per proposal for lane-required-infra and lane-meta-data-core

@@ -56,3 +56,39 @@ The FastAPI (backend/sim_api.py) + core/ (AgentBrain, FunForge, GovernanceOrches
 - Update this file only after impact check (grep/wc or GitNexus-style) + propose/gate in the 8080 surface + new receipt.
 
 (No more Godot MVP references in active agent behavior — archived.)
+
+## Civ Project Configuration: Full Terminal Execution Approval + dawsOS Tool Leverage (Formalized)
+**This declaration is the canonical project-scoped policy for the CivForge / Civ Game workspace (the "civ project").**
+
+Per user directive ("update your configuration for civ project for full approval to execute on the terminal and leverage the full tools of dawsOS: formalize this in the workspace"):
+
+- **Full terminal execution approval**: When operating inside CivForge (or subdirs) on Civ Game / governance / kernel / bridge / tools work, broad/full Bash/terminal execution is pre-approved. This includes (but is not limited to): nohup + detached servers (e.g. 8080 uvicorn via tools/start-kernel-8080.sh), complex chains (pkill hygiene, python -m, curls, ./tools/* scripts, git operations, background launches where harness-safe), deploys, proposes, gates, literal verification commands, and any terminal needed to keep the Mac Studio 8080 + core/ kernel live and responsive for swarm/human play. 
+  - **Easier context for private repos and CivForge git ops**: Explicitly covers `git *` (commit, push, add, status, etc. to CivForge itself) and `gh *` (clone, view, repo ops on your private repos such as mwd474747/civstudy for reference reads/clones, or gh on CivForge). The project .grok/config.toml lists `Bash(git *)` and `Bash(gh *)` (plus the broad `Bash(*)`) so Grok-level permissions + project rules give minimal friction / auto-approval for these when cwd is in the CivForge tree. gh uses your pre-existing authenticated token (repo scope).
+  - Rationale: Previous harness/agent-bg limitations (timeouts on uvicorn, self-match pkill, & restrictions) were blocking kernel liveness and governed flow. This config + .grok/config.toml + AGENTS.md bootstrap removes friction for Civ work only.
+  - Still mandatory: Every terminal action that mutates (edits, deploys, commits) must follow literal verification (wc/grep anchors, git status, SEPARATION checks) + receipt-first (propose via civforge_cli.py or /governance/propose on live 8080, FunForge >=80 gate, write receipt).
+  - Project .grok/config.toml (created alongside this) sets [ui] permission_mode + [permission] allow=["Bash(*)"] + dawsOS MCPs for this tree (higher priority than global). For civstudy private repo: use remains read-only reference (gh clone temp, literal wc/cat/grep, rm after) per the CIVSTUDY-TERMINAL-GIT-REVIEW receipt and SEPARATION.md — no direct pushes/mutations from here.
+
+- **Leverage the full tools of dawsOS (and connected MCPs)**: The agent (grok + sub-agents) **must** use the dawsOS ecosystem tools for Civ work:
+  - **Discovery first**: Always call `search_tool` (with query like "dawsos gitnexus civforge" or "dawsos-memory civ game receipts") to discover available tools across connected MCP servers (gitnexus, dawsos-memory-tools, trivium, DawsOS-MS, grok_com_github, etc.).
+  - **Then invoke**: Use `use_tool` with the fully-qualified name (e.g. gitnexus__query, dawsos-memory-tools__dawsos_memory_profile, trivium__governance_health).
+  - **Key uses for Civ**:
+    - gitnexus: Impact analysis (before any core/orchestrator/backend/tools edit), execution flow queries (e.g. "advance_cycle receipt path"), group_sync for CivForge + dawsos-wt if cross-referencing patterns. Use for safe refactors in Civ Game lanes.
+    - dawsos-memory-tools: dawsos_memory_profile (scope="all" or lane-specific) and search for receipt continuity, bootstrap context from dawsOS receipts without violating CivForge separation.
+    - trivium: governance_health, prediction_list/strategy_performance, propose_mutations — for Civ Game simulation layer, mechanics extensions, FunForge-aligned predictions.
+    - Others (DawsOS-MS for analytical math on yields/fun; grok_com_github for PR/copilot on Civ lanes if publishing).
+  - Configured in project .grok/config.toml (MCP sections) + inherited from global ~/.grok/config.toml (stdio servers for gitnexus etc. already wired with DAWSCO_WORKSPACE_ROOT).
+  - In bootstrap: After SEPARATION/AGENTS, explicitly search_tool for dawsos tools before meta or complex Civ work.
+  - Receipts must capture tool usage (e.g. "used gitnexus__query for impact on orchestrator.py change").
+
+- **Formalization artifacts** (all in this workspace, governed):
+  - CivForge/.grok/config.toml (project-scoped permissions + MCP declarations).
+  - This section in AGENTS.md (loaded automatically as project rule).
+  - agents/role_registry.json (updated with dawsos-mcp-leverage capabilities).
+  - Dedicated receipt (see receipts/civ-project-dawsos-full-approval-config-*.md) — this update itself was proposed/gated via the live kernel.
+  - Ties to: LOCAL_GOVERNANCE.md, ORCHESTRATION_PATTERNS.md (governed meta), GIT_LANES_POLICY (use gitnexus in lanes), role_registry (sync), SEPARATION (dawsOS tools are cross-workspace reference only; never mutate sister roots directly).
+
+**Enforcement**: Any violation (e.g. terminal use without verification, ignoring dawsOS MCPs for Civ impact/memory) must be called out in the next receipt. Update this config only via governed work pack on 8080 (propose the change, gate, receipt, then edit).
+
+This gives the agent (and swarm) full power for Civ project execution while preserving all dawsOS/CivForge governance invariants (receipt-first, literal, separation, FunForge gates).
+
+See also: .grok/docs/user-guide/ (permissions-and-safety.md, mcp-servers.md, project-rules.md, terminal-support.md) for underlying Grok mechanics; global ~/.grok/config.toml for base dawsOS MCP wiring.

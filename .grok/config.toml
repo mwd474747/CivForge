@@ -1,0 +1,64 @@
+# Project-scoped configuration for CivForge (the Civ project / Civ Game governance workspace)
+# This formalizes full terminal execution approval and dawsOS tool leverage for work in this tree.
+# Loaded with higher priority than global ~/.grok/config.toml per Grok docs.
+# Changes to this file must themselves be governed (propose via 8080 or CLI, FunForge gate, receipt).
+
+[ui]
+# Full approval mode for terminal execution in the Civ project context.
+# Combined with explicit rules below and project AGENTS.md declaration.
+permission_mode = "bypassPermissions"  # Auto-approves (hooks/denies still apply). For Civ work: full terminal freedom for kernel starts, deploys, scripts, hygiene (nohup, pkill for 8080, ./tools/*, complex chains). See AGENTS.md "Civ Project Configuration" section.
+
+[permission]
+# Full terminal approval for CivForge/Civ Game work.
+# Broad Bash allow because the Civ project requires running persistent servers (uvicorn nohup), tools/start-*.sh, civforge_cli.py, deploy bridges, git hygiene, pkill for cleanup, python -m, curls, etc.
+# This is explicitly approved per user directive for this workspace only. Always combine with literal verification + receipt-first per AGENTS.md.
+# deny rules (if any) still win.
+allow = [
+  "Bash(*)",                    # Full terminal execution approval for Civ project (unblocks kernel 8080, proposes, deploys, scripts, background where needed via nohup).
+  "Read",
+  "Edit",
+  "Grep",
+  "MCPTool(*)",                 # Full leverage of discovered MCP tools.
+  "Bash(git *)",                # Easier context for committing and pushing changes to CivForge (git add/commit/push, status, etc.).
+  "Bash(gh *)",                 # Easier context for private repo access (e.g. gh clone/view for mwd474747/civstudy reference-only; gh repo ops on user's own private repos). gh is pre-authenticated with repo scope.
+]
+
+# Explicit easing for common Civ operations (git push/commit to CivForge, gh access to user's private repos like mwd474747/civstudy for reference reads/clones, etc.).
+# These are covered by Bash(*), but listed explicitly for clarity and to ensure no prompt friction in the Civ project tree.
+# Use responsibly: always literal verify first (git status, wc, grep anchors), propose/gate meta changes on 8080, receipt after. For civstudy: reference-only per SEPARATION.md and CIVSTUDY-TERMINAL-GIT-REVIEW receipt — no direct mutation.
+
+# Explicit dawsOS / sister tools for Civ leverage (reinforces global; project scope takes precedence on conflicts).
+# These enable gitnexus (code graph, impact, execution flows for safe refactors in CivForge/core/tools), 
+# dawsos-memory-tools (receipt/memory profile for cross-workspace continuity), trivium (governance health, predictions for Civ Game sim), etc.
+# Use via search_tool (discover) then use_tool (call) as instructed in AGENTS.md.
+# Global ~/.grok/config.toml already wires the stdio servers; this ensures project awareness.
+
+[mcp_servers.gitnexus]
+# Leveraged for CivForge code knowledge graph: query execution flows, impact analysis before edits to core/orchestrator/backend/tools, group for Civ + dawsos-wt if needed.
+enabled = true
+
+[mcp_servers.dawsos-memory-tools]
+# Leveraged for Civ project: bounded memory search/profiles over allowlisted dawsOS receipts, governance artifacts, to bootstrap context without violating separation.
+enabled = true
+
+[mcp_servers.trivium]
+# Leveraged for Civ Game governance layer: governance_health, prediction_list/strategy for simulation layer extensions, propose_mutations if extending graph for mechanics.
+enabled = true
+
+[mcp_servers.DawsOS-MS]
+enabled = true  # Wolfram etc. for any analytical Civ Game mechanics (e.g. yields, fun scoring math).
+
+# Note: dawsos-readonly etc. inherited from global as needed.
+# For any new Civ-specific MCP (e.g. local Civ sim bridge), add here with project .grok/ priority.
+
+# Project rules directory support (Grok scans .grok/rules/ for *.md)
+# Place additional per-dir rules there if subdividing (e.g. core/ vs tools/).
+
+[hooks]
+# Optional: project PreToolUse hooks can be added for extra Civ-specific guards (e.g. always require receipt before certain Bash).
+# See global ~/.grok/hooks/ and docs. For now, rely on AGENTS.md bootstrap + literal verify + 8080 governance.
+
+[[marketplace.sources]]
+# Inherit official; add Civ-specific plugins/skills here if created (e.g. civ-game-sim skill).
+name = "xAI Official"
+git = "https://github.com/xai-org/plugin-marketplace.git"

@@ -49,3 +49,8 @@ This script:
 This SEPARATION.md is the canonical declaration. All planning, code, and future work must respect it.
 
 **Mac Studio local truth**: CivForge (this workspace) is the governance layer. Gravity-mosaic is the independent artifact being governed.
+
+
+## Updated sister: dawsos-nexus (8082)
+- Now handles auth+control for CivForge (device/tokens/govern via thin bridge).
+- dawsos-auth-prototype archived in favor of extension.

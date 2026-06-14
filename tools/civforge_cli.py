@@ -99,7 +99,7 @@ def main():
     sub.add_parser("mcp-stub", help="MCP compatibility stub — shows how endpoints can be exposed as MCP tools later")
     sub.add_parser("advisor", help="Safe gravity advisor (proposal-only, never auto-executes deploy.sh)")
 
-    # Auth prototype integration (thin client to the separate dawsos-auth-prototype)
+    # Auth/control via dawsos-nexus (8082) thin client (replaces archived prototype)
     auth_p = sub.add_parser("auth", help="Auth prototype commands (separate project). Enables protected governance via tokens on :8081")
     auth_p.add_argument("action", nargs="?", default="status", choices=["status", "start", "register-device", "token", "verify"])
     auth_p.add_argument("arg1", nargs="?", default=None)

@@ -20,9 +20,6 @@
   Contents: `index.html`, `models/biefeld_brown_thrust.py` (with `EQUATIONS`), `models/precision_porting.py`, README/ROADMAP. Pristine, no CivForge source inside.  
   **NEVER edit or git from here except via the strict bridge below. Local disk = single source of truth for pushes.**
 
-- **dawsos-auth-prototype** (separate auth/identity prototype for potential dawsOS-wide use; tested end-to-end with CivForge):  
-  `/Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype`  
-  Local git repo + public remote https://github.com/mwd474747/dawsos-auth-prototype (pushed after literal verification).  
   Key files: `backend/auth_api.py` (FastAPI :8081, real PyJWT, SQLite identities/tokens, receipt-style logging, auto-seed from `~/.openclaw/identity`), `core/identity_patterns.py` (IdentityReceiptStore, AgentAuthBrain, AuthQualityScorer — FunForge-inspired), `tools/auth_cli.py`, `tests/test_auth_flows.py` (4/4 passing), `docs/INTEROPERABILITY.md`, `AGENTS.md`, `run_prototype.sh`.  
   Thin CivForge client only: `CivForge/tools/dawsos_auth_client.py` (HTTP calls only; no code merge).  
   **Clone + enable bridge in CivForge**: `tools/auth-prototype/{clone.sh, start.sh, README.md}` (see "Cloning and Enabling..." section below).
@@ -171,7 +168,6 @@ Test: `curl -s http://localhost:8080/state | python3 -c 'import sys,json; d=json
 
 **Start separate auth prototype** (for protected flows / dawsOS interop):
 ```bash
-cd /Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype
 python3 -m uvicorn backend.auth_api:app --port 8081
 ```
 Health: `curl http://localhost:8081/health`
@@ -217,7 +213,6 @@ python3 bridge/grok_macstudio_bridge.py   # or import and call methods
 
 **Stop servers**: `pkill -f 'uvicorn.*sim_api'` and `pkill -f 'uvicorn.*auth_api'`.
 
-### Cloning and Enabling the dawsos-auth-prototype (to enable the auth / protected governance "function")
 
 Now that the prototype repo exists on GitHub, use the dedicated CivForge bridge to create the local clone and turn on auth.
 
@@ -268,11 +263,8 @@ This completes the "create the local clone and steps to enable this function" re
 ## 6. Pending Work + Immediate Next Steps (prioritized)
 
 **#1 Right now (blocking clean handoff for auth prototype)**:
-- User (or successor under explicit "run the push" instruction) must create the GitHub repo: https://github.com/mwd474747/dawsos-auth-prototype
 - Then, **in the separate auth-prototype directory**, after full literal disk review (cat key files, `git status`, `wc -l`, follow the same "push and deploy" process the user enforces everywhere):
   ```bash
-  cd /Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype
-  git remote add origin https://github.com/mwd474747/dawsos-auth-prototype.git || true
   git status
   git add .
   # (review the diff/commit message literally)
