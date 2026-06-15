@@ -17,6 +17,11 @@ from core.swarm_join import FORGE_COORDINATOR_ID
 from core.mechanics_registry import build_default_registry, default_mechanics_lanes
 from backend.civstudy_metadata import civstudy_reference_panel
 from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
+from backend.turn_simulation import (
+    enrich_cycle_receipt,
+    maybe_emit_victory_receipt,
+    run_turn_simulation,
+)
 from backend.multi_agent_state import (
     AGENT_LABELS,
     FACTION_COLORS,
@@ -28,7 +33,6 @@ from backend.multi_agent_state import (
     ensure_multi_agent_state,
     negotiations_for_api,
     respond_negotiation,
-    tick_multi_agent_state,
 )
 
 NEXUS_URL = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
@@ -353,20 +357,22 @@ async def advance_turn(_claims: Dict[str, Any] = Depends(require_public_mode_tok
 
     game_state["turn"] = result["turn"]
     game_state["player"]["fun_score"] = result["fun_score"]
+    victory_before = dict(game_state.get("victory_progress", {}))
 
     # Tick resources (governance budget)
     for key in ["food", "prod", "sci", "influence", "verify_budget"]:
         if key in game_state["player"]["resources"]:
             game_state["player"]["resources"][key] += 1
 
-    receipt = result["receipt"]
+    receipt = enrich_cycle_receipt(result["receipt"], game_state)
     game_state["receipts"].append(receipt)
     for ev in result.get("events", []):
         game_state["events"].append(ev)
 
-    tick_multi_agent_state(game_state, receipt.get("decisions", {}))
-    for ev in mechanics_registry.tick_all(game_state):
+    for ev in run_turn_simulation(game_state, mechanics_registry, receipt.get("decisions", {})):
         game_state["events"].append(ev)
+
+    maybe_emit_victory_receipt(victory_before, game_state, receipt_store)
 
     # Persist the important ones + snapshot full state for restart survival
     receipt_store.append(receipt, filename_hint="governance-cycle")

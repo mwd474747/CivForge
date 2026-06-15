@@ -8,15 +8,18 @@ from __future__ import annotations
 import random
 from typing import Any, Callable, Dict, List
 
-TickFn = Callable[[Dict[str, Any]], List[str]]
+from core.mechanics_tick_contract import TickFn, wrap_tick
 
 
 class MechanicsRegistry:
     def __init__(self) -> None:
         self._modules: Dict[str, TickFn] = {}
 
-    def register(self, name: str, tick: TickFn) -> None:
-        self._modules[name] = tick
+    def register(self, name: str, tick: TickFn, *, enforce_contract: bool = True) -> None:
+        self._modules[name] = wrap_tick(tick) if enforce_contract else tick
+
+    def module_names(self) -> List[str]:
+        return sorted(self._modules.keys())
 
     def tick_all(self, game_state: Dict[str, Any]) -> List[str]:
         events: List[str] = []

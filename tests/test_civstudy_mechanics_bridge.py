@@ -12,6 +12,7 @@ from backend.civstudy_mechanics_bridge import (  # noqa: E402
     tick_civstudy_cultural_chains,
     tick_civstudy_discovery,
     tick_civstudy_district_pulse,
+    tick_civstudy_policy_tree,
 )
 from core.mechanics_registry import build_default_registry  # noqa: E402
 
@@ -65,3 +66,12 @@ def test_build_default_registry_includes_civstudy_modules():
     assert "civstudy_district" in reg._modules
     assert "civstudy_discovery" in reg._modules
     assert "civstudy_cultural" in reg._modules
+    assert "civstudy_policy_tree" in reg._modules
+
+
+def test_policy_tree_unlocks_diplomacy_tier_one():
+    gs = _base_state(turn=8)
+    gs["player"]["resources"]["influence"] = 10
+    events = tick_civstudy_policy_tree(gs)
+    assert any("open_negotiation" in e for e in events)
+    assert "open_negotiation" in gs["civstudy_sim"]["policy_tree"]["unlocked"]

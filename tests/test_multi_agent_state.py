@@ -49,6 +49,7 @@ def test_sync_victory_milestones_at_target():
     vp["joint_progress"] = 100
     events = sync_victory_milestones(vp, turn=99)
     assert vp["milestones"][3]["done"] is True
+    assert vp["outcome"] == "victory"
     assert any("Joint victory" in e for e in events)
 
 

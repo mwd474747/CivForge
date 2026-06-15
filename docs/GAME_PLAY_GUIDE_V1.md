@@ -31,7 +31,7 @@ python3 tools/civforge_cli.py advance
 python3 tools/civforge_cli.py mcp-serve   # stdio MCP for agent players
 ```
 
-## MCP tools (8)
+## MCP tools (6)
 
 | Tool | Action |
 |------|--------|
@@ -41,14 +41,18 @@ python3 tools/civforge_cli.py mcp-serve   # stdio MCP for agent players
 | `civforge_negotiate` | `POST /game/negotiate` |
 | `civforge_negotiate_respond` | `POST /game/negotiate/respond` |
 | `civforge_what_if` | `POST /simulation/what_if` |
-| `civforge_governance_propose` | `POST /governance/propose` |
-| `civforge_governance_gate` | `POST /governance/gate` |
 
 ## Victory
 
 - **Joint progress** increments each governance turn (1–3) and on accepted negotiations (+8).
+- CivStudy cultural chains and policy `festival_receipts` can add bonus progress.
 - Milestones unlock at 25% (map), 60% (quorum), 100% (joint victory).
-- At 100%, all four milestones including **Joint victory** are marked done.
+- At 100%, `outcome: "victory"` is set; dashboard shows overlay; a one-time `victory-outcome-*.md` receipt is written.
+- Governance cycle receipts include a `victory_progress` snapshot each turn.
+
+## Mechanics extensions
+
+Register tick modules per `docs/MECHANICS_TICK_CONTRACT_V1.md`. CivStudy bridge modules: district, discovery, cultural, **policy_tree**.
 
 ## Nexus integration (8082)
 
@@ -59,15 +63,6 @@ python3 tools/nexus_command_poller.py --once
 ```
 
 Optional daemon: `bash tools/start-poller-daemon.sh`
-
-Governance posture:
-
-```bash
-python3 tools/civforge_contract_parity.py
-python3 tools/civforge_poller_posture.py
-python3 tools/civforge_receipt_index.py
-python3 tools/civforge_governance_posture.py
-```
 
 ## Validation
 
@@ -86,6 +81,6 @@ SQLite volume: `civforge-db` → `/app/gravity_backend.db` (matches kernel `DB_P
 
 ## Known limits
 
-- No win/lose screen beyond milestone bar (extensions via governed work packs).
+- Victory overlay is dismissible; turns continue after joint victory (no auto-reset API yet).
 - `:8081` JWT identity plane not wired.
 - Live civstudy corpus not integrated (reference panel only).
