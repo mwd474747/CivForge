@@ -41,6 +41,24 @@ Read `docs/EXECUTION_LANE_V2.md` and `receipts/HANDOFF-GROK-SWARM-20260615.md`.
 - Gravity changes only via `tools/deploy-gravity-mosaic/deploy.sh`
 - CivForge receipts ≠ dawsOS `reports/ops/*` promotion truth
 
+## dawsOS MCP tools (grok.com — unchanged by lane v2)
+
+Lane v2 removed **CivForge-local** `.grok/config.toml` (Mac Studio terminal agent only).  
+Your **grok.com project MCP** uses **account/global** config (`~/.grok/config.toml`) — **not deleted**.
+
+Keep these connected in grok.com project settings:
+
+| MCP | Use on grok.com |
+|-----|-----------------|
+| gitnexus | Impact / flows before requesting Cursor edits |
+| dawsos-memory-tools | Receipt continuity, profile search |
+| trivium | Governance health, predictions (read-only planning) |
+| grok_com_github | CivForge repo read (not local git claims) |
+
+**CivForge kernel MCP** (`tools/mcp_server.py`, 8 tools): runs on Mac `:8080`. grok.com does not call it directly unless you add a remote MCP bridge/tunnel in grok.com settings. Default: assign work packs → Cursor executes → paste `turnkey-cursor-local.sh` output.
+
+**Removed (do not reference):** CivForge `.grok/config.toml`, `Bash(*)` local terminal approval, `grok_macstudio_bridge.py`.
+
 ## Default next work
 
 See `receipts/work-pack-grok-mechanics-sim-001.md`: policy-tree tier effects, negotiation sweep, `:8081` JWT, git worktrees.

@@ -1,7 +1,7 @@
 # Grok Swarm Packet v1
 
-**Status:** `current` — planning lane on grok.com only
-**Execution:** Cursor on Mac Studio (`docs/EXECUTION_LANE_V2.md`)
+**Status:** `current` — planning lane on grok.com only  
+**Execution:** Cursor on Mac Studio (`docs/EXECUTION_LANE_V2.md`)  
 **Handoff seed:** `prompts/grok_swarm_handoff_seed.md`
 
 ---
@@ -56,14 +56,30 @@ Never: `civforge_cli.py status | grep vercel`
 
 ---
 
-## 6. Work pack template
+## 6. grok.com tools (not impacted by lane v2)
+
+Removed: CivForge-local `.grok/config.toml` (Mac terminal agent).  
+Unchanged: global `~/.grok/config.toml` + grok.com project MCP settings.
+
+| Tool class | grok.com | Cursor Mac |
+|------------|----------|------------|
+| dawsOS MCPs (gitnexus, memory, trivium) | keep connected | via Cursor MCP |
+| CivForge `tools/mcp_server.py` (8 tools) | optional remote bridge | local stdio |
+| Terminal / git on CivForge | planning only | executes |
+
+See `prompts/grok_swarm_handoff_seed.md` § dawsOS MCP tools.
+
+---
+
+## 7. Work pack template
 
 `receipts/work-pack-grok-mechanics-sim-001.md`
 
 ---
 
-## 7. Canonical docs
+## 8. Canonical docs
 
 - `docs/EXECUTION_LANE_V2.md`
+- `docs/dawsos_nexus_reference.md` (all apps use dawsos-nexus pattern)
 - `receipts/HANDOFF-GROK-SWARM-20260615.md`
 - `docs/OPENCLAW_ESCALATION_PACKET_V1.md` (when wt needed)

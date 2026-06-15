@@ -47,7 +47,7 @@ This doc itself is a governed meta-action. Update only after propose â†’ gate â†
 All lanes must produce receipts. Literal verification is non-negotiable.
 
 **Execution lanes (2026-06-15):** Grok swarm plans on grok.com; Cursor implements in worktrees; OpenClaw only for wt escalation. See `docs/EXECUTION_LANE_V2.md`.
-# nexus_ctrl reference (dawsos-nexus local) added as per proposal for lane-required-infra and lane-meta-data-core
+See `docs/dawsos_nexus_reference.md` for dawsos-nexus (`:8082`) boundary reference.
 ---
 
 ## Swarm Multi-Agent UI Execution Boundary Approvals (2026-06-15, proposal 47c37283)

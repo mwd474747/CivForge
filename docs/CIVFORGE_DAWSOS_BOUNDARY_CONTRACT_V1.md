@@ -143,13 +143,15 @@ OpenClaw **must not** treat CivForge `receipts/` as C2/promotion evidence.
 
 ## 8. Code alignment backlog (CivForge repo)
 
-| Item | Current | Target |
-|------|---------|--------|
-| Auth story | `SEPARATION.md` / `sim_api` use Nexus `:8082` | Identity → auth-prototype `:8081`; Nexus for machine auth only |
-| `AGENTS.md` bootstrap | Mixed `:8081` and Nexus language | Match this contract |
-| `nexus_command_poller.py` endpoints | Ad-hoc URL list | Sister schema: pending + acknowledge + complete |
-| Poller side effects | `/found_city` on command | Propose-only |
-| App type strings | `civforge_agent` vs `governance_kernel` | `governance_kernel` + `civforge-kernel` |
+| Item | Status | Notes |
+|------|--------|-------|
+| Swarm class documentation | **Done** | `docs/CIVFORGE_SWARM_CLASS_V1.md` |
+| dawsos-nexus naming | **Done** | `docs/dawsos_nexus_reference.md` (retired `nexus_ctrl_*` active docs) |
+| Governance posture builders | **Done** | `civforge_governance_posture.py`, poller/receipt-index/contract-parity |
+| Proposal/gate persistence | **Done** | SQLite-backed in `sim_api.py` / `governance.py` |
+| Auth story | **Open** | Identity → auth-prototype `:8081`; Nexus machine key only |
+| Poller side effects | **Done** | Propose-only path |
+| App type strings | **Done** | `governance_kernel` + `civforge-kernel` |
 
 ---
 

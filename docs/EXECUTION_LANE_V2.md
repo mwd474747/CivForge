@@ -107,6 +107,20 @@ Grok WP (criteria) → Cursor executes → Cursor execution receipt (HEAD + test
 
 ---
 
-## 8. Migration note
+## 8. Swarm class (CivForge ≠ dawsOS registry swarms)
 
-Historical receipts referencing local Grok terminal, `.grok/config.toml`, or `grok_macstudio_bridge.py` are **archived context**. Active execution uses this document.
+CivForge is **dawsOS-shaped** (proposal-first, receipt-first, bounded bridges) but **not** a `swarm-registry.v0.json` workflow swarm.
+
+Three layers — do not conflate:
+
+1. **Grok swarm** (grok.com) — planning / work packs only
+2. **AgentBrain personas** (`grok`, `harper`, `sebastian`) — in-kernel simulation/governance
+3. **dawsos-nexus bridge** — telemetry + propose-only command intake
+
+Full comparison: `docs/CIVFORGE_SWARM_CLASS_V1.md`
+
+---
+
+## 9. Migration note
+
+Historical receipts referencing local Grok terminal, `.grok/config.toml`, or `nexus_ctrl` naming are **archived context**. Active execution uses this document. Nexus canon: `docs/dawsos_nexus_reference.md`.

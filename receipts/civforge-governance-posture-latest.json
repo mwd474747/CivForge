@@ -1,0 +1,1549 @@
+{
+  "contract_parity": {
+    "bridge": {
+      "bridge_files": [
+        "bridge/civforge_http_bridge.py",
+        "bridge/headless_observer.py"
+      ],
+      "bridge_posts_integrate": true,
+      "integrate_methods": [
+        "GET",
+        "POST"
+      ],
+      "post_integrate_supported": true
+    },
+    "documented_mcp_tools": [
+      "civforge_advance_turn",
+      "civforge_found_city",
+      "civforge_governance_gate",
+      "civforge_governance_propose",
+      "civforge_negotiate",
+      "civforge_negotiate_respond",
+      "civforge_status",
+      "civforge_what_if"
+    ],
+    "findings": [],
+    "generated_at": "2026-06-15T19:13:07Z",
+    "mcp_tools": [
+      "civforge_advance_turn",
+      "civforge_found_city",
+      "civforge_governance_gate",
+      "civforge_governance_propose",
+      "civforge_negotiate",
+      "civforge_negotiate_respond",
+      "civforge_status",
+      "civforge_what_if"
+    ],
+    "nexus_allowed_actions": [
+      "sync_config"
+    ],
+    "routes": {
+      "/advance_turn": [
+        "POST"
+      ],
+      "/dashboard": [
+        "GET"
+      ],
+      "/found_city": [
+        "POST"
+      ],
+      "/game/founding-session": [
+        "GET"
+      ],
+      "/game/negotiate": [
+        "POST"
+      ],
+      "/game/negotiate/respond": [
+        "POST"
+      ],
+      "/governance/advance_and_log": [
+        "POST"
+      ],
+      "/governance/gate": [
+        "POST"
+      ],
+      "/governance/gravity_deploy_recommendation": [
+        "GET"
+      ],
+      "/governance/propose": [
+        "POST"
+      ],
+      "/governance/protected_advance": [
+        "POST"
+      ],
+      "/integrate/civforge": [
+        "GET",
+        "POST"
+      ],
+      "/simulation/what_if": [
+        "POST"
+      ],
+      "/state": [
+        "GET"
+      ]
+    },
+    "schema": "civforge.contract_parity.v1",
+    "status": "pass",
+    "summary": {
+      "documented_mcp_tool_count": 8,
+      "fail_count": 0,
+      "finding_count": 0,
+      "mcp_tool_count": 8,
+      "route_count": 15,
+      "warn_count": 0
+    }
+  },
+  "features": {
+    "post_integrate_route_present": true,
+    "proposal_receipt_persistence_present": true,
+    "proposal_restore_present": true,
+    "public_mode_guard_present": true
+  },
+  "findings": [],
+  "generated_at": "2026-06-15T19:13:07Z",
+  "git": {
+    "line_count": 120,
+    "source_dirty": [
+      " M AGENTS.md",
+      " M backend/sim_api.py",
+      " M core/governance.py",
+      " M docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md",
+      " M docs/EXECUTION_LANE_V2.md",
+      " M docs/GAME_PLAY_GUIDE_V1.md",
+      " M docs/GIT_LANES_POLICY.md",
+      " M docs/GROK_SWARM_PACKET_V1.md",
+      " D docs/nexus_ctrl_reference.md",
+      " D planning/references/nexus_ctrl_dawsos_integration.md",
+      " M prompts/grok_swarm_handoff_seed.md",
+      " M tools/civforge_cli.py",
+      " M tools/mcp_server.py",
+      " M tools/nexus_command_poller.py",
+      " M tools/start-kernel-8080.sh",
+      " M tools/start-poller-daemon.sh",
+      " M tools/validate-game.sh",
+      "?? docs/CIVFORGE_SWARM_CLASS_V1.md",
+      "?? docs/dawsos_nexus_reference.md",
+      "?? planning/references/dawsos_nexus_integration.md",
+      "?? tests/test_civforge_governance_tools.py",
+      "?? tools/civforge_governance_posture.py",
+      "?? tools/civforge_poller_posture.py",
+      "?? tools/civforge_receipt_index.py"
+    ],
+    "source_dirty_count": 24
+  },
+  "kernel": {
+    "json": {
+      "agent_labels": {
+        "aris": "Aris (Diplomacy)",
+        "harper": "Harper (Systems)",
+        "lysander": "Lysander (Research)",
+        "player": "Governance Lead (Grok)",
+        "sebastian": "Sebastian (Governance)"
+      },
+      "ai_civs": [
+        {
+          "id": "harper",
+          "name": "Harper (Systems)",
+          "resources": {
+            "food": 10,
+            "influence": 5,
+            "prod": 8,
+            "sci": 11
+          },
+          "territories": 3
+        },
+        {
+          "id": "sebastian",
+          "name": "Sebastian (Governance)",
+          "resources": {
+            "food": 9,
+            "influence": 9,
+            "prod": 7,
+            "sci": 8
+          },
+          "territories": 3
+        },
+        {
+          "id": "lysander",
+          "name": "Lysander (Research)",
+          "resources": {
+            "food": 8,
+            "influence": 4,
+            "prod": 6,
+            "sci": 14
+          },
+          "role": "research",
+          "territories": 2
+        },
+        {
+          "id": "aris",
+          "name": "Aris (Diplomacy)",
+          "resources": {
+            "food": 7,
+            "influence": 12,
+            "prod": 5,
+            "sci": 6
+          },
+          "role": "diplomacy",
+          "territories": 2
+        }
+      ],
+      "alliances": [
+        {
+          "betrayal_risk": 65,
+          "formed_turn": 1,
+          "id": "alliance-player-harper",
+          "note": "Systems integration pact",
+          "parties": [
+            "player",
+            "harper"
+          ],
+          "status": "active"
+        },
+        {
+          "betrayal_risk": 33,
+          "formed_turn": 1,
+          "id": "alliance-harper-sebastian",
+          "note": "Governance verification compact",
+          "parties": [
+            "harper",
+            "sebastian"
+          ],
+          "status": "provisional"
+        },
+        {
+          "betrayal_risk": 41,
+          "formed_turn": 44,
+          "id": "alliance-player-harper-44",
+          "note": "Formed from negotiation: Review test negotiation",
+          "parties": [
+            "harper",
+            "player"
+          ],
+          "status": "active"
+        },
+        {
+          "betrayal_risk": 49,
+          "formed_turn": 48,
+          "id": "alliance-player-harper-48",
+          "note": "Formed from negotiation: First offer same turn",
+          "parties": [
+            "harper",
+            "player"
+          ],
+          "status": "active"
+        }
+      ],
+      "civstudy_reference": {
+        "agents": [
+          {
+            "focus": "scope, corpus map, success criteria",
+            "role": "Research Lead"
+          },
+          {
+            "focus": "provenance, references.json, citation audit",
+            "role": "Archivist"
+          },
+          {
+            "focus": "structure, cross-links, coherence",
+            "role": "Editor"
+          },
+          {
+            "focus": "registry routes, Recharts viz, dark glass UI",
+            "role": "Web Developer"
+          }
+        ],
+        "borrowed_patterns": [
+          "Card-based admin HUD + budget bars",
+          "Discrete task runners with loading feedback",
+          "Nexus JWKS auth patterns (future :8081 identity)",
+          "Governor entity management metaphors"
+        ],
+        "cultural_event_chains": [
+          {
+            "id": "festival-of-receipts",
+            "influence_reward": 3,
+            "name": "Festival of Receipts",
+            "stages": [
+              "gather_proofs",
+              "audit_quorum",
+              "celebrate_milestone"
+            ],
+            "victory_bonus": 2
+          },
+          {
+            "id": "symposium-of-systems",
+            "influence_reward": 4,
+            "name": "Symposium of Systems",
+            "stages": [
+              "harper_keynote",
+              "integration_demo",
+              "shared_map_blessing"
+            ],
+            "victory_bonus": 3
+          },
+          {
+            "id": "archivist-pilgrimage",
+            "influence_reward": 2,
+            "name": "Archivist Pilgrimage",
+            "sci_reward": 2,
+            "stages": [
+              "corpus_map",
+              "citation_audit",
+              "reference_panel_unlock"
+            ]
+          }
+        ],
+        "discovery_forks": [
+          {
+            "branch": "economy",
+            "id": "sci-trade-route",
+            "name": "Sci-Trade Route",
+            "prereq": {
+              "prod": 6,
+              "sci": 8
+            },
+            "unlocks": "economic_institution_boost"
+          },
+          {
+            "branch": "diplomacy",
+            "id": "receipt-quorum",
+            "name": "Receipt Quorum",
+            "prereq": {
+              "verify_budget": 7
+            },
+            "unlocks": "governance_quorum_milestone_hint"
+          },
+          {
+            "branch": "military",
+            "id": "legacy-doctrine",
+            "name": "Legacy Doctrine",
+            "prereq": {
+              "military_strength": 45
+            },
+            "unlocks": "military_legacy_accelerator"
+          },
+          {
+            "branch": "culture",
+            "id": "cross-faction-symposium",
+            "name": "Cross-Faction Symposium",
+            "prereq": {
+              "influence_spread": 15
+            },
+            "unlocks": "cultural_event_chain_bonus"
+          }
+        ],
+        "districts": [
+          {
+            "id": "governance-quarter",
+            "name": "Governance Quarter",
+            "note": "Boosts verification and cross-faction receipts",
+            "specialization": "receipt_audit",
+            "yield_bonus": {
+              "influence": 1,
+              "verify_budget": 1
+            }
+          },
+          {
+            "id": "systems-forge",
+            "name": "Systems Forge",
+            "note": "Harper-aligned production and integration lane",
+            "specialization": "production_guild",
+            "yield_bonus": {
+              "prod": 2,
+              "sci": 1
+            }
+          },
+          {
+            "id": "diplomatic-embassy",
+            "name": "Diplomatic Embassy",
+            "note": "Aris-aligned negotiation throughput",
+            "specialization": "negotiation_hub",
+            "yield_bonus": {
+              "influence": 2
+            }
+          },
+          {
+            "id": "research-campus",
+            "name": "Research Campus",
+            "note": "Lysander-aligned science and fork unlocks",
+            "specialization": "discovery_lab",
+            "yield_bonus": {
+              "sci": 2
+            }
+          }
+        ],
+        "note": "Metadata reference lane \u2014 patterns from CIVSTUDY-TERMINAL-GIT-REVIEW. Not live corpus \u2014 SEPARATION.md.",
+        "policy_tree": {
+          "branches": [
+            {
+              "id": "diplomacy",
+              "name": "Diplomacy",
+              "policies": [
+                {
+                  "effect": "Extra negotiation slot per 4 turns",
+                  "id": "open_negotiation",
+                  "tier": 1
+                },
+                {
+                  "effect": "Raise active alliance soft cap",
+                  "id": "alliance_cap_3",
+                  "tier": 2
+                },
+                {
+                  "effect": "Surface betrayal risk in HUD",
+                  "id": "betrayal_watch",
+                  "tier": 3
+                }
+              ]
+            },
+            {
+              "id": "economy",
+              "name": "Economy",
+              "policies": [
+                {
+                  "effect": "+1 economic institution every 4 turns",
+                  "id": "institution_charter",
+                  "tier": 1
+                },
+                {
+                  "effect": "Unlock sci-trade yield bonus",
+                  "id": "trade_route_map",
+                  "tier": 2
+                },
+                {
+                  "effect": "+5% lane yield bonus",
+                  "id": "yield_surge",
+                  "tier": 3
+                }
+              ]
+            },
+            {
+              "id": "culture",
+              "name": "Culture",
+              "policies": [
+                {
+                  "effect": "Start cultural event chains earlier",
+                  "id": "symposium_chain",
+                  "tier": 1
+                },
+                {
+                  "effect": "+2 influence spread per 6 turns",
+                  "id": "influence_spread",
+                  "tier": 2
+                },
+                {
+                  "effect": "Cultural milestones boost victory +2",
+                  "id": "festival_receipts",
+                  "tier": 3
+                }
+              ]
+            }
+          ]
+        },
+        "repo": "mwd474747/civstudy",
+        "status": "read_only_reference"
+      },
+      "civstudy_sim": {
+        "active_chains": {
+          "archivist-pilgrimage": {
+            "complete": false,
+            "stage_idx": 2
+          },
+          "festival-of-receipts": {
+            "complete": false,
+            "stage_idx": 2
+          },
+          "symposium-of-systems": {
+            "complete": false,
+            "stage_idx": 2
+          }
+        },
+        "active_district": "Governance Quarter",
+        "metadata_status": "read_only_reference",
+        "recent": [
+          "Turn 75: CivStudy district 'Governance Quarter' pulse \u2192 verify_budget+1, influence+1.",
+          "Turn 72: Cultural chain 'Archivist Pilgrimage' \u2014 stage citation_audit.",
+          "Turn 72: Cultural chain 'Symposium of Systems' \u2014 stage integration_demo.",
+          "Turn 72: Cultural chain 'Festival of Receipts' \u2014 stage audit_quorum."
+        ],
+        "unlocked_forks": [
+          "cross-faction-symposium",
+          "legacy-doctrine",
+          "receipt-quorum",
+          "sci-trade-route"
+        ]
+      },
+      "current_turn": 76,
+      "faction_colors": {
+        "aris": "#ec4899",
+        "contested": "#ef4444",
+        "harper": "#22c55e",
+        "lysander": "#f59e0b",
+        "neutral": "#64748b",
+        "player": "#3b82f6",
+        "sebastian": "#a855f7"
+      },
+      "fun_score": 86.6,
+      "map_tiles": [
+        {
+          "label": "City-00",
+          "owner": "player",
+          "strength": 1,
+          "type": "city",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "label": "Tile-10",
+          "owner": "harper",
+          "strength": 2,
+          "type": "territory",
+          "x": 1,
+          "y": 0
+        },
+        {
+          "label": "Tile-20",
+          "owner": "sebastian",
+          "strength": 3,
+          "type": "territory",
+          "x": 2,
+          "y": 0
+        },
+        {
+          "label": "City-30",
+          "owner": "player",
+          "strength": 4,
+          "type": "city",
+          "x": 3,
+          "y": 0
+        },
+        {
+          "label": "Tile-40",
+          "owner": "sebastian",
+          "strength": 1,
+          "type": "territory",
+          "x": 4,
+          "y": 0
+        },
+        {
+          "label": "Tile-01",
+          "owner": "harper",
+          "strength": 2,
+          "type": "territory",
+          "x": 0,
+          "y": 1
+        },
+        {
+          "label": "Tile-11",
+          "owner": "sebastian",
+          "strength": 3,
+          "type": "territory",
+          "x": 1,
+          "y": 1
+        },
+        {
+          "label": "City-21",
+          "owner": "harper",
+          "strength": 4,
+          "type": "city",
+          "x": 2,
+          "y": 1
+        },
+        {
+          "label": "Tile-31",
+          "owner": "player",
+          "strength": 1,
+          "type": "territory",
+          "x": 3,
+          "y": 1
+        },
+        {
+          "label": "Tile-41",
+          "owner": "player",
+          "strength": 2,
+          "type": "territory",
+          "x": 4,
+          "y": 1
+        },
+        {
+          "label": "Tile-02",
+          "owner": "sebastian",
+          "strength": 3,
+          "type": "territory",
+          "x": 0,
+          "y": 2
+        },
+        {
+          "label": "City-12",
+          "owner": "harper",
+          "strength": 4,
+          "type": "city",
+          "x": 1,
+          "y": 2
+        },
+        {
+          "label": "Tile-22",
+          "owner": "sebastian",
+          "strength": 1,
+          "type": "territory",
+          "x": 2,
+          "y": 2
+        },
+        {
+          "label": "Tile-32",
+          "owner": "player",
+          "strength": 2,
+          "type": "territory",
+          "x": 3,
+          "y": 2
+        },
+        {
+          "label": "City-42",
+          "owner": "harper",
+          "strength": 3,
+          "type": "city",
+          "x": 4,
+          "y": 2
+        },
+        {
+          "label": "City-03",
+          "owner": "harper",
+          "strength": 4,
+          "type": "city",
+          "x": 0,
+          "y": 3
+        },
+        {
+          "label": "Tile-13",
+          "owner": "harper",
+          "strength": 1,
+          "type": "territory",
+          "x": 1,
+          "y": 3
+        },
+        {
+          "label": "Tile-23",
+          "owner": "player",
+          "strength": 2,
+          "type": "territory",
+          "x": 2,
+          "y": 3
+        },
+        {
+          "label": "City-33",
+          "owner": "harper",
+          "strength": 3,
+          "type": "city",
+          "x": 3,
+          "y": 3
+        },
+        {
+          "label": "Tile-43",
+          "owner": "sebastian",
+          "strength": 4,
+          "type": "territory",
+          "x": 4,
+          "y": 3
+        },
+        {
+          "label": "Tile-04",
+          "owner": "player",
+          "strength": 1,
+          "type": "territory",
+          "x": 0,
+          "y": 4
+        },
+        {
+          "label": "Tile-14",
+          "owner": "player",
+          "strength": 2,
+          "type": "territory",
+          "x": 1,
+          "y": 4
+        },
+        {
+          "label": "City-24",
+          "owner": "harper",
+          "strength": 3,
+          "type": "city",
+          "x": 2,
+          "y": 4
+        },
+        {
+          "label": "Tile-34",
+          "owner": "sebastian",
+          "strength": 4,
+          "type": "territory",
+          "x": 3,
+          "y": 4
+        },
+        {
+          "label": "Tile-44",
+          "owner": "sebastian",
+          "strength": 1,
+          "type": "territory",
+          "x": 4,
+          "y": 4
+        }
+      ],
+      "mechanics_lanes": {
+        "cultural": {
+          "event_chains": 8,
+          "influence_spread": 55,
+          "recent": [
+            "Turn 72: Cultural event chain started (#8).",
+            "Turn 66: Cultural event chain started (#6).",
+            "Turn 60: Cultural event chain started (#5).",
+            "Turn 54: Cultural event chain started (#4).",
+            "Turn 48: Cultural event chain started (#3).",
+            "Turn 42: Cultural event chain started (#2).",
+            "Festival of Receipts",
+            "Cross-faction symposium"
+          ]
+        },
+        "economic": {
+          "institutions": 11,
+          "recent": [
+            "Turn 76: Economic institution founded (#11).",
+            "Turn 72: Economic institution founded (#10).",
+            "Turn 68: Economic institution founded (#9).",
+            "Turn 64: Economic institution founded (#8).",
+            "Turn 60: Economic institution founded (#7).",
+            "Turn 56: Economic institution founded (#6).",
+            "Turn 52: Economic institution founded (#5).",
+            "Turn 48: Economic institution founded (#4).",
+            "Turn 44: Economic institution founded (#3).",
+            "Production guild chartered",
+            "Sci-trade route opened"
+          ],
+          "trade_routes": 1,
+          "yield_bonus_pct": 15
+        },
+        "military": {
+          "garrisons": 2,
+          "legacy_points": 11,
+          "recent": [
+            "Turn 75: Military legacy point earned (total 11).",
+            "Turn 70: Military legacy point earned (total 10).",
+            "Turn 65: Military legacy point earned (total 8).",
+            "Turn 60: Military legacy point earned (total 7).",
+            "Turn 55: Military legacy point earned (total 6).",
+            "Turn 50: Military legacy point earned (total 5).",
+            "Turn 45: Military legacy point earned (total 4).",
+            "Border patrol reinforced",
+            "Legacy doctrine review"
+          ],
+          "strength": 72
+        }
+      },
+      "negotiations": [
+        {
+          "from": "sebastian",
+          "id": "neg-sebastian-player-1",
+          "offer": "Share verification budget for joint gate review",
+          "status": "pending",
+          "to": "player",
+          "turn": 1
+        },
+        {
+          "from": "lysander",
+          "id": "neg-lysander-player-1",
+          "offer": "Trade science for influence on map tile T22",
+          "status": "pending",
+          "to": "player",
+          "turn": 1
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-2",
+          "offer": "Joint map control test",
+          "status": "pending",
+          "to": "harper",
+          "turn": 2
+        },
+        {
+          "from": "aris",
+          "id": "neg-aris-player-4",
+          "offer": "Coordinate receipt audit across factions",
+          "status": "pending",
+          "to": "player",
+          "turn": 4
+        },
+        {
+          "from": "lysander",
+          "id": "neg-lysander-player-8",
+          "offer": "Pool influence for shared victory push",
+          "status": "pending",
+          "to": "player",
+          "turn": 8
+        },
+        {
+          "from": "aris",
+          "id": "neg-aris-player-12",
+          "offer": "Coordinate receipt audit across factions",
+          "status": "pending",
+          "to": "player",
+          "turn": 12
+        },
+        {
+          "from": "sebastian",
+          "id": "neg-sebastian-player-16",
+          "offer": "Coordinate receipt audit across factions",
+          "status": "pending",
+          "to": "player",
+          "turn": 16
+        },
+        {
+          "from": "lysander",
+          "id": "neg-lysander-player-20",
+          "offer": "Coordinate receipt audit across factions",
+          "status": "pending",
+          "to": "player",
+          "turn": 20
+        },
+        {
+          "from": "harper",
+          "id": "neg-harper-player-24",
+          "offer": "Coordinate receipt audit across factions",
+          "status": "pending",
+          "to": "player",
+          "turn": 24
+        },
+        {
+          "from": "harper",
+          "id": "neg-harper-player-28",
+          "offer": "Pause deploy lane for verification sprint",
+          "status": "pending",
+          "to": "player",
+          "turn": 28
+        },
+        {
+          "from": "aris",
+          "id": "neg-aris-player-32",
+          "offer": "Pool influence for shared victory push",
+          "status": "pending",
+          "to": "player",
+          "turn": 32
+        },
+        {
+          "from": "sebastian",
+          "id": "neg-sebastian-player-36",
+          "offer": "Pool influence for shared victory push",
+          "status": "pending",
+          "to": "player",
+          "turn": 36
+        },
+        {
+          "from": "harper",
+          "id": "neg-harper-player-40",
+          "offer": "Pause deploy lane for verification sprint",
+          "status": "pending",
+          "to": "player",
+          "turn": 40
+        },
+        {
+          "from": "lysander",
+          "id": "neg-lysander-player-44",
+          "offer": "Pool influence for shared victory push",
+          "status": "pending",
+          "to": "player",
+          "turn": 44
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-44",
+          "offer": "Review integration test offer",
+          "status": "pending",
+          "to": "harper",
+          "turn": 44
+        },
+        {
+          "from": "player",
+          "id": "neg-player-sebastian-46",
+          "offer": "Persistence review probe",
+          "status": "pending",
+          "to": "sebastian",
+          "turn": 46
+        },
+        {
+          "from": "aris",
+          "id": "neg-aris-player-48",
+          "offer": "Pool influence for shared victory push",
+          "status": "pending",
+          "to": "player",
+          "turn": 48
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-48-2",
+          "offer": "Second offer same turn",
+          "status": "pending",
+          "to": "harper",
+          "turn": 48
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-50-1",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 50
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-50-2",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 50
+        },
+        {
+          "from": "harper",
+          "id": "neg-harper-player-52-1",
+          "offer": "Pool influence for shared victory push",
+          "status": "pending",
+          "to": "player",
+          "turn": 52
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-52-1",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 52
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-52-2",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 52
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-54-1",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 54
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-54-2",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 54
+        },
+        {
+          "from": "aris",
+          "id": "neg-aris-player-56-1",
+          "offer": "Pool influence for shared victory push",
+          "status": "pending",
+          "to": "player",
+          "turn": 56
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-56-1",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 56
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-56-2",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 56
+        },
+        {
+          "from": "harper",
+          "id": "neg-harper-player-60-1",
+          "offer": "Pause deploy lane for verification sprint",
+          "status": "pending",
+          "to": "player",
+          "turn": 60
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-63-1",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 63
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-63-2",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 63
+        },
+        {
+          "from": "lysander",
+          "id": "neg-lysander-player-64-1",
+          "offer": "Pool influence for shared victory push",
+          "status": "pending",
+          "to": "player",
+          "turn": 64
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-65-1",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 65
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-65-2",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 65
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-67-1",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 67
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-67-2",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 67
+        },
+        {
+          "from": "sebastian",
+          "id": "neg-sebastian-player-68-1",
+          "offer": "Pool influence for shared victory push",
+          "status": "pending",
+          "to": "player",
+          "turn": 68
+        },
+        {
+          "from": "harper",
+          "id": "neg-harper-player-72-1",
+          "offer": "Coordinate receipt audit across factions",
+          "status": "pending",
+          "to": "player",
+          "turn": 72
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-72-1",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 72
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-72-2",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 72
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-74-1",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 74
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-74-2",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 74
+        },
+        {
+          "from": "lysander",
+          "id": "neg-lysander-player-76-1",
+          "offer": "Coordinate receipt audit across factions",
+          "status": "pending",
+          "to": "player",
+          "turn": 76
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-76-1",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 76
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-76-2",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 76
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-48-1",
+          "offer": "First offer same turn",
+          "status": "accepted",
+          "to": "harper",
+          "turn": 48
+        }
+      ],
+      "note": "CivForge governance workspace with multi-agent map, alliances, negotiations, mechanics lanes, and joint victory.",
+      "player": {
+        "cities": 4,
+        "fun_score": 86.6,
+        "name": "Governance Lead (Grok)",
+        "resources": {
+          "food": 303,
+          "influence": 297,
+          "prod": 293,
+          "sci": 296,
+          "verify_budget": 298
+        },
+        "territories": 7
+      },
+      "receipts": [
+        {
+          "action": "governance_gate",
+          "approved": true,
+          "comment": "Quality sufficient.",
+          "fun_score": 92.0,
+          "id": "3591c2c9-gate-20260615184343",
+          "proposal": {
+            "action": "civforge_governance_hardening_validation",
+            "details": {
+              "details": {
+                "scope": "proposal_gate_persistence_after_screen_restart",
+                "via": "openclaw-validation"
+              },
+              "investment": 1,
+              "target": "gravity-mosaic"
+            },
+            "fun_score": 92.0,
+            "id": "3591c2c9",
+            "status": "GATED_APPROVED",
+            "timestamp": "2026-06-15T18:43:43.789261",
+            "turn": 72
+          },
+          "proposal_id": "3591c2c9",
+          "receipt_type": "governance_gate",
+          "status": "GATED_APPROVED",
+          "turn": 72
+        },
+        {
+          "comment": "Acceptable. Consider extra verification pass.",
+          "decisions": {
+            "grok": "Decided: deploy (based on prod=13, sci=9, 0 receipts)",
+            "harper": "Decided: deploy (based on prod=13, sci=9, 0 receipts)",
+            "sebastian": "Decided: deploy (based on prod=13, sci=9, 0 receipts)"
+          },
+          "fun_score": 86.6,
+          "gate": {
+            "approved": true,
+            "comment": "Decided: deploy (based on prod=13, sci=9, 0 receipts)",
+            "receipt": {
+              "action": "govern_gravity_work",
+              "details": {
+                "decisions": {
+                  "grok": "Decided: deploy (based on prod=13, sci=9, 0 receipts)",
+                  "harper": "Decided: deploy (based on prod=13, sci=9, 0 receipts)",
+                  "sebastian": "Decided: deploy (based on prod=13, sci=9, 0 receipts)"
+                },
+                "player_actions": 1
+              },
+              "fun_score": 86.6,
+              "id": "8c6ec648",
+              "status": "GATED_APPROVED",
+              "timestamp": "2026-06-15T18:45:51.623655",
+              "turn": 73
+            }
+          },
+          "proposal_id": "8c6ec648",
+          "resources": {
+            "deploy_budget": 5,
+            "prod": 13,
+            "sci": 9,
+            "verify": 7
+          },
+          "status": "PASS",
+          "turn": 73
+        },
+        {
+          "comment": "Acceptable. Consider extra verification pass.",
+          "decisions": {
+            "grok": "Decided: deploy (based on prod=14, sci=10, 1 receipts)",
+            "harper": "Decided: deploy (based on prod=14, sci=10, 1 receipts)",
+            "sebastian": "Decided: deploy (based on prod=14, sci=10, 1 receipts)"
+          },
+          "fun_score": 86.6,
+          "gate": {
+            "approved": true,
+            "comment": "Decided: deploy (based on prod=14, sci=10, 1 receipts)",
+            "receipt": {
+              "action": "govern_gravity_work",
+              "details": {
+                "decisions": {
+                  "grok": "Decided: deploy (based on prod=14, sci=10, 1 receipts)",
+                  "harper": "Decided: deploy (based on prod=14, sci=10, 1 receipts)",
+                  "sebastian": "Decided: deploy (based on prod=14, sci=10, 1 receipts)"
+                },
+                "player_actions": 1
+              },
+              "fun_score": 86.6,
+              "id": "7a46f1c6",
+              "status": "GATED_APPROVED",
+              "timestamp": "2026-06-15T18:45:51.747015",
+              "turn": 74
+            }
+          },
+          "proposal_id": "7a46f1c6",
+          "resources": {
+            "deploy_budget": 5,
+            "prod": 14,
+            "sci": 10,
+            "verify": 8
+          },
+          "status": "PASS",
+          "turn": 74
+        },
+        {
+          "comment": "Acceptable. Consider extra verification pass.",
+          "decisions": {
+            "grok": "Decided: deploy (based on prod=15, sci=11, 2 receipts)",
+            "harper": "Decided: deploy (based on prod=15, sci=11, 2 receipts)",
+            "sebastian": "Decided: deploy (based on prod=15, sci=11, 2 receipts)"
+          },
+          "fun_score": 86.6,
+          "gate": {
+            "approved": true,
+            "comment": "Decided: deploy (based on prod=15, sci=11, 2 receipts)",
+            "receipt": {
+              "action": "govern_gravity_work",
+              "details": {
+                "decisions": {
+                  "grok": "Decided: deploy (based on prod=15, sci=11, 2 receipts)",
+                  "harper": "Decided: deploy (based on prod=15, sci=11, 2 receipts)",
+                  "sebastian": "Decided: deploy (based on prod=15, sci=11, 2 receipts)"
+                },
+                "player_actions": 1
+              },
+              "fun_score": 86.6,
+              "id": "6f33e437",
+              "status": "GATED_APPROVED",
+              "timestamp": "2026-06-15T18:54:46.512757",
+              "turn": 75
+            }
+          },
+          "proposal_id": "6f33e437",
+          "resources": {
+            "deploy_budget": 5,
+            "prod": 15,
+            "sci": 11,
+            "verify": 9
+          },
+          "status": "PASS",
+          "turn": 75
+        },
+        {
+          "comment": "Acceptable. Consider extra verification pass.",
+          "decisions": {
+            "grok": "Decided: deploy (based on prod=16, sci=12, 3 receipts)",
+            "harper": "Decided: deploy (based on prod=16, sci=12, 3 receipts)",
+            "sebastian": "Decided: deploy (based on prod=16, sci=12, 3 receipts)"
+          },
+          "fun_score": 86.6,
+          "gate": {
+            "approved": true,
+            "comment": "Decided: deploy (based on prod=16, sci=12, 3 receipts)",
+            "receipt": {
+              "action": "govern_gravity_work",
+              "details": {
+                "decisions": {
+                  "grok": "Decided: deploy (based on prod=16, sci=12, 3 receipts)",
+                  "harper": "Decided: deploy (based on prod=16, sci=12, 3 receipts)",
+                  "sebastian": "Decided: deploy (based on prod=16, sci=12, 3 receipts)"
+                },
+                "player_actions": 1
+              },
+              "fun_score": 86.6,
+              "id": "fec15840",
+              "status": "GATED_APPROVED",
+              "timestamp": "2026-06-15T18:54:46.630676",
+              "turn": 76
+            }
+          },
+          "proposal_id": "fec15840",
+          "resources": {
+            "deploy_budget": 5,
+            "prod": 16,
+            "sci": 12,
+            "verify": 10
+          },
+          "status": "PASS",
+          "turn": 76
+        }
+      ],
+      "recent_events": [
+        "Turn 76: Alliance alliance-player-harper-44 betrayal risk elevated to 41%.",
+        "Turn 76: Alliance alliance-player-harper-48 betrayal risk elevated to 49%.",
+        "Turn 76: Lysander (Research) opened negotiation.",
+        "Turn 76: Harper (Systems) \u2014 Decided: deploy (based on prod=16, sci=12, 3 receipts)",
+        "Turn 76: Sebastian (Governance) \u2014 Decided: deploy (based on prod=16, sci=12, 3 receipts)",
+        "Turn 76: Economic institution founded (#11).",
+        "Turn 76: Governance Lead (Grok) proposed to Harper (Systems): validate A",
+        "Turn 76: Governance Lead (Grok) proposed to Harper (Systems): validate B"
+      ],
+      "status": "active",
+      "victory_progress": {
+        "joint_progress": 100,
+        "milestones": [
+          {
+            "done": true,
+            "name": "First alliance"
+          },
+          {
+            "done": true,
+            "name": "Shared map control"
+          },
+          {
+            "done": true,
+            "name": "Governance quorum"
+          },
+          {
+            "done": true,
+            "name": "Joint victory"
+          }
+        ],
+        "outcome": "victory",
+        "target": 100
+      },
+      "work_packs": [
+        {
+          "action": "land_completion_patches_per_status",
+          "id": "8d4303dd",
+          "status": "PROPOSED"
+        },
+        {
+          "action": "nexus_sync_config",
+          "id": "747989fa",
+          "status": "PROPOSED"
+        },
+        {
+          "action": "align_and_execute_swarm_multi_agent_ui_progress",
+          "id": "9e21c224",
+          "status": "PROPOSED"
+        },
+        {
+          "action": "execute_swarm_turnkey_ready_work_to_completion",
+          "id": "47c37283",
+          "status": "PROPOSED"
+        },
+        {
+          "name": "ReviewPack",
+          "status": "active"
+        },
+        {
+          "action": "civforge_governance_hardening_validation",
+          "id": "3591c2c9",
+          "proposal_id": "3591c2c9",
+          "status": "GATED_APPROVED",
+          "updated_at": "2026-06-15T18:43:43.795253"
+        }
+      ]
+    },
+    "ok": true,
+    "status_code": 200
+  },
+  "nexus": {
+    "json": {
+      "bind": "127.0.0.1",
+      "port": "8082",
+      "service": "dawsos-nexus",
+      "status": "ok",
+      "version": "0.2.0-rebirth"
+    },
+    "ok": true,
+    "status_code": 200
+  },
+  "poller_posture": {
+    "findings": [],
+    "generated_at": "2026-06-15T19:13:07Z",
+    "key_file": {
+      "exists": true,
+      "has_civforge_kernel": true,
+      "mode": "0o600"
+    },
+    "log_file": "/tmp/civforge-poller.log",
+    "log_tail": [
+      "/Users/michaeldawson/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020",
+      "  warnings.warn(",
+      "[launcher] civforge-poller screen start pid=17129 nexus=http://127.0.0.1:8082",
+      "/Users/michaeldawson/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020",
+      "  warnings.warn(",
+      "[nexus-poller] Starting loop every 30s against http://127.0.0.1:8082 (app=civforge-kernel). Ctrl-C to stop."
+    ],
+    "nexus": {
+      "body": "{\"status\":\"ok\",\"service\":\"dawsos-nexus\",\"version\":\"0.2.0-rebirth\",\"bind\":\"127.0.0.1\",\"port\":\"8082\"}",
+      "ok": true,
+      "status_code": 200
+    },
+    "pid": 17129,
+    "pid_alive": true,
+    "pid_file": "/tmp/civforge-poller.pid",
+    "process_command": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python -u tools/nexus_command_poller.py --loop --interval 30",
+    "schema": "civforge.poller_posture.v1",
+    "screen_sessions": [
+      "17123.civforge-poller\t(Detached)"
+    ],
+    "status": "pass",
+    "summary": {
+      "fail_count": 0,
+      "finding_count": 0,
+      "warn_count": 0
+    }
+  },
+  "receipt_index": {
+    "generated_at": "2026-06-15T19:13:07Z",
+    "latest_files": [
+      {
+        "mtime": "2026-06-15T19:12:49Z",
+        "path": "receipts/cursor-execution-governance-swarm-class-20260615.md",
+        "size": 1265
+      },
+      {
+        "mtime": "2026-06-15T18:54:46Z",
+        "path": "receipts/governance-cycle-20260615-185446.md",
+        "size": 1072
+      },
+      {
+        "mtime": "2026-06-15T18:54:46Z",
+        "path": "receipts/civforge-governance-posture-latest.md",
+        "size": 189
+      },
+      {
+        "mtime": "2026-06-15T18:54:46Z",
+        "path": "receipts/civforge-receipt-index-latest.md",
+        "size": 1149
+      },
+      {
+        "mtime": "2026-06-15T18:54:46Z",
+        "path": "receipts/civforge-contract-parity-latest.md",
+        "size": 152
+      },
+      {
+        "mtime": "2026-06-15T18:54:41Z",
+        "path": "receipts/synthesis-lane-v2-nexus-governance-20260615.md",
+        "size": 4507
+      },
+      {
+        "mtime": "2026-06-15T18:50:16Z",
+        "path": "receipts/openclaw-civforge-governance-hardening-20260615-1450.md",
+        "size": 2658
+      },
+      {
+        "mtime": "2026-06-15T18:48:44Z",
+        "path": "receipts/work-pack-grok-mechanics-sim-001.md",
+        "size": 2209
+      },
+      {
+        "mtime": "2026-06-15T18:48:44Z",
+        "path": "receipts/HANDOFF-GROK-SWARM-20260615.md",
+        "size": 5850
+      },
+      {
+        "mtime": "2026-06-15T18:47:43Z",
+        "path": "receipts/gravity-rec-20260615-184743.md",
+        "size": 589
+      },
+      {
+        "mtime": "2026-06-15T18:47:05Z",
+        "path": "receipts/lane-v2-migration-20260615.md",
+        "size": 1328
+      },
+      {
+        "mtime": "2026-06-15T18:45:51Z",
+        "path": "receipts/governance-cycle-20260615-184551.md",
+        "size": 1071
+      }
+    ],
+    "schema": "civforge.receipt_index.v1",
+    "sqlite": {
+      "exists": true,
+      "latest": [
+        {
+          "action": "PASS",
+          "created_at": "2026-06-15T18:54:46.631892",
+          "id": "r-76-20260615-185446",
+          "status": "PASS",
+          "turn": 76
+        },
+        {
+          "action": "PASS",
+          "created_at": "2026-06-15T18:54:46.513272",
+          "id": "r-75-20260615-185446",
+          "status": "PASS",
+          "turn": 75
+        },
+        {
+          "action": "gravity_recommendation",
+          "created_at": "2026-06-15T18:47:43.048264",
+          "id": "r-0-20260615-184743",
+          "status": null,
+          "turn": 0
+        },
+        {
+          "action": "PASS",
+          "created_at": "2026-06-15T18:45:51.747419",
+          "id": "r-74-20260615-184551",
+          "status": "PASS",
+          "turn": 74
+        },
+        {
+          "action": "PASS",
+          "created_at": "2026-06-15T18:45:51.624067",
+          "id": "r-73-20260615-184551",
+          "status": "PASS",
+          "turn": 73
+        }
+      ],
+      "receipts": 322,
+      "state_snapshots": 1
+    },
+    "status": "pass",
+    "summary": {
+      "latest_file_count": 12,
+      "sqlite_receipts": 322,
+      "sqlite_state_snapshots": 1
+    }
+  },
+  "schema": "civforge.governance_posture.v1",
+  "status": "pass",
+  "summary": {
+    "fail_count": 0,
+    "finding_count": 0,
+    "fun_score": 86.6,
+    "mcp_tool_count": 8,
+    "pending_negotiations": 45,
+    "turn": 76,
+    "warn_count": 0
+  }
+}

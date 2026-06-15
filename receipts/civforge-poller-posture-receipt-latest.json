@@ -1,0 +1,7 @@
+{
+  "action": "civforge_poller_posture",
+  "artifact": "receipts/civforge-poller-posture-latest.json",
+  "generated_at": "2026-06-15T18:45:07Z",
+  "schema": "civforge.receipt.v1",
+  "status": "pass"
+}

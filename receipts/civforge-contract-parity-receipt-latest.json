@@ -1,0 +1,7 @@
+{
+  "action": "civforge_contract_parity",
+  "artifact": "receipts/civforge-contract-parity-latest.json",
+  "generated_at": "2026-06-15T19:13:07Z",
+  "schema": "civforge.receipt.v1",
+  "status": "pass"
+}

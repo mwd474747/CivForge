@@ -16,8 +16,8 @@
 
 ## Bootstrap (every session)
 
-1. Read `SEPARATION.md` and `docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md`
-2. Read `docs/EXECUTION_LANE_V2.md` — know your lane
+1. Read `SEPARATION.md`, `docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md`, and `docs/CIVFORGE_SWARM_CLASS_V1.md`
+2. Read `docs/EXECUTION_LANE_V2.md` — know your lane (CivForge ≠ dawsOS `swarm-registry` class)
 3. Read `receipts/HANDOFF-GROK-SWARM-20260615.md` for current state
 4. Grok swarm: `prompts/grok_swarm_handoff_seed.md`
 5. Cursor: run `bash tools/turnkey-cursor-local.sh` after implementation
@@ -58,9 +58,15 @@ Handoff: `prompts/grok_swarm_handoff_seed.md`, `docs/GROK_SWARM_PACKET_V1.md`
 
 ---
 
+## Swarm class (important)
+
+CivForge borrows dawsOS **governance patterns** but is **not** a wt-registered workflow swarm. Grok on grok.com plans; AgentBrains simulate in `:8080`; OpenClaw owns wt truth on escalation only. See `docs/CIVFORGE_SWARM_CLASS_V1.md`.
+
+---
+
 ## In-game agent registry (`agents/role_registry.json`)
 
-Simulation personas in `core/` governance cycles:
+Simulation personas in `core/` governance cycles (Layer 2 — not grok.com swarm, not wt delegates):
 
 - **harper** — memory, research, verify
 - **sebastian** — FunForge gate, separation, literal verify

@@ -1,0 +1,94 @@
+{
+  "bridge": {
+    "bridge_files": [
+      "bridge/civforge_http_bridge.py",
+      "bridge/headless_observer.py"
+    ],
+    "bridge_posts_integrate": true,
+    "integrate_methods": [
+      "GET",
+      "POST"
+    ],
+    "post_integrate_supported": true
+  },
+  "documented_mcp_tools": [
+    "civforge_advance_turn",
+    "civforge_found_city",
+    "civforge_governance_gate",
+    "civforge_governance_propose",
+    "civforge_negotiate",
+    "civforge_negotiate_respond",
+    "civforge_status",
+    "civforge_what_if"
+  ],
+  "findings": [],
+  "generated_at": "2026-06-15T19:13:07Z",
+  "mcp_tools": [
+    "civforge_advance_turn",
+    "civforge_found_city",
+    "civforge_governance_gate",
+    "civforge_governance_propose",
+    "civforge_negotiate",
+    "civforge_negotiate_respond",
+    "civforge_status",
+    "civforge_what_if"
+  ],
+  "nexus_allowed_actions": [
+    "sync_config"
+  ],
+  "routes": {
+    "/advance_turn": [
+      "POST"
+    ],
+    "/dashboard": [
+      "GET"
+    ],
+    "/found_city": [
+      "POST"
+    ],
+    "/game/founding-session": [
+      "GET"
+    ],
+    "/game/negotiate": [
+      "POST"
+    ],
+    "/game/negotiate/respond": [
+      "POST"
+    ],
+    "/governance/advance_and_log": [
+      "POST"
+    ],
+    "/governance/gate": [
+      "POST"
+    ],
+    "/governance/gravity_deploy_recommendation": [
+      "GET"
+    ],
+    "/governance/propose": [
+      "POST"
+    ],
+    "/governance/protected_advance": [
+      "POST"
+    ],
+    "/integrate/civforge": [
+      "GET",
+      "POST"
+    ],
+    "/simulation/what_if": [
+      "POST"
+    ],
+    "/state": [
+      "GET"
+    ]
+  },
+  "schema": "civforge.contract_parity.v1",
+  "status": "pass",
+  "summary": {
+    "documented_mcp_tool_count": 8,
+    "fail_count": 0,
+    "finding_count": 0,
+    "mcp_tool_count": 8,
+    "route_count": 15,
+    "warn_count": 0
+  }
+}

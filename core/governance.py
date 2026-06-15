@@ -32,6 +32,30 @@ class GovernanceGate:
         self.min_fun_for_execute = min_fun_for_execute
         self.proposals: List[Receipt] = []
 
+    def load_proposals(self, proposals: List[Dict[str, Any]]) -> None:
+        """Restore proposal state from persisted snapshots.
+
+        ReceiptStore owns durable storage. The gate keeps only the active in-memory
+        working set, so startup has to rehydrate it before `/governance/gate`
+        can truthfully evaluate proposals created before a restart.
+        """
+        restored: List[Receipt] = []
+        for item in proposals:
+            if not isinstance(item, dict) or not item.get("id"):
+                continue
+            restored.append(
+                Receipt(
+                    id=str(item["id"]),
+                    turn=int(item.get("turn", 0) or 0),
+                    action=str(item.get("action", "unknown")),
+                    status=str(item.get("status", "PROPOSED")),
+                    fun_score=float(item.get("fun_score", 0) or 0),
+                    details=dict(item.get("details") or {}),
+                    timestamp=str(item.get("timestamp") or datetime.utcnow().isoformat()),
+                )
+            )
+        self.proposals = restored
+
     def propose(self, turn: int, action: str, details: Dict[str, Any]) -> Receipt:
         receipt = Receipt(
             id=str(uuid.uuid4())[:8],

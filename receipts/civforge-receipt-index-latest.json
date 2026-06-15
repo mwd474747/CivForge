@@ -1,0 +1,114 @@
+{
+  "generated_at": "2026-06-15T18:54:46Z",
+  "latest_files": [
+    {
+      "mtime": "2026-06-15T18:54:46Z",
+      "path": "receipts/civforge-contract-parity-latest.md",
+      "size": 152
+    },
+    {
+      "mtime": "2026-06-15T18:54:41Z",
+      "path": "receipts/synthesis-lane-v2-nexus-governance-20260615.md",
+      "size": 4507
+    },
+    {
+      "mtime": "2026-06-15T18:50:16Z",
+      "path": "receipts/openclaw-civforge-governance-hardening-20260615-1450.md",
+      "size": 2658
+    },
+    {
+      "mtime": "2026-06-15T18:48:57Z",
+      "path": "receipts/civforge-governance-posture-latest.md",
+      "size": 189
+    },
+    {
+      "mtime": "2026-06-15T18:48:44Z",
+      "path": "receipts/work-pack-grok-mechanics-sim-001.md",
+      "size": 2209
+    },
+    {
+      "mtime": "2026-06-15T18:48:44Z",
+      "path": "receipts/HANDOFF-GROK-SWARM-20260615.md",
+      "size": 5850
+    },
+    {
+      "mtime": "2026-06-15T18:47:43Z",
+      "path": "receipts/gravity-rec-20260615-184743.md",
+      "size": 589
+    },
+    {
+      "mtime": "2026-06-15T18:47:05Z",
+      "path": "receipts/lane-v2-migration-20260615.md",
+      "size": 1328
+    },
+    {
+      "mtime": "2026-06-15T18:46:06Z",
+      "path": "receipts/civforge-receipt-index-latest.md",
+      "size": 1135
+    },
+    {
+      "mtime": "2026-06-15T18:45:51Z",
+      "path": "receipts/governance-cycle-20260615-184551.md",
+      "size": 1071
+    },
+    {
+      "mtime": "2026-06-15T18:45:07Z",
+      "path": "receipts/civforge-poller-posture-latest.md",
+      "size": 157
+    },
+    {
+      "mtime": "2026-06-15T18:43:43Z",
+      "path": "receipts/governance-gate-20260615-184343.md",
+      "size": 683
+    }
+  ],
+  "schema": "civforge.receipt_index.v1",
+  "sqlite": {
+    "exists": true,
+    "latest": [
+      {
+        "action": "gravity_recommendation",
+        "created_at": "2026-06-15T18:47:43.048264",
+        "id": "r-0-20260615-184743",
+        "status": null,
+        "turn": 0
+      },
+      {
+        "action": "PASS",
+        "created_at": "2026-06-15T18:45:51.747419",
+        "id": "r-74-20260615-184551",
+        "status": "PASS",
+        "turn": 74
+      },
+      {
+        "action": "PASS",
+        "created_at": "2026-06-15T18:45:51.624067",
+        "id": "r-73-20260615-184551",
+        "status": "PASS",
+        "turn": 73
+      },
+      {
+        "action": "governance_gate",
+        "created_at": "2026-06-15T18:43:43.795428",
+        "id": "3591c2c9-gate-20260615184343",
+        "status": "GATED_APPROVED",
+        "turn": 72
+      },
+      {
+        "action": "civforge_governance_hardening_validation",
+        "created_at": "2026-06-15T18:43:43.789525",
+        "id": "3591c2c9",
+        "status": "PROPOSED",
+        "turn": 72
+      }
+    ],
+    "receipts": 320,
+    "state_snapshots": 1
+  },
+  "status": "pass",
+  "summary": {
+    "latest_file_count": 12,
+    "sqlite_receipts": 320,
+    "sqlite_state_snapshots": 1
+  }
+}

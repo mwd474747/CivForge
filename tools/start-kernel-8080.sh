@@ -11,6 +11,7 @@ cd "$ROOT_DIR"
 
 LOG_FILE="/tmp/civforge-8080.log"
 PID_FILE="/tmp/civforge-8080.pid"
+SCREEN_SESSION="civforge-kernel-8080"
 
 echo "=== CivForge Kernel Start (8080) ==="
 
@@ -27,12 +28,20 @@ fi
 
 # Fallback: try a narrow kill for uvicorn on this port only (avoid self-match issues)
 pkill -f "uvicorn.*8080" 2>/dev/null || true
+screen -S "$SCREEN_SESSION" -X quit >/dev/null 2>&1 || true
 sleep 1
 
-echo "Starting uvicorn (nohup, detached)..."
-nohup python3 -m uvicorn backend.sim_api:app --host 0.0.0.0 --port 8080 > "$LOG_FILE" 2>&1 &
-SRV_PID=$!
-echo "$SRV_PID" > "$PID_FILE"
+if command -v screen >/dev/null 2>&1; then
+  echo "Starting uvicorn (screen, detached)..."
+  screen -dmS "$SCREEN_SESSION" bash -lc "cd '$ROOT_DIR'; python3 -m uvicorn backend.sim_api:app --host 0.0.0.0 --port 8080 > '$LOG_FILE' 2>&1 & echo \$! > '$PID_FILE'; wait \$(cat '$PID_FILE')"
+  sleep 1
+  SRV_PID="$(cat "$PID_FILE")"
+else
+  echo "Starting uvicorn (nohup, detached)..."
+  nohup python3 -m uvicorn backend.sim_api:app --host 0.0.0.0 --port 8080 > "$LOG_FILE" 2>&1 &
+  SRV_PID=$!
+  echo "$SRV_PID" > "$PID_FILE"
+fi
 
 echo "PID: $SRV_PID (saved to $PID_FILE)"
 echo "Log: $LOG_FILE"

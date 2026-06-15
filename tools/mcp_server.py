@@ -66,10 +66,14 @@ TOOLS = [
 
 def _http(method: str, path: str, body: Optional[Dict[str, Any]] = None) -> Any:
     data = json.dumps(body).encode() if body is not None else None
+    headers = {"Content-Type": "application/json"} if data else {}
+    api_key = os.environ.get("CIVFORGE_API_KEY") or os.environ.get("NEXUS_API_KEY")
+    if api_key:
+        headers["X-CivForge-Token"] = api_key
     req = urllib.request.Request(
         f"{KERNEL}{path}",
         data=data,
-        headers={"Content-Type": "application/json"} if data else {},
+        headers=headers,
         method=method,
     )
     try:

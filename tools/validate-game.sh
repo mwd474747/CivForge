@@ -1,15 +1,23 @@
 #!/bin/bash
 # Full CivForge game validation: unit tests + live kernel probes + turnkey.
-# Usage: bash tools/validate-game.sh [--restart]
+#
+# STATEFUL: default mode runs turnkey-multi-ui-full.sh which advances turns via CLI.
+# For architecture/report-only review use --read-only (skips turn advances).
+#
+# Usage: bash tools/validate-game.sh [--restart] [--read-only]
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 RESTART=false
-if [[ "${1:-}" == "--restart" ]]; then
-  RESTART=true
-fi
+READ_ONLY=false
+for arg in "$@"; do
+  case "$arg" in
+    --restart) RESTART=true ;;
+    --read-only) READ_ONLY=true ;;
+  esac
+done
 
 echo "=== CivForge validate-game ==="
 
@@ -74,8 +82,12 @@ assert "civforge_governance_gate" in names
 print("  API + MCP probes OK")
 PY
 
-echo "4. Turnkey multi-ui..."
-bash tools/turnkey-multi-ui-full.sh
+if $READ_ONLY; then
+  echo "4. Skipping turnkey multi-ui (read-only — no turn advances)"
+else
+  echo "4. Turnkey multi-ui (advances turns — see docs/CIVFORGE_SWARM_CLASS_V1.md)..."
+  bash tools/turnkey-multi-ui-full.sh
+fi
 
 echo "=== validate-game PASSED ==="
 echo "Dashboard: http://127.0.0.1:8080/dashboard"

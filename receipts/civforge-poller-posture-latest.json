@@ -1,0 +1,37 @@
+{
+  "findings": [],
+  "generated_at": "2026-06-15T18:45:07Z",
+  "key_file": {
+    "exists": true,
+    "has_civforge_kernel": true,
+    "mode": "0o600"
+  },
+  "log_file": "/tmp/civforge-poller.log",
+  "log_tail": [
+    "/Users/michaeldawson/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020",
+    "  warnings.warn(",
+    "[launcher] civforge-poller screen start pid=17129 nexus=http://127.0.0.1:8082",
+    "/Users/michaeldawson/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020",
+    "  warnings.warn(",
+    "[nexus-poller] Starting loop every 30s against http://127.0.0.1:8082 (app=civforge-kernel). Ctrl-C to stop."
+  ],
+  "nexus": {
+    "body": "{\"status\":\"ok\",\"service\":\"dawsos-nexus\",\"version\":\"0.2.0-rebirth\",\"bind\":\"127.0.0.1\",\"port\":\"8082\"}",
+    "ok": true,
+    "status_code": 200
+  },
+  "pid": 17129,
+  "pid_alive": true,
+  "pid_file": "/tmp/civforge-poller.pid",
+  "process_command": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python -u tools/nexus_command_poller.py --loop --interval 30",
+  "schema": "civforge.poller_posture.v1",
+  "screen_sessions": [
+    "17123.civforge-poller\t(Detached)"
+  ],
+  "status": "pass",
+  "summary": {
+    "fail_count": 0,
+    "finding_count": 0,
+    "warn_count": 0
+  }
+}

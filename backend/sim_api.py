@@ -7,6 +7,8 @@ from typing import Dict, Any, Optional
 import uvicorn
 import sys
 from pathlib import Path
+from datetime import datetime
+import hmac
 
 # Add core to path for the realigned Python agentic patterns (no more Godot MVP)
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -29,6 +31,41 @@ from backend.multi_agent_state import (
 )
 
 NEXUS_URL = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
+
+def _truthy_env(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _constant_time_match(candidate: str, allowed: list[str]) -> bool:
+    return any(token and hmac.compare_digest(candidate, token) for token in allowed)
+
+
+def require_public_mode_token(
+    authorization: Optional[str] = Header(None),
+    x_civforge_token: Optional[str] = Header(None, alias="X-CivForge-Token"),
+    x_nexus_api_key: Optional[str] = Header(None, alias="x-nexus-api-key"),
+) -> Dict[str, Any]:
+    """Optional exposure guard for mutating routes.
+
+    Local development remains permissive by default. If the kernel is intentionally
+    exposed through a tunnel or public host, set `CIVFORGE_PUBLIC_MODE=1` and one
+    of `CIVFORGE_OPERATOR_TOKEN`, `CIVFORGE_API_KEY`, or `NEXUS_API_KEY`.
+    """
+    if not _truthy_env("CIVFORGE_PUBLIC_MODE"):
+        return {"public_mode": False, "scope": "local"}
+
+    allowed = [
+        os.environ.get("CIVFORGE_OPERATOR_TOKEN", ""),
+        os.environ.get("CIVFORGE_API_KEY", ""),
+        os.environ.get("NEXUS_API_KEY", ""),
+    ]
+    candidates = [x for x in (x_civforge_token, x_nexus_api_key) if isinstance(x, str) and x]
+    if isinstance(authorization, str) and authorization:
+        candidates.append(authorization.split(" ", 1)[1] if authorization.lower().startswith("bearer ") else authorization)
+    if any(_constant_time_match(candidate, allowed) for candidate in candidates):
+        return {"public_mode": True, "scope": "mutate"}
+    raise HTTPException(401, "CIVFORGE_PUBLIC_MODE requires a valid CivForge or Nexus API token for mutating routes")
+
 
 def send_telemetry_to_nexus(turn: int, fun_score: float, resources: dict, extra: dict = None):
     """Send heartbeat to dawsos-nexus (8082) as CivForge satellite.
@@ -55,7 +92,9 @@ def send_telemetry_to_nexus(turn: int, fun_score: float, resources: dict, extra:
             for key in ("alliancesCount", "negotiationsPending", "victoryProgress", "mapPlayerTiles", "mechanicsSummary"):
                 if key in extra:
                     payload["customMetrics"][key] = extra[key]
-        requests.post(f"{NEXUS_URL}/api/telemetry/heartbeat", json=payload, timeout=5)
+        api_key = os.environ.get("NEXUS_API_KEY", "")
+        headers = {"x-nexus-api-key": api_key} if api_key else None
+        requests.post(f"{NEXUS_URL}/api/telemetry/heartbeat", json=payload, headers=headers, timeout=5)
     except Exception:
         pass  # never block game on telemetry
 
@@ -135,6 +174,25 @@ if restored:
 ensure_multi_agent_state(game_state)
 ensure_civstudy_sim_state(game_state)
 orchestrator.turn = int(game_state.get("turn", 1))
+orchestrator.gate.load_proposals(game_state.get("governance_proposals", []))
+
+
+def _sync_governance_proposals_to_state() -> None:
+    game_state["governance_proposals"] = [p.to_dict() for p in orchestrator.gate.proposals]
+
+
+def _update_work_pack_status(proposal_id: str, status: str) -> None:
+    for work_pack in game_state.get("work_packs", []):
+        if work_pack.get("id") == proposal_id or work_pack.get("proposal_id") == proposal_id:
+            work_pack["status"] = status
+            work_pack["updated_at"] = datetime.utcnow().isoformat()
+
+
+def _persist_governance_event(receipt: Dict[str, Any], filename_hint: str) -> None:
+    game_state["receipts"].append(receipt)
+    _sync_governance_proposals_to_state()
+    receipt_store.append(receipt, filename_hint=filename_hint)
+    receipt_store.save_state("game_state", game_state)
 
 def telemetry_extra_from_state() -> Dict[str, Any]:
     ensure_multi_agent_state(game_state)
@@ -228,7 +286,7 @@ async def founding_session() -> Dict[str, Any]:
     }
 
 @app.post("/found_city")
-async def found_city(req: FoundCityRequest) -> Dict[str, Any]:
+async def found_city(req: FoundCityRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
     """Initiate a governed work item ('found city' in the original paste = start a major work pack or gravity deploy thread).
 
     Checks prod/attention budget, updates state + territories, appends detailed receipt (with turn, status, fun_score, claim).
@@ -282,7 +340,7 @@ async def found_city(req: FoundCityRequest) -> Dict[str, Any]:
     }
 
 @app.post("/advance_turn")
-async def advance_turn() -> Dict[str, Any]:
+async def advance_turn(_claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
     """Advance one governance cycle (the heart of the earlier FastAPI version).
 
     Now powered by the real Python GovernanceOrchestrator + AgentBrains + FunForge.
@@ -325,22 +383,20 @@ async def advance_turn() -> Dict[str, Any]:
     }
 
 @app.post("/game/negotiate")
-async def game_negotiate(req: NegotiateRequest) -> Dict[str, Any]:
+async def game_negotiate(req: NegotiateRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
     """Player proposes a negotiation offer to another agent."""
     entry = add_negotiation(game_state, req.to, req.offer, from_agent="player")
     receipt_store.save_state("game_state", game_state)
     return {"negotiation": entry, "negotiations": negotiations_for_api(game_state)}
 
 @app.post("/game/negotiate/respond")
-async def game_negotiate_respond(req: NegotiateRespondRequest) -> Dict[str, Any]:
+async def game_negotiate_respond(req: NegotiateRespondRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
     """Accept or decline a pending negotiation."""
     result = respond_negotiation(game_state, req.negotiation_id, req.accept)
     receipt_store.save_state("game_state", game_state)
     return {"result": result, "alliances": game_state["alliances"], "victory_progress": game_state["victory_progress"]}
 
-@app.get("/integrate/civforge")
-async def integrate_civforge() -> Dict[str, Any]:
-    """Hook for CivForge agents (Grok, receipts, governance). Primary integration point."""
+def _integrate_civforge_response(payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     return {
         "civforge_version": "governance-fastapi-2026",
         "current_receipts": game_state["receipts"][-6:],
@@ -348,23 +404,40 @@ async def integrate_civforge() -> Dict[str, Any]:
         "core": "AgentBrain + FunForge + GovernanceGate + Orchestrator (pure Python, no Godot MVP)",
         "gravity_deploy_tool": "tools/deploy-gravity-mosaic/deploy.sh (literal verification enforced)",
         "next": "POST /found_city to start a work pack, POST /advance_turn for a cycle, or use the governance endpoints + deploy tool.",
+        "received": payload or None,
     }
+
+
+@app.get("/integrate/civforge")
+async def integrate_civforge() -> Dict[str, Any]:
+    """Hook for CivForge agents (Grok, receipts, governance). Primary integration point."""
+    return _integrate_civforge_response()
+
+
+@app.post("/integrate/civforge")
+async def integrate_civforge_post(payload: Dict[str, Any], _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    """POST-compatible bridge for swarm work packs. It reports intake; execution still requires proposal/gate."""
+    return _integrate_civforge_response(payload)
+
 
 # === New governance-aligned endpoints (do not break the earlier /state /found_city surface) ===
 
 @app.post("/governance/propose")
-async def governance_propose(req: ProposeWorkRequest) -> Dict[str, Any]:
+async def governance_propose(req: ProposeWorkRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
     """Propose a concrete work item (e.g. a gravity-mosaic change). Returns a proposal receipt for gating."""
     proposal = orchestrator.gate.propose(
         game_state["turn"],
         req.action,
         {"details": req.details, "investment": req.investment, "target": "gravity-mosaic"},
     )
-    game_state["work_packs"].append({"id": proposal.id, "action": req.action, "status": "PROPOSED"})
-    return {"proposal": proposal.to_dict(), "message": "Proposal created. Call /governance/gate to evaluate with FunForge."}
+    proposal_receipt = proposal.to_dict()
+    proposal_receipt["receipt_type"] = "governance_proposal"
+    game_state["work_packs"].append({"id": proposal.id, "proposal_id": proposal.id, "action": req.action, "status": "PROPOSED"})
+    _persist_governance_event(proposal_receipt, filename_hint="governance-proposal")
+    return {"proposal": proposal_receipt, "message": "Proposal created. Call /governance/gate to evaluate with FunForge."}
 
 @app.post("/governance/gate")
-async def governance_gate(req: GateRequest) -> Dict[str, Any]:
+async def governance_gate(req: GateRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
     """Run the FunForge quality gate on a proposal. This is the real receipt-first control."""
     fun = req.fun_score_override
     if fun is None:
@@ -372,12 +445,28 @@ async def governance_gate(req: GateRequest) -> Dict[str, Any]:
     result = orchestrator.gate.gate(req.proposal_id, fun)
     if result.get("approved"):
         game_state["player"]["fun_score"] = max(game_state["player"]["fun_score"], fun)
+    if result.get("receipt"):
+        proposal_receipt = result["receipt"]
+        _update_work_pack_status(req.proposal_id, proposal_receipt.get("status", "GATED"))
+        gate_receipt = {
+            "id": f"{req.proposal_id}-gate-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+            "turn": game_state["turn"],
+            "action": "governance_gate",
+            "status": proposal_receipt.get("status"),
+            "fun_score": fun,
+            "proposal_id": req.proposal_id,
+            "approved": bool(result.get("approved")),
+            "comment": result.get("comment"),
+            "proposal": proposal_receipt,
+            "receipt_type": "governance_gate",
+        }
+        _persist_governance_event(gate_receipt, filename_hint="governance-gate")
     return result
 
 @app.post("/governance/advance_and_log")
-async def governance_advance_and_log() -> Dict[str, Any]:
+async def governance_advance_and_log(_claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
     """Convenience: advance a cycle (agents decide + FunForge + gate) and ensure a receipt is on disk."""
-    res = await advance_turn()
+    res = await advance_turn(_claims)
     # The orchestrator + receipt_store already wrote the main receipt
     return {
         "cycle_result": res,
@@ -406,7 +495,7 @@ async def gravity_deploy_recommendation() -> Dict[str, Any]:
 
 
 @app.post("/simulation/what_if")
-async def what_if_simulation(scenario: dict):
+async def what_if_simulation(scenario: dict, _claims: Dict[str, Any] = Depends(require_public_mode_token)):
     """What-if simulation for Civ Game mechanics, driven by live dawsos-nexus telemetry (customMetrics, agentState).
     Projects resource yields + fun impact. Uses nexus as source of truth for fleet/agent context (thin bridge).
     """
@@ -453,21 +542,13 @@ async def what_if_simulation(scenario: dict):
         "note": "Simulation using dawsos-nexus telemetry/customMetrics for Civ Game what-if (governed, receipt-first)."
     }
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
-
-
 # Thin bridge to dawsos-nexus (8082) — machine satellite only (telemetry heartbeats + command proposals).
 # Per boundary contract (wt governed-connectors-registry.v1 + CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md) + dawsOS agent feedback:
 #   - governance_kernel type, allowed_actions=["sync_config"] only (strict per registry + user Q1).
 #   - x-nexus-api-key (satellite key) for machine auth. Operator token path dropped for CivForge (per Q2 "remove entirely").
 #   - Identity / JWT long-term via dawsos-auth-prototype :8081. No hybrid bypass.
 # register-device / machine heartbeat via client or /api/apps (satellite key). Commands propose (not execute). See SEPARATION.md planes.
-import requests
-from fastapi import Header, HTTPException
-
 NEXUS_AUTH_BASE = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
-NEXUS_OPERATOR = os.environ.get("NEXUS_OPERATOR_TOKEN", "")
 
 def require_govern_token(authorization: str = Header(None)):
     """require_machine_satellite_key (renamed focus per agent rec + user Q2 'remove entirely').
@@ -490,7 +571,7 @@ def require_govern_token(authorization: str = Header(None)):
 
 @app.post("/governance/protected_advance")
 async def protected_advance(claims: dict = Depends(require_govern_token)):
-    # Protected path: requires valid govern credential from dawsos-nexus (or operator token).
+    # Protected path: requires valid govern credential from dawsos-nexus.
     # In real use: register CivForge as app via client, issue scoped token, use for sensitive turns.
     # Telemetry still sent on success.
     extra = telemetry_extra_from_state()
@@ -501,3 +582,7 @@ async def protected_advance(claims: dict = Depends(require_govern_token)):
         "turn": game_state["turn"],
         "note": "Protected via dawsos-nexus (8082) thin bridge. Commands from nexus treated as proposals per sister contract."
     }
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8080)

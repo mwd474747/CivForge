@@ -20,6 +20,7 @@ import json
 import os
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -27,11 +28,10 @@ import requests
 
 NEXUS_BASE = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
 CIV_APP_ID = "civforge-kernel"
-OPERATOR_TOKEN = os.environ.get("NEXUS_OPERATOR_TOKEN", "")
-API_KEY = os.environ.get("NEXUS_API_KEY", "")
-
 # Local 8080 for proposing surfaced commands (never auto execute)
 CIV_BASE = "http://127.0.0.1:8080"
+ROOT = Path(__file__).resolve().parent.parent
+RECEIPTS = ROOT / "receipts"
 
 # Map from nexus CommandActions -> local proposal action prefix (commands are proposals)
 COMMAND_ACTION_MAP = {
@@ -141,6 +141,29 @@ def ack_command(cmd_id: str, status: str = "ACKNOWLEDGED", note: str = "") -> bo
     return False
 
 
+def write_command_receipt(summary: Dict[str, Any]) -> None:
+    """Write a local receipt when a Nexus command is actually handled.
+
+    Quiet polling with no commands should not spam receipts. Commands that are
+    blocked by canon still deserve local evidence because they prove the bridge
+    enforced the boundary.
+    """
+    if not summary.get("processed"):
+        return
+    RECEIPTS.mkdir(parents=True, exist_ok=True)
+    generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    payload = {
+        "schema": "civforge.nexus_command_poll_receipt.v1",
+        "generated_at": generated_at,
+        "action": "nexus_command_poll",
+        "status": "pass",
+        "summary": summary,
+    }
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    path = RECEIPTS / f"nexus-command-poll-{stamp}.json"
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
 def handle_command(cmd: Dict[str, Any]) -> str:
     """Map command to local governed proposal (never direct mutate game state). Return local action taken.
     Per user boundary answers: strictly honor registry allowed_actions=["sync_config"] only.
@@ -194,13 +217,15 @@ def poll_once() -> Dict[str, Any]:
             processed.append({"id": cmd_id, "action": cmd.get("action"), "acked": acked, "note": note})
         except Exception as e:
             ack_command(cmd_id, status="FAILED", note=f"error: {e}")
-    return {
+    summary = {
         "polled": len(pending),
         "processed": len(processed),
         "items": processed,
         "nexus_base": NEXUS_BASE,
         "timestamp": time.time(),
     }
+    write_command_receipt(summary)
+    return summary
 
 
 def run_loop(interval: int = 5) -> None:

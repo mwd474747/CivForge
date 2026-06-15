@@ -31,7 +31,7 @@ python3 tools/civforge_cli.py advance
 python3 tools/civforge_cli.py mcp-serve   # stdio MCP for agent players
 ```
 
-## MCP tools (6)
+## MCP tools (8)
 
 | Tool | Action |
 |------|--------|
@@ -41,6 +41,8 @@ python3 tools/civforge_cli.py mcp-serve   # stdio MCP for agent players
 | `civforge_negotiate` | `POST /game/negotiate` |
 | `civforge_negotiate_respond` | `POST /game/negotiate/respond` |
 | `civforge_what_if` | `POST /simulation/what_if` |
+| `civforge_governance_propose` | `POST /governance/propose` |
+| `civforge_governance_gate` | `POST /governance/gate` |
 
 ## Victory
 
@@ -57,6 +59,15 @@ python3 tools/nexus_command_poller.py --once
 ```
 
 Optional daemon: `bash tools/start-poller-daemon.sh`
+
+Governance posture:
+
+```bash
+python3 tools/civforge_contract_parity.py
+python3 tools/civforge_poller_posture.py
+python3 tools/civforge_receipt_index.py
+python3 tools/civforge_governance_posture.py
+```
 
 ## Validation
 
