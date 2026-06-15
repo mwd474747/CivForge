@@ -10,7 +10,7 @@ Before doing anything else (no mental notes, text > brain):
 3. Read `PROJECT_MANIFESTO.md` (or equivalent SOUL) — who CivForge is and its intention.
 4. Read latest in `receipts/` (or `receipts/github-sync-*.md`, governance-cycle-*.md) for continuity.
 5. Run literal verification: `git status --short`, `wc -l` on key files (SEPARATION, HANDOFF, core/*.py, tools/auth-prototype/*), `grep` for golden anchors ("separate projects", "literal verification", "FunForge >=80", "auth-prototype", "handoff").
-6. Confirm working targets: localhost:8080 (CivForge backend), :8081 (auth prototype if enabled via bridge).
+6. Confirm working targets: localhost:8080 (CivForge backend + /state probe). Nexus :8082 for machine telemetry heartbeats + command proposals (governance_kernel per wt canon). Auth prototype :8081 for identity/JWT when enabled (or explicit local dev operator bypass per SEPARATION boundary note). Do not conflate.
 
 **Write It Down discipline**: Capture decisions, context, lessons in receipts/ or daily notes. No mental notes. When you learn or mistake — document so future-you (or other Grok) doesn't repeat it.
 

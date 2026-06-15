@@ -342,9 +342,12 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
 
 
-# Thin bridge auth to dawsos-nexus (8082) - primary control + evolving auth sister (replaces archived prototype).
-# register-device / token issuance / verify via tools/dawsos_auth_client.py or direct /api/apps + x-nexus-api-key / operator token.
-# protected_advance demonstrates govern scope for sensitive actions. Commands from nexus are treated as proposals (see SEPARATION.md).
+# Thin bridge to dawsos-nexus (8082) — machine satellite only (telemetry heartbeats + command proposals).
+# Per boundary contract (wt governed-connectors-registry.v1 + updated SEPARATION):
+#   - governance_kernel type, allowed_actions=["sync_config"] (others surface via local /governance/propose + FunForge gate).
+#   - x-nexus-api-key or operator for machine auth (heartbeats, poll, protected_advance in dev).
+#   - Identity / JWT long-term via dawsos-auth-prototype :8081 (or explicit documented local dev operator bypass below).
+# register-device / machine heartbeat via client or /api/apps. Commands propose (not execute). See SEPARATION.md planes.
 import requests
 from fastapi import Header, HTTPException
 
@@ -352,9 +355,10 @@ NEXUS_AUTH_BASE = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
 NEXUS_OPERATOR = os.environ.get("NEXUS_OPERATOR_TOKEN", "")
 
 def require_govern_token(authorization: str = Header(None)):
-    """Validate govern token/credential from dawsos-nexus.
-    Accepts: Bearer <NEXUS_OPERATOR_TOKEN>, or x-nexus-api-key style, or falls back to client verify.
-    Thin HTTP only. Not full identity store (hybrid possible).
+    """Validate machine govern credential from dawsos-nexus (governance_kernel satellite).
+    Accepts: Bearer <NEXUS_OPERATOR_TOKEN>, x-nexus-api-key (preferred for apps), or health fallback.
+    Thin HTTP only. This is **machine/command context**, not product identity.
+    Long-term identity via auth-prototype :8081. Local dev permissive is explicit Mac Studio bypass (documented in SEPARATION).
     """
     if not authorization:
         # Allow dev/demo with operator token in env for local Mac Studio

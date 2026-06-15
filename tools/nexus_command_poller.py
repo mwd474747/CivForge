@@ -2,22 +2,18 @@
 """
 CivForge Nexus Command Poller (thin bidirectional control bridge to dawsos-nexus 8082).
 
-Per SEPARATION.md + sister contract:
-- dawsos-nexus is the control sister (telemetry, commands as proposals, audit mirror).
-- Commands propose, never direct execute on 8080 kernel.
-- Thin HTTP only. Uses patterns from dawsos_auth_client + shared schema (CommandActions, CommandStatuses).
-- No mutation of the dawsos-nexus tree (reference only).
+Per updated boundary contract (SEPARATION.md + wt governed-connectors-registry.v1):
+- CivForge is governance_kernel (nexus_satellite), allowed_actions=["sync_config"] (canon). Other actions surface as local proposals only.
+- Nexus = observability (heartbeats) + command queue. Commands propose, never direct execute.
+- Thin HTTP only. Sister issues commands via POST /api/apps/:appId/commands (PENDING). Satellites poll defensively.
+- No state mutation on ingest. No mutation of dawsos-nexus tree (reference only).
+- Identity separate (auth-prototype 8081 or documented local dev bypass).
 
-Supported (from schema): PAUSE, RESUME, RESTART, EMERGENCY_STOP, SYNC_CONFIG, RUN_TASK, CANCEL_TASK.
-On receive pending command for civforge-kernel (or general):
-  - Record local event + create governance proposal (action="nexus_<action>").
-  - Ack back to nexus (ACKNOWLEDGED / IN_PROGRESS / COMPLETED).
-- Fully defensive: if 8082 unreachable, no commands, or auth fail -> clean no-op + log. Never blocks game.
-- Run modes: --once (single poll cycle) or --loop (daemon with sleep).
+On receive pending: create governance proposal (nexus_<action>) + ack (IN_PROGRESS then COMPLETED). Defensive no-op when 8082 down.
 
-CLI integration: python tools/civforge_cli.py nexus-poll [--loop] [--interval 5]
+Run: python tools/civforge_cli.py nexus-poll [--loop] or direct --once/--loop.
 
-Wired for use after 8082 live (register app "civforge-kernel" first via auth client recommended).
+Register as governance_kernel (matches canon row).
 """
 
 import argparse
@@ -84,7 +80,7 @@ def _post_local(path: str, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 def register_if_needed() -> None:
     """Light register of civforge-kernel app (idempotent, best-effort)."""
     try:
-        payload = {"appId": CIV_APP_ID, "name": "CivForge Governance Kernel", "type": "civforge_agent", "telemetryMode": "push"}
+        payload = {"appId": CIV_APP_ID, "name": "CivForge Governance Kernel", "type": "governance_kernel", "telemetryMode": "push"}
         requests.post(f"{NEXUS_BASE}/api/apps", json=payload, headers=_headers(), timeout=5)
     except Exception:
         pass  # silent; register via CLI auth client preferred
@@ -160,8 +156,8 @@ def handle_command(cmd: Dict[str, Any]) -> str:
     if propose_resp and propose_resp.get("proposal"):
         note += f" (proposal_id={propose_resp['proposal'].get('id')})"
 
-    # Also log a receipt-like event via state touch (advance not forced here)
-    _post_local("/found_city", {"city_name": f"nexus_cmd_{action}", "investment": 1})  # lightweight marker work pack
+    # Proposals only — no direct state mutation (per boundary: commands propose, then FunForge gate on 8080).
+    # No /found_city or other side effects here.
 
     return note
 

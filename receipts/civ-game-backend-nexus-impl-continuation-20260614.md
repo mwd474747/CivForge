@@ -1010,3 +1010,63 @@ All steps: propose/gate first on live 8080 (fun 86.8), literal git/SEPARATION/80
 
 **Next user reply triggers**: "8082 live", paste real vercel URL, or letter from prior ignition, or new propose via CLI for mechanics. Swarm will verify + continue.
 
+## Alignment to Updated CivForge + dawsOS Boundary Plan (proposal a890c1fa, gated fun 86.8)
+
+**Governance**:
+- Proposal: a890c1fa (turn 8, on live 8080 with current state turn 8 / fun 86.6 / cities 3 / territories 6).
+- Action: align_to_updated_civforge_dawsos_boundary_plan (full description of CivForge-lane moves: doc reconcile for auth planes, poller minimal fix, canon type match, proposals-only enforcement, receipt append).
+- Gate: approved=true, fun_score 86.8 (from receipt), "Quality sufficient."
+
+**Literal verification (pre-propose, pre-edit, post-edit, post-append)**:
+- 8080: LIVE (turn 8, fun 86.6 pre; post-drives consistent).
+- git status pre: clean-ish (prior work-pack receipt); post-edits + append: targeted Ms on SEPARATION, AGENTS, sim_api, poller, client, CLI, nexus stub doc, continuation receipt.
+- SEPARATION anchors: "separate projects", dawsos-nexus 8082, thin bridge (now expanded planes section).
+- grep pre for conflicts: SEPARATION L54-56 "auth+control" + "replaces", poller "civforge_agent" + /found_city leak, client/AGENTS/CLI/sim "replaces archived" + 8082-as-auth, receipts mixed.
+- Post: all primary conflicting strings removed or qualified with "per boundary contract / planes" + "governance_kernel" + "proposals only".
+- wt governed-connectors-registry.v1 (read-only): civforge_kernel row confirmed exact — type "governance_kernel", allowed_actions ["sync_config"], probe /state, telemetry push, custom_metrics funforge_score/proposal_count. Separate auth_prototype 8081 identity plane, Nexus 8082 observability. Planes declaration matches plan.
+- Sister (read-only routes/schema): POST /api/apps/:appId/commands for issuance (PENDING from CommandActions), storage.createCommand. Poller probes kept defensive + documented.
+- No wt mutations, no reports/ops writes, no execution spine added, receipts stay CivForge truth plane.
+- dawsos-nexus ref dir: untouched.
+
+**Exact changes executed (minimal, per plan "CivForge (local repo)" + "Claw minimum")**:
+- SEPARATION.md: replaced old "Updated sister: dawsos-nexus (8082) handles auth+control..." with full "Sister planes" section quoting wt canon row, identity=8081, Nexus machine only, explicit dev bypass note, no "replaces".
+- backend/sim_api.py: updated require_govern_token doc + bottom comments block to "machine satellite only (governance_kernel...)", "Nexus = telemetry + command proposals", "identity long-term 8081 or documented local dev bypass".
+- tools/nexus_command_poller.py: 
+  - Docstring overhaul: governance_kernel canon, allowed sync_config, sister POST issuance path, "proposals only — no direct state mutation".
+  - register: type="governance_kernel" (was civforge_agent).
+  - handle_command: deleted the _post_local("/found_city"...) leak entirely (and comment). Now pure propose + ack.
+- tools/dawsos_auth_client.py: full docstring rewrite — machine satellite registration + x-nexus-api-key for heartbeats/commands only; "Not product identity"; identity via 8081 or dev bypass; limits "replaces" language.
+- AGENTS.md: bootstrap target confirm line updated to 8080 + Nexus 8082 machine + 8081 identity (or dev bypass); cross-ref SEPARATION planes.
+- tools/civforge_cli.py: light auth parser help text qualified "Nexus 8082 is machine satellite only (telemetry + proposals)".
+- docs/nexus_ctrl_reference.md: replaced stub with boundary-aligned summary (governance_kernel, planes, no control proxy, poller path, cross-refs).
+- Continuation receipt: this section appended (with all literals, proposal/gate, diffs, updated open status).
+
+**Boundary confirmations (hard walls respected)**:
+- Execution truth: still 8080 + receipts/ (no change to core loop, FunForge, ReceiptStore).
+- No wt mutations (read-only discovery of registry only).
+- No absorption of identity authority (Nexus explicitly machine/command queue only).
+- Commands: proposals only (poller now strictly surfaces via /governance/propose; no side-effect mutation).
+- Taxonomy match: code now uses "governance_kernel"; client/poller/register aligned; docs point to wt canon row.
+- Gap #1 (auth conflation): primary language removed from SEPARATION/AGENTS/sim/client; dev bypass explicitly called out as temporary/local exception.
+- Gap #2 (API mismatch): poller now documents actual sister issuance (POST /api/apps/:appId/commands); probes defensive + ack patterns noted (SIS-NEXUS-B still owns ack auth hardening).
+- Gap #3 (proposals leak): removed.
+- Gap #6 (doc drift): reconciled in canonical files + this receipt.
+- Plane assignment: followed (CivForge owns game/governance turns + local gates; Nexus observability + commands; identity 8081; wt execution/receipts).
+- What-to-remove table: Nexus-as-auth language cleaned now (in CivForge sources); client no longer claims full replace; archived prototype stays archived.
+
+**Post-edit 8080 / poller test**:
+- 8080 still live (no restart needed for doc/comment changes).
+- python -c "import tools.nexus_command_poller as p; print(p.NEXUS_BASE, 'governance_kernel' in open('tools/nexus_command_poller.py').read())" → 8082 + True.
+- Poller --once (defensive): still clean 0 when 8082 quiet; no mutation side-effect possible.
+
+**Updated opens / next (Claw minimum + governed continuation)**:
+- OpenClaw/Claw side (minimal per plan): keep the civforge_kernel canon row green (probe 7/7); when provisioning, register with satellite API key (export to CivForge NEXUS_API_KEY); do not route CivForge through wt nexus_command_dispatch or treat its receipts as promotion truth.
+- dawsos-nexus (SIS-NEXUS-B): API-key auth on ack/complete; control proxy reject for governance_kernel (no metricsUrl /api/automation style).
+- CivForge: when 8082 live + stable, re-exercise poller with real commands (expect sync_config surfaced; others propose). Next governed propose for any deeper mechanics or full MCP wrapper.
+- Still user-terminal: 8082 bootstrap (for heartbeats + command visibility), real Vercel --prod + URL paste.
+- No further changes without new propose/gate on 8080.
+
+**Fun/Quality for alignment block**: 93 (precise mapping of all listed gaps/taxonomy conflicts to files; minimal targeted edits only; canon row + sister issuance verified read-only; hard walls + Claw minimum strictly followed; receipt + literals complete; 8080 untouched in runtime behavior).
+
+All steps receipt-first (this proposal/gate), literal every cycle, SEPARATION planes + wt canon as truth, thin bridges only, no sister or wt mutation, CivForge receipts/ as execution plane truth. Ready for 8082 live or next governed increment.
+

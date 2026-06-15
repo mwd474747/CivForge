@@ -51,6 +51,9 @@ This SEPARATION.md is the canonical declaration. All planning, code, and future 
 **Mac Studio local truth**: CivForge (this workspace) is the governance layer. Gravity-mosaic is the independent artifact being governed.
 
 
-## Updated sister: dawsos-nexus (8082)
-- Now handles auth+control for CivForge (device/tokens/govern via thin bridge).
-- dawsos-auth-prototype archived in favor of extension.
+## Sister planes (per updated CivForge + dawsOS boundary contract)
+- **dawsos-nexus (8082)**: observability (telemetry heartbeats with customMetrics + agentState) + command queue. CivForge is registered as governance_kernel nexus_satellite (see wt governed-connectors-registry.v1: type="governance_kernel", allowed_actions=["sync_config"] only, telemetry_mode="push", probe=/state). Commands surface as proposals only (never direct execution).
+- **dawsos-auth-prototype (8081)**: identity (JWT, scopes, device/user registration). Long-term preferred for govern tokens. Nexus x-nexus-api-key / operator is for machine satellite heartbeats + command poll only.
+- Explicit local Mac Studio dev bypass (NEXUS_OPERATOR_TOKEN) is permitted in require_govern_token as a documented exception while 8081 hinge matures; never promoted as production identity authority for CivForge.
+- dawsos-auth-prototype tree remains archived in _archive/ for reference only. No active code paths claim "replaces" it outside this boundary note.
+- Full separation: CivForge execution truth = :8080 + receipts/ + SQLite. Never mutates wt reports/ops/* or absorbs Nexus identity role. See wt planes declaration (identity=8081, observability=Nexus, execution=wt 8000).

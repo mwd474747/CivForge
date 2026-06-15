@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """
-CivForge tool: Client to call dawsos-nexus (8082) for auth + control.
+CivForge tool: thin client for dawsos-nexus (8082) machine satellite functions.
 
-Replaces dawsos-auth-prototype (archived). dawsos-nexus now provides:
-- Device/agent registration
-- Scoped tokens (govern, control, read)
-- Verify for protected_advance
-- Control commands, telemetry, audit (per nexus_ctrl patterns)
+Per boundary contract:
+- Nexus = telemetry (heartbeats with customMetrics/agentState) + command queue (proposals).
+- Register app (governance_kernel type) + x-nexus-api-key for heartbeats/poll.
+- **Not** product identity. Scoped "govern" here is machine context only.
+- Identity / JWT / user scopes long-term via dawsos-auth-prototype :8081 (or explicit local dev operator bypass documented in SEPARATION.md).
+- Does not replace auth-prototype. "Replaces" language limited to old prototype's machine satellite parts only.
 
-Usage:
-  python tools/dawsos_auth_client.py register-device my-dev pk123
-  python tools/dawsos_auth_client.py token <identity-id> govern
-  python tools/dawsos_auth_client.py verify <token>
+Usage (machine only):
+  python tools/dawsos_auth_client.py register-device civforge-kernel
+  ... (heartbeats, basic verify for dev)
 
-Interoperable with dawsOS. Thin HTTP only (separation).
-NEXUS_URL defaults to http://127.0.0.1:8082 (local Mac Studio).
+Thin HTTP only. See SEPARATION.md planes + wt governed-connectors-registry.v1 for civforge_kernel.
+NEXUS_URL defaults to http://127.0.0.1:8082.
 """
 
 import sys

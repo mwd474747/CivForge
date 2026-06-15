@@ -101,7 +101,7 @@ def main():
     sub.add_parser("nexus-poll", help="Poll dawsos-nexus (8082) for pending commands and surface as governed proposals (thin bridge, commands propose not execute). Supports --once/--loop.")
 
     # Auth/control via dawsos-nexus (8082) thin client (replaces archived prototype)
-    auth_p = sub.add_parser("auth", help="Auth prototype commands (separate project). Enables protected governance via tokens on :8081")
+    auth_p = sub.add_parser("auth", help="Auth prototype commands (separate identity plane :8081). Nexus 8082 is machine satellite only (telemetry + proposals). See SEPARATION planes.")
     auth_p.add_argument("action", nargs="?", default="status", choices=["status", "start", "register-device", "token", "verify"])
     auth_p.add_argument("arg1", nargs="?", default=None)
     auth_p.add_argument("arg2", nargs="?", default=None)
