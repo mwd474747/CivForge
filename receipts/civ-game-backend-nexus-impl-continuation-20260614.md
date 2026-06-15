@@ -1150,5 +1150,7 @@ git push
 
 All steps from the list fully executed on this workspace. Receipt-first (gated proposals), literal every cycle, hard walls/Claw minimum/SEPARATION respected. No further action needed from CivForge side.
 
+**WT commit executed** (via terminal in wt repo per list item 6): pointer + planning-inputs committed and pushed in the OpenClaw/wt as separate packet.
+
 Ready for "8082 live" or next.
 
