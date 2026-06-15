@@ -1,0 +1,42 @@
+# CivForge local production stack (governed artifact)
+# Usage:
+#   docker compose up -d civforge-kernel
+#   docker compose --profile poller up -d   # requires NEXUS_API_KEY in .env
+# Smoke: bash tools/docker-smoke.sh
+
+services:
+  civforge-kernel:
+    build: .
+    image: civforge-kernel:local
+    ports:
+      - "8080:8080"
+    environment:
+      NEXUS_URL: ${NEXUS_URL:-http://host.docker.internal:8082}
+      CIVFORGE_CORS_ORIGINS: ${CIVFORGE_CORS_ORIGINS:-https://civforge.vercel.app,http://127.0.0.1:8080}
+    volumes:
+      - civforge-receipts:/app/receipts
+      - civforge-db:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/state', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  civforge-poller:
+    profiles: ["poller"]
+    build: .
+    image: civforge-kernel:local
+    command: ["python", "tools/nexus_command_poller.py", "--loop", "--interval", "30"]
+    environment:
+      NEXUS_URL: ${NEXUS_URL:-http://host.docker.internal:8082}
+      NEXUS_API_KEY: ${NEXUS_API_KEY:?set NEXUS_API_KEY for poller profile}
+    depends_on:
+      civforge-kernel:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  civforge-receipts:
+  civforge-db:

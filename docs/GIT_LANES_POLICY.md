@@ -52,7 +52,7 @@ All lanes must produce receipts. Literal verification is non-negotiable.
 
 Per user "execute all the turnkey ready work swarm did to completion, or lane boundary approvals" (WP-UI-MULTI-AGENT-EXTENSION-20260614):
 
-- Dashboard lane: Foundation + rich multi-agent extension (tabs, shared map, negotiation, alliance, joint victory) landed in main via turnkey + frontend enhancement. Approved for integration.
+- Dashboard lane: Rich multi-agent UI **implemented** in `frontend/index.html` + `backend/multi_agent_state.py` (tabs, map, negotiation, alliance, victory). Local: http://127.0.0.1:8080/dashboard
 - Agent-player lane: Multi via ai_civs + negotiation/alliances ready; CLI + poller for agent play.
 - Simulation lane: what_if + backend multi-state tested with 8082.
 - Mechanics lane: emergent larger interactions via governance + joint victory.

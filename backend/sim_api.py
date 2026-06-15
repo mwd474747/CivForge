@@ -11,6 +11,19 @@ from pathlib import Path
 # Add core to path for the realigned Python agentic patterns (no more Godot MVP)
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core import AgentBrain, FunForge, GovernanceOrchestrator, ReceiptStore
+from core.mechanics_registry import build_default_registry, default_mechanics_lanes
+from backend.multi_agent_state import (
+    AGENT_LABELS,
+    FACTION_COLORS,
+    add_negotiation,
+    default_alliances,
+    default_map_tiles,
+    default_negotiations,
+    default_victory_progress,
+    ensure_multi_agent_state,
+    respond_negotiation,
+    tick_multi_agent_state,
+)
 
 NEXUS_URL = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
 
@@ -35,6 +48,10 @@ def send_telemetry_to_nexus(turn: int, fun_score: float, resources: dict, extra:
         }
         if extra and "fun_components" in extra:
             payload["customMetrics"]["funComponents"] = extra["fun_components"]
+        if extra:
+            for key in ("alliancesCount", "negotiationsPending", "victoryProgress", "mapPlayerTiles", "mechanicsSummary"):
+                if key in extra:
+                    payload["customMetrics"][key] = extra[key]
         requests.post(f"{NEXUS_URL}/api/telemetry/heartbeat", json=payload, timeout=5)
     except Exception:
         pass  # never block game on telemetry
@@ -74,6 +91,7 @@ async def local_dashboard():
 # State + receipts now survive uvicorn restarts via SQLite
 DB_PATH = Path(__file__).parent.parent / "gravity_backend.db"
 orchestrator = GovernanceOrchestrator()
+mechanics_registry = build_default_registry()
 receipt_store = ReceiptStore(
     base_dir=Path(__file__).parent.parent / "receipts",
     db_path=DB_PATH
@@ -99,6 +117,11 @@ game_state: Dict[str, Any] = {
     "events": [],
     "receipts": [],  # rich DawsOS-style receipts (also written to disk via ReceiptStore)
     "work_packs": [],  # proposals / active governed items
+    "map_tiles": default_map_tiles(),
+    "alliances": default_alliances(),
+    "negotiations": default_negotiations(),
+    "victory_progress": default_victory_progress(),
+    "mechanics_lanes": default_mechanics_lanes(),
 }
 
 # Try to restore last known state snapshot if available (now safe)
@@ -106,8 +129,52 @@ restored = receipt_store.load_state("game_state")
 if restored:
     game_state.update(restored)
     print("[CivForge] Restored previous state snapshot from SQLite (persistence active)")
+ensure_multi_agent_state(game_state)
+orchestrator.turn = int(game_state.get("turn", 1))
 
-# Register the main agent + sub-agents (realigned from the old civs)
+def civstudy_reference_panel() -> Dict[str, Any]:
+    """Read-only civstudy pattern hints (reference lane — no corpus mutation)."""
+    return {
+        "status": "read_only_reference",
+        "repo": "mwd474747/civstudy",
+        "note": "Patterns from CIVSTUDY-TERMINAL-GIT-REVIEW receipt. Not live corpus — SEPARATION.md.",
+        "agents": [
+            {"role": "Research Lead", "focus": "scope, corpus map, success criteria"},
+            {"role": "Archivist", "focus": "provenance, references.json, citation audit"},
+            {"role": "Editor", "focus": "structure, cross-links, coherence"},
+            {"role": "Web Developer", "focus": "registry routes, Recharts viz, dark glass UI"},
+        ],
+        "borrowed_patterns": [
+            "Card-based admin HUD + budget bars",
+            "Discrete task runners with loading feedback",
+            "Nexus JWKS auth patterns (future :8081 identity)",
+            "Governor entity management metaphors",
+        ],
+    }
+
+
+def telemetry_extra_from_state() -> Dict[str, Any]:
+    ensure_multi_agent_state(game_state)
+    if "mechanics_lanes" not in game_state:
+        game_state["mechanics_lanes"] = default_mechanics_lanes()
+    player_tiles = sum(1 for t in game_state.get("map_tiles", []) if t.get("owner") == "player")
+    pending_neg = sum(1 for n in game_state.get("negotiations", []) if n.get("status") == "pending")
+    ml = game_state.get("mechanics_lanes", {})
+    return {
+        "territories": game_state["player"].get("territories", 0),
+        "cities": game_state["player"].get("cities", 0),
+        "events": game_state.get("events", []),
+        "alliancesCount": len(game_state.get("alliances", [])),
+        "negotiationsPending": pending_neg,
+        "victoryProgress": game_state.get("victory_progress", {}).get("joint_progress", 0),
+        "mapPlayerTiles": player_tiles,
+        "mechanicsSummary": {
+            "military_strength": ml.get("military", {}).get("strength"),
+            "economic_institutions": ml.get("economic", {}).get("institutions"),
+            "cultural_chains": ml.get("cultural", {}).get("event_chains"),
+        },
+    }
+
 grok = orchestrator.register_agent("grok", "Grok (Main Orchestrator)")
 orchestrator.register_agent("harper", "Harper (Agentic Systems & Memory)")
 orchestrator.register_agent("sebastian", "Sebastian (Governance & Safety)")
@@ -126,23 +193,54 @@ class GateRequest(BaseModel):
     proposal_id: str
     fun_score_override: Optional[float] = None
 
+class NegotiateRequest(BaseModel):
+    to: str = "harper"
+    offer: str = "Propose joint governance review"
+
+class NegotiateRespondRequest(BaseModel):
+    negotiation_id: str
+    accept: bool = True
+
 @app.get("/state")
 async def get_state() -> Dict[str, Any]:
-    """Returns live governance workspace state (matches the earlier FastAPI/Codespaces shape exactly for easy testing).
-
-    Includes player (lead workstream), ai_civs (sub-agents), resources, territories (active items),
-    fun_score (quality/engagement of the governed process), receipts, events.
-    """
+    """Returns live governance workspace + multi-agent civ layer."""
+    ensure_multi_agent_state(game_state)
     recent = game_state["receipts"][-5:] if game_state["receipts"] else []
     return {
         "status": "active",
         "current_turn": game_state["turn"],
         "player": game_state["player"],
         "ai_civs": game_state["ai_civs"],
-        "recent_events": game_state["events"][-3:],
+        "recent_events": game_state["events"][-8:],
         "fun_score": game_state["player"]["fun_score"],
         "receipts": recent,
-        "note": "CivForge FastAPI governance workspace. Use this to drive receipt-first work on the separate gravity-mosaic project. Actual deploys go through tools/deploy-gravity-mosaic/deploy.sh with literal verification.",
+        "map_tiles": game_state["map_tiles"],
+        "alliances": game_state["alliances"],
+        "negotiations": game_state["negotiations"][-12:],
+        "victory_progress": game_state["victory_progress"],
+        "agent_labels": AGENT_LABELS,
+        "faction_colors": FACTION_COLORS,
+        "work_packs": game_state.get("work_packs", [])[-6:],
+        "mechanics_lanes": game_state.get("mechanics_lanes", default_mechanics_lanes()),
+        "civstudy_reference": civstudy_reference_panel(),
+        "note": "CivForge governance workspace with multi-agent map, alliances, negotiations, mechanics lanes, and joint victory.",
+    }
+
+@app.get("/game/founding-session")
+async def founding_session() -> Dict[str, Any]:
+    """Guided founding session metadata for dashboard UI."""
+    ensure_multi_agent_state(game_state)
+    prod = game_state["player"]["resources"].get("prod", 0)
+    return {
+        "steps": [
+            {"id": 1, "title": "Choose work pack name", "field": "city_name"},
+            {"id": 2, "title": "Set production investment", "field": "investment", "min": 3, "max": prod},
+            {"id": 3, "title": "Confirm & found", "action": "POST /found_city"},
+        ],
+        "defaults": {"city_name": "New Work Pack", "investment": 4, "position": "gravity-mosaic"},
+        "available_prod": prod,
+        "cities": game_state["player"].get("cities", 0),
+        "can_found": prod >= 3,
     }
 
 @app.post("/found_city")
@@ -189,11 +287,7 @@ async def found_city(req: FoundCityRequest) -> Dict[str, Any]:
     receipt_store.append(receipt, filename_hint="work-pack")
 
     # Telemetry to dawsos-nexus on work pack / found action
-    extra = {
-        "territories": game_state["player"].get("territories", 0),
-        "cities": game_state["player"].get("cities", 0),
-        "events": game_state.get("events", []),
-    }
+    extra = telemetry_extra_from_state()
     send_telemetry_to_nexus(game_state["turn"], game_state["player"]["fun_score"], game_state["player"]["resources"], extra)
 
     return {
@@ -225,16 +319,16 @@ async def advance_turn() -> Dict[str, Any]:
     for ev in result.get("events", []):
         game_state["events"].append(ev)
 
+    tick_multi_agent_state(game_state, receipt.get("decisions", {}))
+    for ev in mechanics_registry.tick_all(game_state):
+        game_state["events"].append(ev)
+
     # Persist the important ones + snapshot full state for restart survival
     receipt_store.append(receipt, filename_hint="governance-cycle")
     receipt_store.save_state("game_state", game_state)
 
     # Send telemetry to dawsos-nexus (8082) - primary for control, telemetry, simulation input, audit mirror
-    extra = {
-        "territories": game_state["player"].get("territories", 0),
-        "cities": game_state["player"].get("cities", 0),
-        "events": game_state.get("events", []),
-    }
+    extra = telemetry_extra_from_state()
     send_telemetry_to_nexus(game_state["turn"], game_state["player"]["fun_score"], game_state["player"]["resources"], extra)
 
     return {
@@ -242,7 +336,23 @@ async def advance_turn() -> Dict[str, Any]:
         "receipt": receipt,
         "state": game_state["player"],
         "agent_decisions": receipt.get("decisions", {}),
+        "victory_progress": game_state["victory_progress"],
+        "mechanics_lanes": game_state.get("mechanics_lanes"),
     }
+
+@app.post("/game/negotiate")
+async def game_negotiate(req: NegotiateRequest) -> Dict[str, Any]:
+    """Player proposes a negotiation offer to another agent."""
+    entry = add_negotiation(game_state, req.to, req.offer, from_agent="player")
+    receipt_store.save_state("game_state", game_state)
+    return {"negotiation": entry, "negotiations": game_state["negotiations"][-8:]}
+
+@app.post("/game/negotiate/respond")
+async def game_negotiate_respond(req: NegotiateRespondRequest) -> Dict[str, Any]:
+    """Accept or decline a pending negotiation."""
+    result = respond_negotiation(game_state, req.negotiation_id, req.accept)
+    receipt_store.save_state("game_state", game_state)
+    return {"result": result, "alliances": game_state["alliances"], "victory_progress": game_state["victory_progress"]}
 
 @app.get("/integrate/civforge")
 async def integrate_civforge() -> Dict[str, Any]:
@@ -399,7 +509,7 @@ async def protected_advance(claims: dict = Depends(require_govern_token)):
     # Protected path: requires valid govern credential from dawsos-nexus (or operator token).
     # In real use: register CivForge as app via client, issue scoped token, use for sensitive turns.
     # Telemetry still sent on success.
-    extra = {"territories": game_state["player"].get("territories", 0), "cities": game_state["player"].get("cities", 0), "events": game_state.get("events", [])}
+    extra = telemetry_extra_from_state()
     send_telemetry_to_nexus(game_state["turn"], game_state["player"]["fun_score"], game_state["player"]["resources"], extra)
     return {
         "status": "advanced with auth",

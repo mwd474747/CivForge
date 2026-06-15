@@ -1,0 +1,12 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+.vercel
+node_modules
+gravity_backend.db
+*.db-journal
+receipts/governance-cycle-*.md
+.env
+.env.*

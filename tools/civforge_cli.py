@@ -24,6 +24,8 @@ Auth prototype (separate) is enabled via tools/auth-prototype/{clone.sh,start.sh
 """
 
 import argparse
+import os
+import sys
 import requests
 import json
 import subprocess
@@ -96,7 +98,7 @@ def main():
     sub.add_parser("run-deploy", help="Print the exact safe command to run the strict gravity deploy tool")
 
     # === New commands added per Mac Studio backend lock-in receipt (swarm execution) ===
-    sub.add_parser("mcp-stub", help="MCP compatibility stub — shows how endpoints can be exposed as MCP tools later")
+    sub.add_parser("mcp-serve", help="Start stdio MCP tool server (forwards to kernel :8080)")
     sub.add_parser("advisor", help="Safe gravity advisor (proposal-only, never auto-executes deploy.sh)")
     sub.add_parser("nexus-poll", help="Poll dawsos-nexus (8082) for pending commands and surface as governed proposals (thin bridge, commands propose not execute). Supports --once/--loop.")
 
@@ -123,10 +125,14 @@ def main():
         cmd_gate(args.proposal_id)
     elif args.cmd == "run-deploy":
         cmd_run_deploy()
+    elif args.cmd == "mcp-serve":
+        import subprocess
+        mcp = Path(__file__).parent / "mcp_server.py"
+        print(f"Starting CivForge MCP server (stdio) → {os.environ.get('CIVFORGE_KERNEL_URL', 'http://127.0.0.1:8080')}")
+        os.execv(sys.executable, [sys.executable, str(mcp)])
     elif args.cmd == "mcp-stub":
-        print("MCP stub upgraded → ready to expose /advance_turn, /governance/propose, /governance/gate, /governance/gravity_deploy_recommendation as future MCP tools.")
-        print("Current backend already provides the raw HTTP surface at localhost:8080.")
-        print("When ready, reply with: “Implement lightweight MCP server wrapper”")
+        print("MCP is implemented: use `python3 tools/civforge_cli.py mcp-serve` (stdio JSON-RPC).")
+        print("Tools: civforge_status, civforge_advance_turn, civforge_found_city, civforge_negotiate, civforge_what_if")
     elif args.cmd == "advisor":
         print("=== Gravity Safety Advisor (Mac Studio canonical) ===")
         print("This layer only advises. It never calls deploy.sh.")

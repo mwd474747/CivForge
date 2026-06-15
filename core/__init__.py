@@ -14,6 +14,9 @@ from .fun_forge import FunForge
 from .governance import GovernanceGate, Receipt
 from .orchestrator import GovernanceOrchestrator
 from .receipts import ReceiptStore
+from .mechanics_registry import MechanicsRegistry, build_default_registry, default_mechanics_lanes
+
+from .mechanics_registry import MechanicsRegistry, build_default_registry, default_mechanics_lanes
 
 __all__ = [
     "AgentBrain",
@@ -22,4 +25,7 @@ __all__ = [
     "Receipt",
     "GovernanceOrchestrator",
     "ReceiptStore",
+    "MechanicsRegistry",
+    "build_default_registry",
+    "default_mechanics_lanes",
 ]

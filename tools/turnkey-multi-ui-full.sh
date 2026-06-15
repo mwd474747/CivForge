@@ -28,12 +28,16 @@ echo "3. Run CLI advances for multi play..."
 python3 tools/civforge_cli.py advance || true
 python3 tools/civforge_cli.py advance || true
 
-echo "4. Verify/improve multi-agent dashboard (frontend + local /dashboard)..."
-# The frontend/index.html and kernel /dashboard already support multi via /state (ai_civs as agents).
-# For "rich" extension per swarm: ensure tabs/map etc. are in the served UI.
-# Current is setup + state; enhancement would add JS for tabs etc. (assumed in prior swarm UI work).
-# Here we test and "deploy" by verifying.
-curl -sf http://127.0.0.1:8080/dashboard > /dev/null && echo "  Local dashboard OK" || echo "  Dashboard endpoint issue (may be static)"
+echo "4. Verify multi-agent dashboard (frontend + local /dashboard)..."
+curl -sf http://127.0.0.1:8080/dashboard | grep -q "Multi-Agent Command" && echo "  Rich dashboard HTML OK" || { echo "  Dashboard missing multi-agent UI"; exit 1; }
+curl -sf http://127.0.0.1:8080/state | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+assert len(d.get('map_tiles', [])) == 25, 'map_tiles'
+assert 'victory_progress' in d, 'victory_progress'
+assert 'alliances' in d, 'alliances'
+print('  /state multi fields OK:', len(d.get('map_tiles',[])), 'tiles', len(d.get('alliances',[])), 'alliances')
+"
 ls -l frontend/index.html vercel.json .vercelignore 2>/dev/null && echo "  Vercel static multi-ready"
 
 echo "5. Test poller (if key) and receipts..."

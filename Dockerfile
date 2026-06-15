@@ -14,6 +14,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy only what the kernel needs (core + backend + tools for CLI/poller + receipts for persistence)
+COPY frontend/ ./frontend/
 COPY core/ ./core/
 COPY backend/ ./backend/
 COPY tools/ ./tools/

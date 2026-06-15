@@ -60,27 +60,21 @@ Observed: `polled: 2`, `processed: 2` — restart `blocked_by_canon`; sync_confi
 ```bash
 curl -sf http://127.0.0.1:8080/state | head -c 120
 curl -sf http://127.0.0.1:8082/api/health
+open http://127.0.0.1:8080/dashboard
 curl -sf -X POST http://127.0.0.1:8080/simulation/what_if -H 'Content-Type: application/json' -d '{"investment":5}' | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('fun_impact_estimate'), 'fallback' not in str(d.get('nexus_context','')))"
 ```
+
 ---
 
-## Swarm Turnkey Multi-Agent UI Execution (WP-UI-MULTI-AGENT-EXTENSION-20260614)
+## Multi-Agent UI (WP-UI-MULTI-AGENT-EXTENSION) — `current`
 
-**Executed to completion in this workspace (governed proposal 47c37283):**
-- [x] Created tools/turnkey-multi-ui-full.sh — runs kernel advances, 8082 tests, CLI, multi-state verification, dashboard, poller equivalent. Matches swarm "builds + improves + deploys + test".
-- [x] Enhanced frontend/index.html with rich multi-agent UI: agent tabs (governors with detail), shared map view (grid with cities/factions), negotiation panel (propose with log), alliance tracker (status + betrayal risk), joint victory bar (progress).
-- [x] Integration: UI populates from live /state (player + ai_civs as agents, events, turn). Preserves tunnel/setup + Vercel static.
-- [x] Improvement: added JS visuals (grid, buttons, dynamic bars), responsiveness note, juice (transitions).
-- [x] Test & Verify: turnkey script run, kernel at turn ~15+, 8082 real context, local dashboard, CLI.
-- [x] Lane boundary: noted in receipt; 6 lanes conceptually advanced per swarm (dashboard lane foundation here).
-- [x] Receipt appended, push done.
+Implemented in code (not receipt-only):
 
-**Local execution:**
-bash tools/turnkey-multi-ui-full.sh
-# Then: python3 tools/civforge_cli.py advance ; open http://127.0.0.1:8080/dashboard (now with multi tabs/map etc.)
+| Layer | Path |
+|-------|------|
+| State engine | `backend/multi_agent_state.py` |
+| API | `backend/sim_api.py` — `/state`, `/game/negotiate`, `/game/negotiate/respond` |
+| Dashboard | `frontend/index.html` — tabs, map, negotiation, alliances, victory |
 
-**Vercel:** https://civforge.vercel.app (use ?api_base for live multi state from kernel)
+**Open:** http://127.0.0.1:8080/dashboard
 
-**Remaining per swarm:** Full NEXUS_API_KEY poller test with key, any wt pointer (separate).
-
-All per SEPARATION, AGENTS, receipt-first, FunForge.

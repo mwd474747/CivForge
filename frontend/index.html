@@ -2,180 +2,424 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>CivForge Empire • Live</title>
+  <title>CivForge Empire • Multi-Agent Live</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.45; }
-    .banner { background: #1e293b; color: #e2e8f0; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; }
-    .setup { background: #fef3c7; color: #78350f; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
-    .ok { color: #86efac; }
-    .warn { color: #fbbf24; }
-    pre { background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow: auto; font-size: 0.85rem; }
-    button { margin-right: 0.5rem; margin-top: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; }
-    button:disabled { opacity: 0.45; cursor: not-allowed; }
-    input[type=url] { width: 100%; max-width: 32rem; padding: 0.5rem; font-family: inherit; }
-    code { font-size: 0.9em; }
-    .links a { margin-right: 1rem; }
+    :root {
+      --bg: #0f172a; --panel: #1e293b; --text: #e2e8f0; --muted: #94a3b8;
+      --accent: #38bdf8; --warn: #fbbf24; --ok: #4ade80; --danger: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 1rem; line-height: 1.4; }
+    h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
+    .sub { color: var(--muted); margin-bottom: 1rem; font-size: 0.9rem; }
+    .banner, .setup { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
+    .banner { background: var(--panel); }
+    .setup { background: #422006; color: #fde68a; }
+    .hud { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; }
+    .stat { background: var(--panel); padding: 0.6rem 0.9rem; border-radius: 8px; min-width: 7rem; }
+    .stat strong { display: block; font-size: 1.2rem; }
+    .controls { margin-bottom: 1rem; }
+    button, .tab-btn { background: #334155; color: var(--text); border: none; padding: 0.45rem 0.85rem; border-radius: 6px; cursor: pointer; margin-right: 0.4rem; margin-bottom: 0.4rem; }
+    button:hover, .tab-btn:hover { background: #475569; }
+    button.primary { background: #0369a1; }
+    input, select, textarea { background: #0f172a; color: var(--text); border: 1px solid #475569; border-radius: 6px; padding: 0.45rem; font: inherit; }
+    textarea { width: 100%; min-height: 3rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+    .panel { background: var(--panel); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
+    .panel h2 { margin: 0 0 0.75rem; font-size: 1rem; color: var(--accent); }
+    .tabs { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.75rem; }
+    .tab-btn.active { background: var(--accent); color: #0f172a; font-weight: 600; }
+    .agent-detail { display: none; }
+    .agent-detail.active { display: block; }
+    .map { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 320px; }
+    .tile { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; text-align: center; padding: 2px; border: 1px solid rgba(255,255,255,0.15); }
+    .tile.city { font-weight: 700; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.25); }
+    .victory-bar { background: #0f172a; border-radius: 999px; height: 14px; overflow: hidden; margin: 0.5rem 0; }
+    .victory-fill { background: linear-gradient(90deg, #22c55e, #38bdf8); height: 100%; transition: width 0.4s ease; }
+    .alliance, .neg-item { background: #0f172a; padding: 0.6rem; border-radius: 6px; margin-bottom: 0.5rem; font-size: 0.85rem; }
+    .risk-high { color: var(--danger); }
+    .risk-low { color: var(--ok); }
+    .events { font-size: 0.8rem; color: var(--muted); max-height: 8rem; overflow: auto; }
+    .events li { margin-bottom: 0.25rem; }
+    .hidden { display: none !important; }
+    code { font-size: 0.85em; }
   </style>
 </head>
 <body>
-  <h1>CivForge Live Dashboard</h1>
+  <h1>CivForge Multi-Agent Command</h1>
+  <p class="sub">Governance kernel + agent tabs, shared map, negotiations, alliances, joint victory</p>
 
-  <div id="setup-panel" class="setup" hidden>
-    <strong>Connect your Mac Studio kernel</strong>
-    <p>
-      This page is served over <strong>HTTPS</strong> (Vercel). Browsers block it from calling
-      <code>http://127.0.0.1:8080</code> on your machine.
-    </p>
-    <p><strong>Option A — play on the host (simplest)</strong></p>
-    <p class="links">
-      <a href="http://127.0.0.1:8080/dashboard" target="_blank" rel="noopener">Open local dashboard</a>
-      · CLI: <code>python3 tools/civforge_cli.py status</code>
-    </p>
-    <p><strong>Option B — remote via HTTPS tunnel</strong></p>
-    <ol>
-      <li>Expose <code>:8080</code> with Cloudflare Tunnel, ngrok, etc. (must be <code>https://…</code>)</li>
-      <li>Paste the public base URL below (no trailing slash)</li>
-    </ol>
-    <label for="api-base-input">Kernel API base</label><br />
-    <input id="api-base-input" type="url" placeholder="https://your-tunnel.example.com" />
-    <br />
-    <button id="save-base-btn" type="button">Save &amp; connect</button>
-    <p class="links"><small>Or append <code>?api_base=https://your-tunnel</code> to this page URL.</small></p>
+  <div id="setup-panel" class="setup hidden">
+    <strong>Remote dashboard (HTTPS)</strong>
+    <p>Paste an HTTPS tunnel to your Mac Studio kernel, or open <a href="http://127.0.0.1:8080/dashboard" style="color:#fde68a">http://127.0.0.1:8080/dashboard</a> locally.</p>
+    <input id="api-base-input" type="url" placeholder="https://your-tunnel.example.com" style="width:100%;max-width:28rem;margin-bottom:0.5rem" />
+    <button id="save-base-btn" type="button">Connect</button>
   </div>
 
-  <p id="connected-banner" class="banner" hidden>
-    Connected to kernel at <code id="api-base-label"></code>.
-    <span id="https-note" class="warn" hidden> — tunnel must stay up while you play.</span>
-  </p>
+  <div id="main-dashboard" class="hidden">
+    <p class="banner">Kernel: <code id="api-base-label"></code> · <span id="conn-status">connected</span></p>
+    <div class="hud">
+      <div class="stat"><span>Turn</span><strong id="hud-turn">—</strong></div>
+      <div class="stat"><span>Fun</span><strong id="hud-fun">—</strong></div>
+      <div class="stat"><span>Cities</span><strong id="hud-cities">—</strong></div>
+      <div class="stat"><span>Alliances</span><strong id="hud-alliances">—</strong></div>
+      <div class="stat"><span>Victory</span><strong id="hud-victory">—</strong></div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="advance-btn">Advance Turn</button>
+      <button id="refresh-btn">Refresh</button>
+      <button id="change-base-btn" type="button">Change API</button>
+    </div>
 
-  <div id="controls" hidden>
-    <button id="advance-btn">Advance Turn</button>
-    <button id="refresh-btn">Refresh State</button>
-    <button id="change-base-btn" type="button">Change API base</button>
+    <div class="tabs" id="view-tabs">
+      <button class="tab-btn active" data-view="overview">Overview</button>
+      <button class="tab-btn" data-view="military">Military</button>
+      <button class="tab-btn" data-view="economic">Economic</button>
+      <button class="tab-btn" data-view="cultural">Cultural</button>
+      <button class="tab-btn" data-view="founding">Found City</button>
+      <button class="tab-btn" data-view="civstudy">CivStudy Ref</button>
+    </div>
+
+    <div id="view-overview">
+    <div class="grid-2">
+      <div class="panel">
+        <h2>Agent Governors</h2>
+        <div class="tabs" id="agent-tabs"></div>
+        <div id="agent-details"></div>
+      </div>
+      <div class="panel">
+        <h2>Shared Map (5×5)</h2>
+        <div class="map" id="map-grid"></div>
+        <p class="sub" style="margin-top:0.5rem">Cities are bold tiles. Colors = faction owner.</p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2>Negotiation Panel</h2>
+        <label>To agent</label>
+        <select id="neg-to"></select>
+        <label style="display:block;margin-top:0.5rem">Offer</label>
+        <textarea id="neg-offer" placeholder="Propose joint governance review…"></textarea>
+        <button class="primary" id="neg-send" style="margin-top:0.5rem">Send Offer</button>
+        <div id="neg-log" style="margin-top:0.75rem"></div>
+      </div>
+      <div class="panel">
+        <h2>Alliance Tracker</h2>
+        <div id="alliance-list"></div>
+        <h2 style="margin-top:1rem">Joint Victory</h2>
+        <div class="victory-bar"><div class="victory-fill" id="victory-fill" style="width:0%"></div></div>
+        <p id="victory-text"></p>
+        <ul id="victory-milestones"></ul>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Recent Events</h2>
+      <ul class="events" id="event-list"></ul>
+    </div>
+    </div>
+
+    <div id="view-military" class="panel hidden">
+      <h2>Military Lane</h2>
+      <div id="lane-military"></div>
+    </div>
+    <div id="view-economic" class="panel hidden">
+      <h2>Economic Lane</h2>
+      <div id="lane-economic"></div>
+    </div>
+    <div id="view-cultural" class="panel hidden">
+      <h2>Cultural Lane</h2>
+      <div id="lane-cultural"></div>
+    </div>
+    <div id="view-founding" class="panel hidden">
+      <h2>Found City Session</h2>
+      <div id="founding-session"></div>
+      <label>Name</label><input id="found-name" value="New Work Pack" style="width:100%;margin:0.5rem 0" />
+      <label>Investment (prod)</label><input id="found-invest" type="number" value="4" min="3" style="width:6rem" />
+      <button class="primary" id="found-btn" style="margin-top:0.5rem">Found Work Pack</button>
+      <p id="found-result" class="sub"></p>
+    </div>
+    <div id="view-civstudy" class="panel hidden">
+      <h2>CivStudy Reference (read-only)</h2>
+      <div id="civstudy-panel"></div>
+    </div>
   </div>
-
-  <div id="state"><em>Configure connection above to load state.</em></div>
 
   <script>
     (function () {
       const STORAGE_KEY = "civforge_api_base";
-      const pageIsHttps = window.location.protocol === "https:";
-      const params = new URLSearchParams(window.location.search);
+      const pageIsHttps = location.protocol === "https:";
+      const params = new URLSearchParams(location.search);
+      const colors = {};
 
-      const setupPanel = document.getElementById("setup-panel");
-      const connectedBanner = document.getElementById("connected-banner");
-      const controls = document.getElementById("controls");
-      const stateEl = document.getElementById("state");
-      const apiBaseLabel = document.getElementById("api-base-label");
-      const apiBaseInput = document.getElementById("api-base-input");
-      const httpsNote = document.getElementById("https-note");
-
-      function normalizeBase(url) {
-        return (url || "").trim().replace(/\/$/, "");
-      }
-
+      function normalizeBase(url) { return (url || "").trim().replace(/\/$/, ""); }
       function isValidBase(url) {
         if (!url) return false;
         try {
           const u = new URL(url);
           if (pageIsHttps && u.protocol !== "https:") return false;
           return u.protocol === "http:" || u.protocol === "https:";
-        } catch (_) {
-          return false;
-        }
+        } catch (_) { return false; }
       }
-
       function resolveApiBase() {
-        const fromQuery = normalizeBase(params.get("api_base"));
-        if (isValidBase(fromQuery)) return fromQuery;
-        const fromStorage = normalizeBase(localStorage.getItem(STORAGE_KEY));
-        if (isValidBase(fromStorage)) return fromStorage;
+        const q = normalizeBase(params.get("api_base"));
+        if (isValidBase(q)) return q;
+        const s = normalizeBase(localStorage.getItem(STORAGE_KEY));
+        if (isValidBase(s)) return s;
         if (!pageIsHttps) return "http://127.0.0.1:8080";
         return "";
       }
 
       let apiBase = resolveApiBase();
+      let state = null;
+      let activeTab = "player";
+      let activeView = "overview";
 
-      function showSetup(message) {
-        setupPanel.hidden = false;
-        connectedBanner.hidden = true;
-        controls.hidden = true;
-        if (message) {
-          stateEl.innerHTML = "<p class='warn'>" + message + "</p>";
-        } else if (!apiBase) {
-          stateEl.innerHTML = "<p>Waiting for kernel URL.</p>";
-        }
+      document.getElementById("view-tabs").onclick = (e) => {
+        const btn = e.target.closest("[data-view]");
+        if (!btn) return;
+        activeView = btn.dataset.view;
+        document.querySelectorAll("#view-tabs .tab-btn").forEach(b => b.classList.toggle("active", b.dataset.view === activeView));
+        ["overview","military","economic","cultural","founding","civstudy"].forEach(v => {
+          const el = document.getElementById("view-" + v);
+          if (el) el.classList.toggle("hidden", v !== activeView);
+        });
+      };
+
+      const els = {
+        setup: document.getElementById("setup-panel"),
+        main: document.getElementById("main-dashboard"),
+        apiLabel: document.getElementById("api-base-label"),
+        apiInput: document.getElementById("api-base-input"),
+      };
+
+      function showSetup() {
+        els.setup.classList.remove("hidden");
+        els.main.classList.add("hidden");
+      }
+      function showMain() {
+        els.setup.classList.add("hidden");
+        els.main.classList.remove("hidden");
+        els.apiLabel.textContent = apiBase;
       }
 
-      function showConnected() {
-        setupPanel.hidden = true;
-        connectedBanner.hidden = false;
-        controls.hidden = false;
-        apiBaseLabel.textContent = apiBase;
-        httpsNote.hidden = !pageIsHttps;
-        if (apiBaseInput.value !== apiBase) apiBaseInput.value = apiBase;
+      function agentId(civ, player) {
+        if (!civ) return "player";
+        return civ.id || (civ.name || "").split(" ")[0].toLowerCase();
       }
 
-      function saveBase() {
-        const candidate = normalizeBase(apiBaseInput.value);
-        if (!isValidBase(candidate)) {
-          alert(pageIsHttps
-            ? "Use a full https:// URL for your tunnel (http://127.0.0.1 will not work from this page)."
-            : "Enter a valid http:// or https:// API base URL.");
-          return;
+      function renderAgents(data) {
+        const tabs = document.getElementById("agent-tabs");
+        const details = document.getElementById("agent-details");
+        tabs.innerHTML = "";
+        details.innerHTML = "";
+        const agents = [{ id: "player", name: data.player.name, data: data.player, isPlayer: true }]
+          .concat((data.ai_civs || []).map(c => ({ id: agentId(c), name: c.name, data: c, isPlayer: false })));
+
+        agents.forEach(a => {
+          const btn = document.createElement("button");
+          btn.className = "tab-btn" + (a.id === activeTab ? " active" : "");
+          btn.textContent = a.name.split(" ")[0];
+          btn.onclick = () => { activeTab = a.id; renderAgents(data); };
+          tabs.appendChild(btn);
+
+          const pane = document.createElement("div");
+          pane.className = "agent-detail" + (a.id === activeTab ? " active" : "");
+          const r = a.data.resources || {};
+          pane.innerHTML = "<strong>" + a.name + "</strong><br/>" +
+            "Territories: " + (a.data.territories || "—") + " · Cities: " + (a.data.cities || "—") + "<br/>" +
+            "Food " + (r.food ?? "—") + " · Prod " + (r.prod ?? "—") + " · Sci " + (r.sci ?? "—") + " · Influence " + (r.influence ?? "—") +
+            (a.isPlayer ? "<br/>Fun score: <strong>" + (a.data.fun_score ?? data.fun_score) + "</strong>" : "");
+          details.appendChild(pane);
+        });
+      }
+
+      function renderMap(data) {
+        const grid = document.getElementById("map-grid");
+        grid.innerHTML = "";
+        const fc = data.faction_colors || {};
+        (data.map_tiles || []).forEach(t => {
+          const div = document.createElement("div");
+          div.className = "tile" + (t.type === "city" ? " city" : "");
+          div.style.background = fc[t.owner] || "#64748b";
+          div.title = t.label + " (" + t.owner + ")";
+          div.textContent = t.type === "city" ? "⬤" : "·";
+          grid.appendChild(div);
+        });
+      }
+
+      function renderNegotiations(data) {
+        const log = document.getElementById("neg-log");
+        const sel = document.getElementById("neg-to");
+        const ids = (data.ai_civs || []).map(c => agentId(c));
+        if (sel.options.length === 0) {
+          ids.forEach(id => {
+            const o = document.createElement("option");
+            o.value = id;
+            o.textContent = (data.agent_labels && data.agent_labels[id]) || id;
+            sel.appendChild(o);
+          });
         }
-        apiBase = candidate;
-        localStorage.setItem(STORAGE_KEY, apiBase);
-        const next = new URL(window.location.href);
-        next.searchParams.set("api_base", apiBase);
-        window.history.replaceState({}, "", next);
-        showConnected();
-        loadState();
+        const pending = (data.negotiations || []).filter(n => n.status === "pending");
+        log.innerHTML = pending.length ? pending.map(n =>
+          "<div class='neg-item'><strong>" + n.from + " → " + n.to + "</strong>: " + n.offer +
+          " <button data-neg='" + n.id + "' data-acc='1'>Accept</button>" +
+          " <button data-neg='" + n.id + "' data-acc='0'>Decline</button></div>"
+        ).join("") : "<em>No pending offers.</em>";
+        log.querySelectorAll("button[data-neg]").forEach(btn => {
+          btn.onclick = async () => {
+            await fetch(apiBase + "/game/negotiate/respond", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ negotiation_id: btn.dataset.neg, accept: btn.dataset.acc === "1" }),
+            });
+            await loadState();
+          };
+        });
+      }
+
+      function renderAlliances(data) {
+        const list = document.getElementById("alliance-list");
+        const alliances = data.alliances || [];
+        list.innerHTML = alliances.length ? alliances.map(a => {
+          const risk = a.betrayal_risk || 0;
+          const cls = risk > 35 ? "risk-high" : "risk-low";
+          return "<div class='alliance'><strong>" + a.parties.join(" ↔ ") + "</strong> (" + a.status + ")<br/>" +
+            "<span class='" + cls + "'>Betrayal risk: " + risk + "%</span><br/><small>" + (a.note || "") + "</small></div>";
+        }).join("") : "<em>No alliances yet.</em>";
+      }
+
+      function renderVictory(data) {
+        const vp = data.victory_progress || { joint_progress: 0, target: 100, milestones: [] };
+        const pct = Math.round(100 * (vp.joint_progress || 0) / (vp.target || 100));
+        document.getElementById("victory-fill").style.width = pct + "%";
+        document.getElementById("victory-text").textContent = "Joint progress: " + (vp.joint_progress || 0) + " / " + (vp.target || 100) + " (" + pct + "%)";
+        document.getElementById("victory-milestones").innerHTML = (vp.milestones || []).map(m =>
+          "<li>" + (m.done ? "✅" : "⬜") + " " + m.name + "</li>"
+        ).join("");
+        document.getElementById("hud-victory").textContent = pct + "%";
+      }
+
+      function renderHud(data) {
+        document.getElementById("hud-turn").textContent = data.current_turn;
+        document.getElementById("hud-fun").textContent = data.fun_score;
+        document.getElementById("hud-cities").textContent = data.player.cities;
+        document.getElementById("hud-alliances").textContent = (data.alliances || []).length;
+      }
+
+      function renderEvents(data) {
+        document.getElementById("event-list").innerHTML = (data.recent_events || []).slice().reverse()
+          .map(e => "<li>" + e + "</li>").join("") || "<li><em>No events yet.</em></li>";
+      }
+
+      function renderMechanics(data) {
+        const ml = data.mechanics_lanes || {};
+        const m = ml.military || {};
+        document.getElementById("lane-military").innerHTML =
+          "<p>Strength <strong>" + (m.strength||"—") + "</strong> · Garrisons " + (m.garrisons||"—") +
+          " · Legacy " + (m.legacy_points||"—") + "</p><ul>" +
+          (m.recent||[]).map(x => "<li>" + x + "</li>").join("") + "</ul>";
+        const e = ml.economic || {};
+        document.getElementById("lane-economic").innerHTML =
+          "<p>Institutions <strong>" + (e.institutions||"—") + "</strong> · Trade routes " + (e.trade_routes||"—") +
+          " · Yield +" + (e.yield_bonus_pct||0) + "%</p><ul>" +
+          (e.recent||[]).map(x => "<li>" + x + "</li>").join("") + "</ul>";
+        const c = ml.cultural || {};
+        document.getElementById("lane-cultural").innerHTML =
+          "<p>Event chains <strong>" + (c.event_chains||"—") + "</strong> · Influence spread " + (c.influence_spread||"—") + "</p><ul>" +
+          (c.recent||[]).map(x => "<li>" + x + "</li>").join("") + "</ul>";
+      }
+
+      function renderCivstudy(data) {
+        const cs = data.civstudy_reference || {};
+        document.getElementById("civstudy-panel").innerHTML =
+          "<p><em>" + (cs.note||"") + "</em></p><p>Repo: <code>" + (cs.repo||"") + "</code></p>" +
+          "<h3>Reference agents</h3><ul>" + (cs.agents||[]).map(a => "<li><strong>" + a.role + "</strong>: " + a.focus + "</li>").join("") + "</ul>" +
+          "<h3>Borrowed patterns</h3><ul>" + (cs.borrowed_patterns||[]).map(p => "<li>" + p + "</li>").join("") + "</ul>";
+      }
+
+      async function renderFounding() {
+        try {
+          const r = await fetch(apiBase + "/game/founding-session");
+          const fs = await r.json();
+          document.getElementById("founding-session").innerHTML =
+            "<p>Cities: " + fs.cities + " · Available prod: <strong>" + fs.available_prod + "</strong></p>" +
+            (fs.can_found ? "<p class='ok'>Ready to found</p>" : "<p class='warn'>Need more production budget</p>");
+          document.getElementById("found-invest").max = fs.available_prod;
+        } catch (_) {}
+      }
+
+      function renderAll(data) {
+        state = data;
+        renderHud(data);
+        renderAgents(data);
+        renderMap(data);
+        renderNegotiations(data);
+        renderAlliances(data);
+        renderVictory(data);
+        renderEvents(data);
+        renderMechanics(data);
+        renderCivstudy(data);
+        renderFounding();
       }
 
       async function loadState() {
-        if (!apiBase) {
-          showSetup();
-          return;
-        }
-        stateEl.innerHTML = "<em>Loading…</em>";
+        if (!apiBase) { showSetup(); return; }
         try {
           const r = await fetch(apiBase + "/state");
           if (!r.ok) throw new Error("HTTP " + r.status);
-          const text = await r.text();
-          stateEl.innerHTML = "<pre>" + text.replace(/</g, "&lt;") + "</pre>";
+          renderAll(await r.json());
+          showMain();
         } catch (e) {
           showSetup();
-          stateEl.innerHTML =
-            "<p class='warn'>Cannot reach kernel at <code>" + apiBase + "</code>.</p>" +
-            "<p>Check the tunnel is running, CORS allows <code>https://civforge.vercel.app</code> " +
-            "(set <code>CIVFORGE_CORS_ORIGINS</code> on the kernel), or use the " +
-            "<a href='http://127.0.0.1:8080/dashboard' target='_blank' rel='noopener'>local dashboard</a>.</p>";
+          document.getElementById("conn-status").textContent = "disconnected";
         }
       }
 
-      document.getElementById("save-base-btn").onclick = saveBase;
-      document.getElementById("change-base-btn").onclick = function () {
-        showSetup("Enter a new API base URL.");
-        apiBaseInput.focus();
-      };
-      document.getElementById("refresh-btn").onclick = loadState;
-      document.getElementById("advance-btn").onclick = async function () {
-        try {
-          const r = await fetch(apiBase + "/advance_turn", { method: "POST" });
-          if (!r.ok) throw new Error("HTTP " + r.status);
-          await loadState();
-        } catch (e) {
-          alert("Advance failed — kernel unreachable. Check tunnel or use local dashboard.");
-        }
-      };
-
-      if (apiBase) {
-        showConnected();
+      document.getElementById("save-base-btn").onclick = () => {
+        const c = normalizeBase(els.apiInput.value);
+        if (!isValidBase(c)) { alert("Enter a valid API base URL"); return; }
+        apiBase = c;
+        localStorage.setItem(STORAGE_KEY, c);
+        const u = new URL(location.href);
+        u.searchParams.set("api_base", c);
+        history.replaceState({}, "", u);
         loadState();
-      } else {
-        showSetup();
-      }
+      };
+
+      document.getElementById("change-base-btn").onclick = () => showSetup();
+      document.getElementById("refresh-btn").onclick = loadState;
+      document.getElementById("advance-btn").onclick = async () => {
+        await fetch(apiBase + "/advance_turn", { method: "POST" });
+        await loadState();
+      };
+      document.getElementById("neg-send").onclick = async () => {
+        await fetch(apiBase + "/game/negotiate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ to: document.getElementById("neg-to").value, offer: document.getElementById("neg-offer").value }),
+        });
+        document.getElementById("neg-offer").value = "";
+        await loadState();
+      };
+
+      document.getElementById("found-btn").onclick = async () => {
+        const r = await fetch(apiBase + "/found_city", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            city_name: document.getElementById("found-name").value,
+            investment: parseInt(document.getElementById("found-invest").value, 10) || 4,
+          }),
+        });
+        const d = await r.json();
+        document.getElementById("found-result").textContent = d.message || d.error || JSON.stringify(d);
+        await loadState();
+      };
+
+      if (apiBase) { showMain(); loadState(); } else { showSetup(); }
     })();
   </script>
 </body>

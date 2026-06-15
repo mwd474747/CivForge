@@ -44,3 +44,4 @@ var/
 wheels/
 _archive/pre-realign-orphans/
 receipts/_archive/
+.vercel
