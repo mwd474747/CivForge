@@ -334,8 +334,26 @@
 
       function renderCivstudy(data) {
         const cs = data.civstudy_reference || {};
+        const districts = (cs.districts || []).map(d =>
+          "<li><strong>" + d.name + "</strong> (" + d.specialization + "): " + (d.note || "") + "</li>"
+        ).join("");
+        const branches = (cs.policy_tree && cs.policy_tree.branches || []).map(b =>
+          "<li><strong>" + b.name + "</strong><ul>" + (b.policies || []).map(p =>
+            "<li>" + p.id + " (tier " + p.tier + "): " + p.effect + "</li>"
+          ).join("") + "</ul></li>"
+        ).join("");
+        const forks = (cs.discovery_forks || []).map(f =>
+          "<li><strong>" + f.name + "</strong> → " + f.unlocks + " <small>(" + f.branch + ")</small></li>"
+        ).join("");
+        const chains = (cs.cultural_event_chains || []).map(c =>
+          "<li><strong>" + c.name + "</strong>: " + (c.stages || []).join(" → ") + "</li>"
+        ).join("");
         document.getElementById("civstudy-panel").innerHTML =
           "<p><em>" + (cs.note||"") + "</em></p><p>Repo: <code>" + (cs.repo||"") + "</code></p>" +
+          "<h3>District specializations</h3><ul>" + (districts || "<li><em>—</em></li>") + "</ul>" +
+          "<h3>Policy tree branches</h3><ul>" + (branches || "<li><em>—</em></li>") + "</ul>" +
+          "<h3>Scientific discovery forks</h3><ul>" + (forks || "<li><em>—</em></li>") + "</ul>" +
+          "<h3>Cultural event chains</h3><ul>" + (chains || "<li><em>—</em></li>") + "</ul>" +
           "<h3>Reference agents</h3><ul>" + (cs.agents||[]).map(a => "<li><strong>" + a.role + "</strong>: " + a.focus + "</li>").join("") + "</ul>" +
           "<h3>Borrowed patterns</h3><ul>" + (cs.borrowed_patterns||[]).map(p => "<li>" + p + "</li>").join("") + "</ul>";
       }

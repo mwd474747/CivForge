@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core import AgentBrain, FunForge, GovernanceOrchestrator, ReceiptStore
 from core.mechanics_registry import build_default_registry, default_mechanics_lanes
+from backend.civstudy_metadata import civstudy_reference_panel
 from backend.multi_agent_state import (
     AGENT_LABELS,
     FACTION_COLORS,
@@ -132,27 +133,6 @@ if restored:
     print("[CivForge] Restored previous state snapshot from SQLite (persistence active)")
 ensure_multi_agent_state(game_state)
 orchestrator.turn = int(game_state.get("turn", 1))
-
-def civstudy_reference_panel() -> Dict[str, Any]:
-    """Read-only civstudy pattern hints (reference lane — no corpus mutation)."""
-    return {
-        "status": "read_only_reference",
-        "repo": "mwd474747/civstudy",
-        "note": "Patterns from CIVSTUDY-TERMINAL-GIT-REVIEW receipt. Not live corpus — SEPARATION.md.",
-        "agents": [
-            {"role": "Research Lead", "focus": "scope, corpus map, success criteria"},
-            {"role": "Archivist", "focus": "provenance, references.json, citation audit"},
-            {"role": "Editor", "focus": "structure, cross-links, coherence"},
-            {"role": "Web Developer", "focus": "registry routes, Recharts viz, dark glass UI"},
-        ],
-        "borrowed_patterns": [
-            "Card-based admin HUD + budget bars",
-            "Discrete task runners with loading feedback",
-            "Nexus JWKS auth patterns (future :8081 identity)",
-            "Governor entity management metaphors",
-        ],
-    }
-
 
 def telemetry_extra_from_state() -> Dict[str, Any]:
     ensure_multi_agent_state(game_state)

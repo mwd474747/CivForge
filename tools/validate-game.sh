@@ -22,8 +22,8 @@ else
     || { echo "8080 not live — run: bash tools/start-kernel-8080.sh"; exit 1; }
 fi
 
-echo "2. Unit tests (multi_agent_state)..."
-python3 -m pytest tests/test_multi_agent_state.py -q
+echo "2. Unit tests..."
+python3 -m pytest tests/test_multi_agent_state.py tests/test_civstudy_metadata.py -q
 
 echo "3. API contract probes..."
 python3 <<'PY'
@@ -48,6 +48,9 @@ s = get("/state")
 assert s["status"] == "active"
 assert len(s.get("map_tiles", [])) == 25
 assert set((s.get("mechanics_lanes") or {}).keys()) == {"military", "economic", "cultural"}
+cs = s.get("civstudy_reference", {})
+for key in ("districts", "policy_tree", "discovery_forks", "cultural_event_chains"):
+    assert key in cs, f"missing civstudy_reference.{key}"
 vp = s.get("victory_progress", {})
 if vp.get("joint_progress", 0) >= vp.get("target", 100):
     assert vp["milestones"][3]["done"] is True, "Joint victory milestone should sync at 100%"
