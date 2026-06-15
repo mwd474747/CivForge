@@ -40,6 +40,8 @@
     .alliance, .neg-item { background: #0f172a; padding: 0.6rem; border-radius: 6px; margin-bottom: 0.5rem; font-size: 0.85rem; }
     .risk-high { color: var(--danger); }
     .risk-low { color: var(--ok); }
+    .policy-watch { border-left: 3px solid var(--warn); padding-left: 0.5rem; }
+    .policy-banner { background: #422006; color: #fde68a; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem; }
     .events { font-size: 0.8rem; color: var(--muted); max-height: 8rem; overflow: auto; }
     .events li { margin-bottom: 0.25rem; }
     .hidden { display: none !important; }
@@ -57,6 +59,7 @@
     <div class="outcome-card">
       <h2>Joint Victory</h2>
       <p id="outcome-text">All milestones complete. Governance quorum achieved across factions.</p>
+      <button type="button" id="outcome-reset-btn">Start New Game</button>
       <button type="button" onclick="document.getElementById('outcome-overlay').classList.add('hidden')">Continue governing</button>
     </div>
   </div>
@@ -76,10 +79,13 @@
       <div class="stat"><span>Cities</span><strong id="hud-cities">—</strong></div>
       <div class="stat"><span>Alliances</span><strong id="hud-alliances">—</strong></div>
       <div class="stat"><span>Victory</span><strong id="hud-victory">—</strong></div>
+      <div class="stat" id="hud-policy-stat" style="display:none"><span>Policies</span><strong id="hud-policies">—</strong></div>
     </div>
+    <div id="policy-banner" class="policy-banner hidden"></div>
     <div class="controls">
       <button class="primary" id="advance-btn">Advance Turn</button>
       <button id="refresh-btn">Refresh</button>
+      <button id="reset-btn" type="button" title="Start a fresh game session">Reset Game</button>
       <button id="change-base-btn" type="button">Change API</button>
     </div>
 
@@ -294,12 +300,42 @@
       function renderAlliances(data) {
         const list = document.getElementById("alliance-list");
         const alliances = data.alliances || [];
+        const sim = data.civstudy_sim || {};
+        const betrayalWatch = !!(sim.policy_flags && sim.policy_flags.betrayal_watch);
         list.innerHTML = alliances.length ? alliances.map(a => {
           const risk = a.betrayal_risk || 0;
-          const cls = risk > 35 ? "risk-high" : "risk-low";
-          return "<div class='alliance'><strong>" + a.parties.join(" ↔ ") + "</strong> (" + a.status + ")<br/>" +
-            "<span class='" + cls + "'>Betrayal risk: " + risk + "%</span><br/><small>" + (a.note || "") + "</small></div>";
+          const watchBoost = betrayalWatch ? 12 : 0;
+          const displayRisk = Math.min(100, risk + watchBoost);
+          const cls = displayRisk > 35 ? "risk-high" : "risk-low";
+          const watchNote = betrayalWatch ? " <span class='policy-watch'>⚠ Betrayal Watch policy active</span>" : "";
+          return "<div class='alliance" + (betrayalWatch ? " policy-watch" : "") + "'><strong>" + a.parties.join(" ↔ ") + "</strong> (" + a.status + ")<br/>" +
+            "<span class='" + cls + "'>Betrayal risk: " + displayRisk + "%</span>" + watchNote + "<br/><small>" + (a.note || "") + "</small></div>";
         }).join("") : "<em>No alliances yet.</em>";
+      }
+
+      function renderPolicyHud(data) {
+        const sim = data.civstudy_sim || {};
+        const flags = sim.policy_flags || {};
+        const unlocked = sim.unlocked_policies || [];
+        const banner = document.getElementById("policy-banner");
+        const stat = document.getElementById("hud-policy-stat");
+        if (unlocked.length) {
+          stat.style.display = "";
+          document.getElementById("hud-policies").textContent = unlocked.length;
+        } else {
+          stat.style.display = "none";
+        }
+        const activeFlags = Object.keys(flags).filter(k => flags[k]);
+        if (flags.betrayal_watch) {
+          banner.classList.remove("hidden");
+          banner.textContent = "Policy active: Betrayal Watch — alliance betrayal risk is elevated in the tracker.";
+        } else if (activeFlags.length) {
+          banner.classList.remove("hidden");
+          banner.textContent = "Active policy flags: " + activeFlags.join(", ");
+        } else {
+          banner.classList.add("hidden");
+          banner.textContent = "";
+        }
       }
 
       function renderVictory(data) {
@@ -349,6 +385,20 @@
 
       function renderCivstudy(data) {
         const cs = data.civstudy_reference || {};
+        const sim = data.civstudy_sim || {};
+        const livePolicies = (sim.unlocked_policies || []).map(p =>
+          "<li><strong>" + p + "</strong></li>"
+        ).join("");
+        const liveFlags = Object.entries(sim.policy_flags || {}).filter(([, v]) => v).map(([k]) =>
+          "<li><code>" + k + "</code></li>"
+        ).join("");
+        const liveSection = (livePolicies || liveFlags) ?
+          "<h3>Live sim (this session)</h3>" +
+          "<p>District: <strong>" + (sim.active_district || "—") + "</strong></p>" +
+          "<h4>Unlocked policies</h4><ul>" + (livePolicies || "<li><em>None yet — advance turns to unlock via policy tree.</em></li>") + "</ul>" +
+          "<h4>Active policy flags</h4><ul>" + (liveFlags || "<li><em>—</em></li>") + "</ul>" +
+          (sim.recent && sim.recent.length ? "<h4>Recent CivStudy events</h4><ul>" + sim.recent.map(r => "<li>" + r + "</li>").join("") + "</ul>" : "") :
+          "<p><em>Live CivStudy sim state will appear here after policy-tree ticks.</em></p>";
         const districts = (cs.districts || []).map(d =>
           "<li><strong>" + d.name + "</strong> (" + d.specialization + "): " + (d.note || "") + "</li>"
         ).join("");
@@ -364,6 +414,8 @@
           "<li><strong>" + c.name + "</strong>: " + (c.stages || []).join(" → ") + "</li>"
         ).join("");
         document.getElementById("civstudy-panel").innerHTML =
+          liveSection +
+          "<hr style='border-color:#334155;margin:1rem 0'/>" +
           "<p><em>" + (cs.note||"") + "</em></p><p>Repo: <code>" + (cs.repo||"") + "</code></p>" +
           "<h3>District specializations</h3><ul>" + (districts || "<li><em>—</em></li>") + "</ul>" +
           "<h3>Policy tree branches</h3><ul>" + (branches || "<li><em>—</em></li>") + "</ul>" +
@@ -391,6 +443,7 @@
         renderMap(data);
         renderNegotiations(data);
         renderAlliances(data);
+        renderPolicyHud(data);
         renderVictory(data);
         renderEvents(data);
         renderMechanics(data);
@@ -424,6 +477,14 @@
 
       document.getElementById("change-base-btn").onclick = () => showSetup();
       document.getElementById("refresh-btn").onclick = loadState;
+      async function resetGame() {
+        if (!confirm("Reset to a fresh game? Progress and alliances will be cleared.")) return;
+        await fetch(apiBase + "/game/reset", { method: "POST" });
+        document.getElementById("outcome-overlay").classList.add("hidden");
+        await loadState();
+      }
+      document.getElementById("reset-btn").onclick = resetGame;
+      document.getElementById("outcome-reset-btn").onclick = resetGame;
       document.getElementById("advance-btn").onclick = async () => {
         await fetch(apiBase + "/advance_turn", { method: "POST" });
         await loadState();

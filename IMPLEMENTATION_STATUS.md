@@ -13,14 +13,14 @@ CivForge = **local Python FastAPI governance backend** running on `0.0.0.0:8080`
 - backend/sim_api.py (earlier FastAPI shape preserved: /state, /found_city with detailed receipt, /advance_turn, /integrate + new /governance/*)
 - core/ fully wired with persistence (SQLite gravity_backend.db for state + receipts that survive restarts)
 - bridge/civforge_http_bridge.py — HTTP control of :8080 (Cursor local executor)
-- tools/civforge_cli.py + tools/gravity_advisor.py + tools/dawsos_auth_client.py — terminal-first drivers, safety layer, and auth client bridge
+- tools/civforge_cli.py + tools/gravity_advisor.py + tools/auth-prototype/ — terminal-first drivers, safety layer, and auth enablement bridge
 - receipts/ — growing set of real governance-cycle and work-pack markdown artifacts (including auth-prototype-push, git-tools, LOCKED-CIV-GAME-PLAN, mechanics-extension-sim receipts)
 - Gravity deploy tool untouched and canonical for the separate project
 - dawsos-auth-prototype (separate repo https://github.com/mwd474747/dawsos-auth-prototype) — pushed after literal verification; only thin client integration in CivForge/tools/dawsos_auth_client.py + optional protected_advance demo
-- **Civ Game Layer (Locked, Required)**: Planning for simple core mechanics + simulation layer + gamified Command Center (Path A) + expanded agents (GameMechanicDesigner, PlayerAgent, etc.) + required infra (Docker, hosting, MCP, auth). All extensions governed via the kernel. See planning/production_deployment_assessment.md, ROADMAP.md, AGENTS.md (role registry + agents/role_registry.json), docs/GIT_LANES_POLICY.md, docs/CIV_GAME_MECHANICS_INSPIRATION.md, receipts/LOCKED-CIV-GAME-PLAN-*.md and orphan-cleanup-*.md. Pre-realign orphans consolidated to _archive/pre-realign-orphans/ and receipts/_archive/. No implementation yet; kernel ready for governed development.
+- **Civ Game Layer**: **Prototype live** on the kernel — multi-agent map, alliances, negotiations, joint victory, `MechanicsRegistry` + CivStudy policy-tree ticks, turn simulation runner, victory-outcome receipts, `POST /game/reset`, dashboard at `/dashboard`, 9 MCP tools. Gap inventory: `docs/GAME_ENGINE_IMPLEMENTATION_GAP_INVENTORY_V1.md`. Planning canon: `docs/GAME_PLAY_GUIDE_V1.md`, `docs/MECHANICS_TICK_CONTRACT_V1.md`, `receipts/LOCKED-CIV-GAME-PLAN-*.md`.
 
 **Persistence**: Enabled (ReceiptStore now supports db_path). State snapshots + receipts load on startup.
-**MCP readiness**: Stub upgraded in CLI + bridge (ready for full MCP server wrapper when requested).
+**MCP readiness**: `tools/mcp_server.py` — 9 tools (status, advance, reset, found city, negotiate, what-if, governance propose/gate).
 **Execution lanes (v2):** Grok swarm (grok.com) plans; Cursor executes; OpenClaw escalates for wt. See `docs/EXECUTION_LANE_V2.md`.
 **Bridge**: `bridge/civforge_http_bridge.py` — Cursor/scripts call get_state(), advance_cycle(), etc.
 

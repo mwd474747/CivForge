@@ -23,6 +23,7 @@ KERNEL = os.environ.get("CIVFORGE_KERNEL_URL", "http://127.0.0.1:8080").rstrip("
 TOOLS = [
     {"name": "civforge_status", "description": "Get live governance + multi-agent state", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "civforge_advance_turn", "description": "Advance one governance cycle", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "civforge_reset_game", "description": "Reset to a fresh game session (turn 1, cleared victory progress)", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "civforge_found_city", "description": "Found a work pack / city", "inputSchema": {
         "type": "object",
         "properties": {
@@ -66,14 +67,10 @@ TOOLS = [
 
 def _http(method: str, path: str, body: Optional[Dict[str, Any]] = None) -> Any:
     data = json.dumps(body).encode() if body is not None else None
-    headers = {"Content-Type": "application/json"} if data else {}
-    api_key = os.environ.get("CIVFORGE_API_KEY") or os.environ.get("NEXUS_API_KEY")
-    if api_key:
-        headers["X-CivForge-Token"] = api_key
     req = urllib.request.Request(
         f"{KERNEL}{path}",
         data=data,
-        headers=headers,
+        headers={"Content-Type": "application/json"} if data else {},
         method=method,
     )
     try:
@@ -89,6 +86,8 @@ def _call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         result = _http("GET", "/state")
     elif name == "civforge_advance_turn":
         result = _http("POST", "/advance_turn")
+    elif name == "civforge_reset_game":
+        result = _http("POST", "/game/reset")
     elif name == "civforge_found_city":
         result = _http("POST", "/found_city", {
             "city_name": arguments.get("city_name", "New Work Pack"),

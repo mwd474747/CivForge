@@ -31,16 +31,19 @@ python3 tools/civforge_cli.py advance
 python3 tools/civforge_cli.py mcp-serve   # stdio MCP for agent players
 ```
 
-## MCP tools (6)
+## MCP tools (9)
 
 | Tool | Action |
 |------|--------|
 | `civforge_status` | `GET /state` |
 | `civforge_advance_turn` | `POST /advance_turn` |
+| `civforge_reset_game` | `POST /game/reset` |
 | `civforge_found_city` | `POST /found_city` |
 | `civforge_negotiate` | `POST /game/negotiate` |
 | `civforge_negotiate_respond` | `POST /game/negotiate/respond` |
 | `civforge_what_if` | `POST /simulation/what_if` |
+| `civforge_governance_propose` | `POST /governance/propose` |
+| `civforge_governance_gate` | `POST /governance/gate` |
 
 ## Victory
 
@@ -48,6 +51,7 @@ python3 tools/civforge_cli.py mcp-serve   # stdio MCP for agent players
 - CivStudy cultural chains and policy `festival_receipts` can add bonus progress.
 - Milestones unlock at 25% (map), 60% (quorum), 100% (joint victory).
 - At 100%, `outcome: "victory"` is set; dashboard shows overlay; a one-time `victory-outcome-*.md` receipt is written.
+- Use **Reset Game** (dashboard) or `POST /game/reset` / MCP `civforge_reset_game` to start a fresh session.
 - Governance cycle receipts include a `victory_progress` snapshot each turn.
 
 ## Mechanics extensions

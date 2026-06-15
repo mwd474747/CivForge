@@ -17,6 +17,7 @@ from core.swarm_join import FORGE_COORDINATOR_ID
 from core.mechanics_registry import build_default_registry, default_mechanics_lanes
 from backend.civstudy_metadata import civstudy_reference_panel
 from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
+from backend.game_reset import apply_game_reset
 from backend.turn_simulation import (
     enrich_cycle_receipt,
     maybe_emit_victory_receipt,
@@ -404,6 +405,36 @@ async def game_negotiate_respond(req: NegotiateRespondRequest, _claims: Dict[str
     result = respond_negotiation(game_state, req.negotiation_id, req.accept)
     receipt_store.save_state("game_state", game_state)
     return {"result": result, "alliances": game_state["alliances"], "victory_progress": game_state["victory_progress"]}
+
+@app.post("/game/reset")
+async def game_reset(_claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    """Start a fresh game: reset in-memory state, orchestrator working memory, and SQLite snapshot."""
+    summary = apply_game_reset(game_state, orchestrator)
+    _sync_governance_proposals_to_state()
+    reset_receipt = {
+        "turn": game_state["turn"],
+        "action": "game_reset",
+        "status": "SUCCESS",
+        "prior_turn": summary["prior_turn"],
+        "prior_outcome": summary.get("prior_outcome"),
+        "claim": "New game session started from canonical initial state.",
+    }
+    game_state["receipts"].append(reset_receipt)
+    receipt_store.append(reset_receipt, filename_hint="game-reset")
+    receipt_store.save_state("game_state", game_state)
+    extra = telemetry_extra_from_state()
+    send_telemetry_to_nexus(
+        game_state["turn"],
+        game_state["player"]["fun_score"],
+        game_state["player"]["resources"],
+        extra,
+    )
+    return {
+        "message": "Game reset to turn 1.",
+        "summary": summary,
+        "victory_progress": game_state["victory_progress"],
+        "receipt": reset_receipt,
+    }
 
 def _integrate_civforge_response(payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     return {
