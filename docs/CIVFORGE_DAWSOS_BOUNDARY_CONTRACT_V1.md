@@ -3,7 +3,7 @@
 **Status:** `current` — cross-plane planning contract (both repos)
 **Canonical home:** `~/CivForge/docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md`
 **dawsOS mirror:** `engine-src/active/docs/planning/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md` (pointer only)
-**wt policy row:** `governed-connectors-registry.v1.json` → `civforge_kernel`
+**wt policy row:** `engine-src/active/config/ops/governed-connectors-registry.v1.json` → `civforge_kernel`
 **Label:** planning evidence — not promotion truth; not an execution-authority grant
 
 ---

@@ -48,7 +48,7 @@ bash tools/turnkey-gaps-all.sh --restart      # full stack: tests + grok + openc
 | Artifact | wt path |
 |----------|---------|
 | Boundary contract | `engine-src/active/docs/planning/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md` |
-| Connector row | `engine-src/active/config/governed-connectors-registry.v1.json` → `civforge_kernel` |
+| Connector row | `engine-src/active/config/ops/governed-connectors-registry.v1.json` → `civforge_kernel` |
 | Nexus receipts | `reports/ops/nexus-*` (mirror builders) |
 
 Copy commands: **`docs/OPENCLAW_WT_APPLY_PACKET_V1.md`**

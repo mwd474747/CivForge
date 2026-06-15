@@ -67,7 +67,7 @@ echo "5. wt probe pointers (read-only)..."
 for f in \
   "reports/ops/dawsos-projection-pipeline-receipt-latest.json" \
   "reports/ops/workflow-dispatch-health-probe-latest.json" \
-  "engine-src/active/config/governed-connectors-registry.v1.json"
+  "reports/ops/integration-http-probes-latest.json"
 do
   if [[ -f "$WT_ROOT/$f" ]]; then
     echo "  OK $f"
@@ -75,6 +75,22 @@ do
     echo "  MISSING $f (OpenClaw refresh)"
   fi
 done
+REGISTRY="$WT_ROOT/engine-src/active/config/ops/governed-connectors-registry.v1.json"
+if [[ -f "$REGISTRY" ]]; then
+  echo "  OK engine-src/active/config/ops/governed-connectors-registry.v1.json"
+  python3 -c "
+import json
+r = json.load(open('$REGISTRY'))
+items = r if isinstance(r, list) else r.get('connectors', r.get('entries', []))
+if not isinstance(items, list):
+    items = [v for v in r.values() if isinstance(v, list)]
+    items = items[0] if items else []
+row = next((x for x in items if isinstance(x, dict) and x.get('id') == 'civforge_kernel'), None)
+print('  civforge_kernel:', row.get('status', 'found') if row else 'NOT FOUND')
+" 2>/dev/null || true
+else
+  echo "  MISSING engine-src/active/config/ops/governed-connectors-registry.v1.json"
+fi
 
 echo "6. Boundary contract mirror check..."
 if [[ -f "$WT_ROOT/engine-src/active/docs/planning/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md" ]]; then
@@ -95,12 +111,11 @@ cat >"$RECEIPT_OUT" <<EOF
 - api_key: $($KEY_OK && echo ok || echo blocked)
 - poller: $($POLLER_OK && echo exercised || echo skipped)
 
-## OpenClaw next (authority lane)
-1. Sustained dawsos-nexus on :8082 + register civforge-kernel if missing
-2. Poller daemon: \`bash tools/start-poller-daemon.sh\`
-3. wt: mirror \`docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md\` + governed-connectors-registry row
-4. Refresh wt receipts per partner-lane packet
-5. Vercel redeploy after frontend changes: \`vercel --prod\` from CivForge root
+## OpenClaw status (post WP-001 closure)
+1. Poller daemon: OpenClaw authority — \`bash tools/start-poller-daemon.sh\` or \`turnkey-openclaw-ops.sh --daemon\`
+2. wt registry canon: \`engine-src/active/config/ops/governed-connectors-registry.v1.json\`
+3. wt boundary: pointer-only mirror (do not overwrite full contract without approval)
+4. Vercel: \`vercel --prod\` when frontend changes approved
 
 ## Canonical docs
 - docs/OPENCLAW_OPS_PACKET_V1.md

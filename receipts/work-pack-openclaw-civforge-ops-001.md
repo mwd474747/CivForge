@@ -4,11 +4,24 @@
 **Lane:** `lane/infra-required` + wt bridge  
 **Owner:** OpenClaw / Mike (authority)  
 **Label:** `approval-gated`  
-**CivForge HEAD at authoring:** post `cc80db3` turnkey gap closure
+**CivForge HEAD at authoring:** `58246de` turnkey gap closure  
+**Closure:** `2026-06-15` — **Done** (OpenClaw authority lane)
 
 ---
 
-## Objective
+## Closure summary
+
+| Step | Status |
+|------|--------|
+| A Kernel | Done |
+| B Nexus + key | Done |
+| C Poller once | Done |
+| C′ Poller daemon | OpenClaw executing |
+| D wt mirror | Done (pointer-only; registry at `config/ops/`) |
+| E wt receipts | Done @ `2026-06-15T17:49:12Z` |
+| F Vercel | Approved — `vercel --prod` from CivForge root |
+
+**RIME:** `current` for integration bridge; CivForge runtime receipts remain `prototype-only`.
 
 Sustained Nexus `:8082` + poller + wt mirror + receipt refresh on this Mac Studio — without conflating CivForge execution truth with dawsOS promotion.
 

@@ -7,6 +7,12 @@
 
 ## 1. Mirror boundary contract
 
+**Default (OpenClaw 2026-06-15):** wt already holds a **pointer-only** mirror at
+`engine-src/active/docs/planning/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md`.
+Do **not** overwrite with the full CivForge-authored contract unless Mike explicitly approves.
+
+Optional full copy (approval-gated only):
+
 ```bash
 export CIVFORGE_ROOT="$HOME/CivForge"
 export WT_ROOT="${DAWSCO_WORKSPACE_ROOT:-$HOME/.openclaw/dawsos-workspace-wt}"
@@ -20,16 +26,18 @@ cp "$CIVFORGE_ROOT/docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md" \
 
 ## 2. governed-connectors-registry row
 
-OpenClaw verifies or adds `civforge_kernel` in:
+OpenClaw verifies `civforge_kernel` in wt canon:
 
-`engine-src/active/config/governed-connectors-registry.v1.json`
+`engine-src/active/config/ops/governed-connectors-registry.v1.json`
+
+(Legacy path `engine-src/active/config/governed-connectors-registry.v1.json` is **stale** — do not use.)
 
 Minimum fields (see full contract §5):
 
-- `app_id`: `civforge-kernel`
-- `plane`: `governance_kernel`
-- `probe`: `http://127.0.0.1:8080/state`
-- `nexus_satellite`: true
+- `nexus.app_id`: `civforge-kernel`
+- `nexus.type`: `governance_kernel`
+- `health_probe_url`: `http://127.0.0.1:8080/state`
+- `nexus.enabled`: true
 
 ---
 
