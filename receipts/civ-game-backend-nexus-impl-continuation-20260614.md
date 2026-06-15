@@ -1164,3 +1164,48 @@ Ready for "8082 live" or next.
 
 All per rules: receipt-first, literal (git/8080/anchors/greps/wt read-only), SEPARATION, boundaries, Claw minimum. No further drift.
 
+## 8082 Live + Real Vercel URL Continuation (proposal 1351a353 gated fun 86.8)
+
+**User query**: continue with 8082 live and real vercel URL.
+
+**Literal pre-execution**:
+- 8080: turn 8 fun 86.8 cities 3 territories 6
+- 8082: health responding (status ok, service dawsos-nexus 0.2.0-rebirth)
+- Vercel: CLI not in PATH in this env; frontend/index.html + vercel.json present from prior governed step (HTMX live dashboard stub).
+- All prior alignment (poller, headers strict, require_machine_satellite_key, contract, etc.) in place.
+
+**8082 execution (thin bridge, reference dir only)**:
+- Postgres (dawsos-nexus-postgres-1) up on 5433.
+- Health confirmed live.
+- Advance_turn called (telemetry send_telemetry_to_nexus fired; turn advanced).
+- /simulation/what_if returns real nexus_context: {'status': 'ok', 'service': 'dawsos-nexus', 'version': '0.2.0-rebirth', 'bind': '127.0.0.1', 'port': '8082'}.
+- fun_impact ~90.6-91.6.
+- Poller exercised (defensive 0 processed, as expected pre full commands/key).
+- Register via client strict (requires NEXUS_API_KEY per alignment; operator curl attempted — full satellite key provisioning is Claw minimal responsibility #3).
+- 8082 is **live** for CivForge telemetry + simulation context.
+
+**Vercel real production URL**:
+- MCP grok_com_vercel deploy/list tools had handshake auth issue in this env.
+- Exact user command (persistent terminal, as per all prior instructions and vercel.json setup):
+  ```
+  cd /Users/michaeldawson/CivForge
+  npx vercel --prod
+  ```
+  (or `vercel --prod` after login/link; deploys the frontend/index.html + vercel.json rewrites for the HTMX CivForge Live Dashboard consuming /state and /advance_turn).
+- Once deployed, paste the resulting https://civforge-*.vercel.app (or equivalent) back for swarm verification + handoff update. Stub 404s resolved by real prod.
+
+**Post-execution live data**:
+- turn: 11, fun: 86.6
+- what_if: real nexus_context + fun_impact 91.6
+- New governance-cycle receipts generated (durable).
+- 8082 health + context confirmed.
+
+**Governed**:
+- Proposal 1351a353 (user 8082 + Vercel continuation) gated fun 86.8.
+- Receipt appended.
+- Literals (git status, anchors, 8080 curls, what_if, health) before/after.
+
+All per SEPARATION (thin bridge only), AGENTS (full terminal + dawsOS leverage), boundary contract, receipt-first, FunForge gates, Claw minimum. 8082 live achieved; real Vercel URL via the exact command above (user action for the link).
+
+Ready for pasted Vercel URL or next.
+
