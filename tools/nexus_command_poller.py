@@ -65,7 +65,7 @@ ACK_ENDPOINT_TEMPLATES = [
 def _headers() -> Dict[str, str]:
     h = {"Content-Type": "application/json"}
     # Per agent rec + Q3: NEXUS_API_KEY (x-nexus-api-key) only for CivForge governance_kernel satellite.
-    # Never use or fall back to OPERATOR_TOKEN in poller/client.
+    # Never fall back to operator token in poller/client (strict satellite key only).
     api_key = os.environ.get("NEXUS_API_KEY", "")
     if api_key:
         h["x-nexus-api-key"] = api_key
