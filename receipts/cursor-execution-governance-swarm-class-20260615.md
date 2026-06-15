@@ -41,4 +41,4 @@ python3 tools/civforge_contract_parity.py
 
 ## HEAD
 
-Set at commit: see `git rev-parse --short HEAD` on `main` after push.
+`b06326a` on `main` (pushed to origin)
