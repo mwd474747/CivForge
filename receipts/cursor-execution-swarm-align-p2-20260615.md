@@ -19,4 +19,4 @@ bash tools/turnkey-governance-posture.sh
 
 ## HEAD
 
-Set after commit.
+`e7905be` on `origin/main`
