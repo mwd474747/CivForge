@@ -45,6 +45,8 @@ This doc itself is a governed meta-action. Update only after propose â†’ gate â†
 - References: AGENTS.md, ORCHESTRATION_PATTERNS.md, production assessment (all required), HANDOFF_CONTEXT.md.
 
 All lanes must produce receipts. Literal verification is non-negotiable.
+
+**Execution lanes (2026-06-15):** Grok swarm plans on grok.com; Cursor implements in worktrees; OpenClaw only for wt escalation. See `docs/EXECUTION_LANE_V2.md`.
 # nexus_ctrl reference (dawsos-nexus local) added as per proposal for lane-required-infra and lane-meta-data-core
 ---
 

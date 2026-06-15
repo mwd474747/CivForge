@@ -1,99 +1,69 @@
 # Grok Swarm Packet v1
 
-**Status:** `current` — alignment + verify + next-lane defaults  
-**Locked truth plane:** receipts 020 → 021 → 024 → 025 + commit `cc80db3`+  
-**Label:** execution claims require literal verify below
+**Status:** `current` — planning lane on grok.com only
+**Execution:** Cursor on Mac Studio (`docs/EXECUTION_LANE_V2.md`)
+**Handoff seed:** `prompts/grok_swarm_handoff_seed.md`
 
 ---
 
-## 1. One-command turnkey
+## 1. You do NOT execute locally
 
-```bash
-cd ~/CivForge
-git pull origin main
-bash tools/start-kernel-8080.sh
-bash tools/turnkey-grok-play.sh --advances 5
-```
+Grok swarm runs on **grok.com**. No Mac Studio terminal, no `.grok/config.toml`, no local git.
 
-Full gap closure:
-
-```bash
-bash tools/turnkey-gaps-all.sh
-```
+**Require from Cursor before closing PRIME receipts:**
+- `receipts/cursor-execution-*.md` with real `git HEAD` + test output
+- Or: `bash tools/turnkey-cursor-local.sh` log pasted by Mike/Cursor
 
 ---
 
-## 2. Default next lane (only these)
+## 2. Default next lane (planning only)
 
-| Priority | Lane | Owner |
-|----------|------|-------|
-| 1 | CivStudy ↔ mechanics sim hooks | `backend/civstudy_mechanics_bridge.py` |
-| 2 | MCP governance tools | `tools/mcp_server.py` |
-| 3 | 8082 poller + telemetry | OpenClaw ops packet |
-| 4 | Git lanes (mechanics/sim) | `docs/GIT_LANES_POLICY.md` |
+| Priority | Work pack topic | Cursor implements |
+|----------|-----------------|-------------------|
+| 1 | Policy-tree tier effects | `backend/civstudy_mechanics_bridge.py` |
+| 2 | Negotiation backlog sweep | `tools/negotiation-sweep.sh` |
+| 3 | `:8081` JWT identity | `tools/dawsos_auth_client.py` + sim_api |
+| 4 | Git worktrees | `docs/GIT_LANES_POLICY.md` |
 
-**Forbidden default:** UI rebuild, “no dashboard” claims, fake commit hashes.
+**Forbidden:** UI rebuild, fake commits, local terminal claims.
 
 ---
 
-## 3. Literal verification (required)
+## 3. Acceptance criteria (put in every WP)
 
 ```bash
+bash tools/turnkey-cursor-local.sh
 bash tools/validate-game.sh
-curl -sf http://127.0.0.1:8080/dashboard | grep -c "Multi-Agent Command"
-python3 -m pytest tests/test_civstudy_mechanics_bridge.py -q
+git rev-parse --short HEAD   # Cursor provides
 ```
 
-### Never use as sole proof
-
-```bash
-python3 tools/civforge_cli.py status | grep vercel   # always 0 matches — INVALID
-```
-
-### Honest UI/Vercel claims
-
-- Local: `http://127.0.0.1:8080/dashboard`
-- Static shell: `https://civforge.vercel.app` + `?api_base=` HTTPS tunnel to Mac `:8080`
+Never: `civforge_cli.py status | grep vercel`
 
 ---
 
-## 4. MCP tools (agent-player)
+## 4. MCP tools (agent-play — Cursor maintains)
 
-| Tool | Endpoint |
-|------|----------|
-| `civforge_status` | `GET /state` |
-| `civforge_advance_turn` | `POST /advance_turn` |
-| `civforge_found_city` | `POST /found_city` |
-| `civforge_negotiate` | `POST /game/negotiate` |
-| `civforge_negotiate_respond` | `POST /game/negotiate/respond` |
-| `civforge_what_if` | `POST /simulation/what_if` |
-| `civforge_governance_propose` | `POST /governance/propose` |
-| `civforge_governance_gate` | `POST /governance/gate` |
-
-List: `echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/mcp_server.py`
+8 tools in `tools/mcp_server.py` — see `docs/GAME_PLAY_GUIDE_V1.md`
 
 ---
 
-## 5. CivStudy simulation (landed)
+## 5. PRIME receipt rules
 
-`/state` exposes:
-
-- `civstudy_reference` — read-only metadata (districts, policy_tree, forks, chains)
-- `civstudy_sim` — live sim summary (district pulse, unlocked forks, chain progress)
-
-Mechanics ticks: `civstudy_district`, `civstudy_discovery`, `civstudy_cultural` on each `advance_turn`.
+1. Planning class only until Cursor execution receipt linked
+2. No invented `fun_score` — cite live `/state`
+3. Tag stale over-claims explicitly
+4. OpenClaw/wt promotion = escalate, not swarm claim
 
 ---
 
-## 6. Work pack
+## 6. Work pack template
 
-**`receipts/work-pack-grok-mechanics-sim-001.md`**
+`receipts/work-pack-grok-mechanics-sim-001.md`
 
 ---
 
-## 7. PRIME receipt rules
+## 7. Canonical docs
 
-1. Cite `git rev-parse --short HEAD` — must exist on `main`
-2. Cite probe output, not narrative
-3. Tag over-claims as `stale` / `blocked`
-4. No FunForge 100.0 without live `fun_score` from `/state`
+- `docs/EXECUTION_LANE_V2.md`
+- `receipts/HANDOFF-GROK-SWARM-20260615.md`
+- `docs/OPENCLAW_ESCALATION_PACKET_V1.md` (when wt needed)

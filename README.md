@@ -20,17 +20,19 @@ cd ~/CivForge
 bash tools/start-kernel-8080.sh
 open http://127.0.0.1:8080/dashboard
 bash tools/validate-game.sh          # pytest + API + turnkey
-bash tools/turnkey-gaps-all.sh       # Grok + OpenClaw packets + all tests
+bash tools/turnkey-cursor-local.sh       # Cursor local verify (primary)
+bash tools/turnkey-gaps-all.sh           # tests + cursor + openclaw escalation probe
 ```
 
-**Turnkey lane packets (Grok + OpenClaw):**
+**Execution lanes:** `docs/EXECUTION_LANE_V2.md` — Grok swarm (grok.com) plans; Cursor executes locally; OpenClaw on escalation only.
+
+**Turnkey lane packets:**
 
 | Lane | Doc | Script |
 |------|-----|--------|
-| Grok swarm play/verify | `docs/GROK_SWARM_PACKET_V1.md` | `bash tools/turnkey-grok-play.sh` |
-| OpenClaw ops (8082, wt) | `docs/OPENCLAW_OPS_PACKET_V1.md` | `bash tools/turnkey-openclaw-ops.sh` |
-| wt mirror apply | `docs/OPENCLAW_WT_APPLY_PACKET_V1.md` | (OpenClaw authority) |
-| Work packs | `receipts/work-pack-grok-mechanics-sim-001.md`, `receipts/work-pack-openclaw-civforge-ops-001.md` | — |
+| Cursor local executor | `docs/EXECUTION_LANE_V2.md` | `bash tools/turnkey-cursor-local.sh` |
+| Grok swarm (grok.com) | `docs/GROK_SWARM_PACKET_V1.md` | planning only — no local terminal |
+| OpenClaw escalation | `docs/OPENCLAW_ESCALATION_PACKET_V1.md` | when wt promotion needed |
 
 
 **Multi-agent dashboard:** agent tabs, 5×5 map, negotiations, alliances, victory bar, mechanics lanes. See `docs/GAME_PLAY_GUIDE_V1.md`.
@@ -78,7 +80,7 @@ The 4X/civ metaphor is retained as an internal model for workstreams, attention 
 See:
 - planning/production_deployment_assessment.md and planning/extension_roadmap_v2.md (locked required elements: simulation layer, dashboard, expanded agents, Docker/hosting/MCP, etc.)
 - ROADMAP.md (Civ Game track)
-- AGENTS.md (role registry including GameMechanicDesigner, PlayerAgent, MechanicsSimulator; bootstrap with HANDOFF + prompts/other_grok_context_update.md)
+- AGENTS.md + `docs/EXECUTION_LANE_V2.md` (Grok swarm plans on grok.com; Cursor executes; bootstrap with `prompts/grok_swarm_handoff_seed.md`)
 - docs/GIT_LANES_POLICY.md (parallel lanes for mechanics, simulation, dashboard, agent-play, infra)
 - docs/patterns/borrowable-governance-patterns.md (core patterns + Civ Game extensions)
 - receipts/LOCKED-CIV-GAME-PLAN-*.md

@@ -19,7 +19,7 @@ COPY core/ ./core/
 COPY backend/ ./backend/
 COPY tools/ ./tools/
 COPY receipts/ ./receipts/
-COPY *.md SEPARATION.md AGENTS.md .grok/ ./
+COPY *.md SEPARATION.md AGENTS.md ./
 
 # Persistence volume hint (SQLite + receipts live here)
 VOLUME ["/app/receipts", "/app/gravity_backend.db"]

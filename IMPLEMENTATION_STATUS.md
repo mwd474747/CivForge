@@ -12,8 +12,8 @@ CivForge = **local Python FastAPI governance backend** running on `0.0.0.0:8080`
 **Active Components**:
 - backend/sim_api.py (earlier FastAPI shape preserved: /state, /found_city with detailed receipt, /advance_turn, /integrate + new /governance/*)
 - core/ fully wired with persistence (SQLite gravity_backend.db for state + receipts that survive restarts)
-- bridge/grok_macstudio_bridge.py — direct Grok / swarm control of the 8080 backend
-- tools/civforge_cli.py + tools/gravity_advisor.py + tools/auth-prototype/ — terminal-first drivers, safety layer, and auth enablement bridge
+- bridge/civforge_http_bridge.py — HTTP control of :8080 (Cursor local executor)
+- tools/civforge_cli.py + tools/gravity_advisor.py + tools/dawsos_auth_client.py — terminal-first drivers, safety layer, and auth client bridge
 - receipts/ — growing set of real governance-cycle and work-pack markdown artifacts (including auth-prototype-push, git-tools, LOCKED-CIV-GAME-PLAN, mechanics-extension-sim receipts)
 - Gravity deploy tool untouched and canonical for the separate project
 - dawsos-auth-prototype (separate repo https://github.com/mwd474747/dawsos-auth-prototype) — pushed after literal verification; only thin client integration in CivForge/tools/dawsos_auth_client.py + optional protected_advance demo
@@ -21,12 +21,14 @@ CivForge = **local Python FastAPI governance backend** running on `0.0.0.0:8080`
 
 **Persistence**: Enabled (ReceiptStore now supports db_path). State snapshots + receipts load on startup.
 **MCP readiness**: Stub upgraded in CLI + bridge (ready for full MCP server wrapper when requested).
-**Grok Bridge**: Live — main orchestration can call get_state(), advance_cycle(), propose_work(), gate_proposal(), get_gravity_recommendation() directly.
+**Execution lanes (v2):** Grok swarm (grok.com) plans; Cursor executes; OpenClaw escalates for wt. See `docs/EXECUTION_LANE_V2.md`.
+**Bridge**: `bridge/civforge_http_bridge.py` — Cursor/scripts call get_state(), advance_cycle(), etc.
 
 **Verification**:
 - Backend responds on http://localhost:8080/state
-- python3 tools/civforge_cli.py status / advance / advisor / mcp-stub all functional
-- python3 bridge/grok_macstudio_bridge.py succeeds against the real backend
+- python3 tools/civforge_cli.py status / advance / advisor
+- python3 bridge/civforge_http_bridge.py
+- bash tools/turnkey-cursor-local.sh
 - ls receipts/ shows multiple .md files
 - gravity_backend.db exists once a cycle with persistence has run
 

@@ -23,7 +23,7 @@ from pathlib import Path
 
 # Try to use the real bridge if available
 try:
-    from bridge.grok_macstudio_bridge import get_gravity_recommendation, get_state
+    from bridge.civforge_http_bridge import get_gravity_recommendation, get_state
     BRIDGE_AVAILABLE = True
 except Exception:
     BRIDGE_AVAILABLE = False

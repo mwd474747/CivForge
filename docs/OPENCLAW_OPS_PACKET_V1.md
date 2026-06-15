@@ -1,9 +1,8 @@
 # OpenClaw Ops Packet v1
 
-**Status:** `current` — turnkey operator checklist for this Mac Studio  
-**Label:** `report-only` / `prototype-only` until wt receipts refreshed  
-**Repo:** `~/CivForge`  
-**Not promotion truth:** CivForge receipts ≠ dawsOS `reports/ops/*`
+**Status:** `current` — **escalation reference** (routine CivForge ops → Cursor)
+**Primary:** `docs/OPENCLAW_ESCALATION_PACKET_V1.md`
+**Lane model:** `~/CivForge/docs/EXECUTION_LANE_V2.md`
 
 ---
 

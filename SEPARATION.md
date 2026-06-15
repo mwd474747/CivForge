@@ -33,7 +33,7 @@ This script:
 
 ## What "Clean and Separate" Means
 - No gravity-mosaic source files (index.html, models/biefeld_brown_thrust.py, etc.) may exist in CivForge outside the deploy bridge directory.
-- No CivForge source (core/, backend/, bridge/grok_macstudio_bridge.py, planning/, etc.) may exist inside the gravity-mosaic directory.
+- No CivForge source (core/, backend/, bridge/civforge_http_bridge.py, planning/, etc.) may exist inside the gravity-mosaic directory.
 - Git histories and remotes are independent.
 - Documentation in both projects must clearly state the separation.
 - Any future dashboard, explorer, or "game-like" UI for governance stays in CivForge. Any public viewer for the knowledge graph itself should live in (or alongside) the gravity-mosaic project.

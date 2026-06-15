@@ -1,9 +1,11 @@
 # HANDOFF — Grok Swarm (CivForge complete state)
 
-**Date:** 2026-06-15  
-**Label:** `current` for landed tree + live probes; Grok extensions remain `prototype-only` until receipt-closed  
-**CivForge HEAD:** `58246de` (+ doc-path fixes pending commit)  
-**OpenClaw WP-001:** **Done** (integration bridge on Mac Studio)
+**Date:** 2026-06-15 (lane v2 aligned)
+**Lane model:** `docs/EXECUTION_LANE_V2.md` — **you plan on grok.com; Cursor executes; OpenClaw escalates only**
+**Local Grok terminal:** **removed** — no `.grok/config.toml`, no Mac Studio Grok CLI
+**Handoff seed:** `prompts/grok_swarm_handoff_seed.md`
+**CivForge HEAD:** `201169f`+ (Cursor commits)
+**OpenClaw WP-001:** **Done**
 
 ---
 
@@ -17,7 +19,7 @@ CivForge is **playable and cross-plane integrated** on this Mac Studio:
 | Nexus `:8082` | Healthy — `civforge-kernel` registered, telemetry push |
 | wt probes | `pass` @ `2026-06-15T17:49:12Z` (`7/7` integration, fleet `100`) |
 | Vercel shell | `https://civforge.vercel.app` — redeploy approved (see §6) |
-| Poller daemon | **OpenClaw executing** — not Cursor |
+| Poller daemon | **Cursor** (or Mike) — `bash tools/start-poller-daemon.sh` |
 
 **Do not rebuild the dashboard.** Extensions only.
 
@@ -41,7 +43,7 @@ CivForge is **playable and cross-plane integrated** on this Mac Studio:
 cd ~/CivForge
 git pull origin main
 bash tools/start-kernel-8080.sh
-bash tools/turnkey-grok-play.sh --advances 3
+bash tools/turnkey-cursor-local.sh --advances 3
 ```
 
 | Surface | URL / command |
@@ -81,7 +83,7 @@ Tests: `tests/test_civstudy_mechanics_bridge.py`.
 | wt boundary | Done — pointer-only mirror (correct; no overwrite) |
 | wt receipts | Done @ `2026-06-15T17:49:12Z` |
 
-Receipt: `receipts/openclaw-ops-run-20260615-134711.md`  
+Receipt: `receipts/openclaw-ops-run-20260615-134711.md`
 wt memory: `~/.openclaw/dawsos-workspace-wt/memory/2026-06-15.md` §13:42–13:52 EDT
 
 **CivForge receipts ≠ dawsOS promotion truth.**
@@ -98,7 +100,7 @@ cd ~/CivForge && vercel --prod
 
 Ships win overlay + latest `frontend/index.html` from `58246de`.
 
-**Deployed 2026-06-15:** Production alias https://civforge.vercel.app  
+**Deployed 2026-06-15:** Production alias https://civforge.vercel.app
 Deployment: `dpl_DMAdbh4vUNwGLZQ8WqEBMYSEW2CE` (Vercel CLI `npx vercel --prod --yes`)
 
 ---
@@ -157,7 +159,7 @@ Work pack: `receipts/work-pack-grok-mechanics-sim-001.md`
 
 ## 11. Prompt seed for other Grok
 
-> CivForge on Mac Studio is at `58246de+`. OpenClaw closed WP-001 (Nexus bridge, wt probes pass). Play locally at `:8080/dashboard` or Vercel with `?api_base=`. Run `bash tools/turnkey-grok-play.sh` before any PRIME receipt. Default lane: CivStudy policy-tree mechanics + negotiation sweep — **no UI rebuild**. Read `receipts/HANDOFF-GROK-SWARM-20260615.md` and `docs/GROK_SWARM_PACKET_V1.md`. Never use `civforge_cli.py status | grep vercel`.
+> CivForge lane v2: Grok swarm on grok.com plans work packs; Cursor executes on Mac Studio; OpenClaw only for wt escalation. No local Grok terminal. Read `docs/EXECUTION_LANE_V2.md` + this handoff. Require Cursor execution receipt before closing PRIME. Default lane: policy-tree mechanics — no UI rebuild.
 
 ---
 

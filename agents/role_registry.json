@@ -1,56 +1,79 @@
 {
-  "version": "1.0",
-  "updated": "2026-06-13",
-  "description": "Machine-readable agent role registry for CivForge (dawsOS-inspired). Keep in sync with AGENTS.md, sim_api.py registrations, and core/orchestrator.py. Used for dynamic swarm, lanes, and Civ Game extensions.",
+  "version": "2.0",
+  "updated": "2026-06-15",
+  "description": "Agent roles for CivForge. In-game agents (harper, sebastian, etc.) are simulation personas. Execution lanes: Grok swarm (grok.com planning), Cursor (local executor), OpenClaw (wt escalation). See docs/EXECUTION_LANE_V2.md.",
+  "execution_lanes": {
+    "grok_swarm": {
+      "runtime": "grok.com",
+      "role": "planning",
+      "executes_locally": false
+    },
+    "cursor": {
+      "runtime": "cursor_ide",
+      "role": "local_executor",
+      "executes_locally": true
+    },
+    "openclaw": {
+      "runtime": "openclaw_wt",
+      "role": "escalation",
+      "executes_locally": "on_trigger_only"
+    }
+  },
   "roles": [
     {
-      "id": "grok",
-      "name": "Grok (Main Orchestrator / ForgeMaster-Grok)",
-      "capabilities": ["govern", "handoff", "meta-config", "auth-tokens", "deploy-advice", "lane-coordination", "dawsos-mcp-leverage", "full-terminal-civ-exec"],
-      "description": "Lead for governance cycles, proposals, bootstrap of other agents, and meta-work (including Civ Game lanes). Explicitly leverages full dawsOS MCP tools (search_tool + use_tool on gitnexus, dawsos-memory-tools, trivium, etc.) and has full terminal execution approval for Civ project (per .grok/config.toml + AGENTS.md Civ Project Configuration section)."
+      "id": "grok-swarm",
+      "name": "Grok Swarm (grok.com planner)",
+      "capabilities": ["work-packs", "roadmap", "prime-receipts-planning", "lane-priority"],
+      "description": "Cloud swarm on grok.com. Authors WP-* criteria and PRIME planning receipts. Does not execute on Mac Studio. Closes against Cursor execution receipts."
+    },
+    {
+      "id": "cursor-executor",
+      "name": "Cursor (local executor)",
+      "capabilities": ["implement", "test", "kernel", "git-push-civforge", "vercel", "execution-receipts"],
+      "description": "All CivForge local work: code, kernel :8080, poller, validate-game, commits to CivForge main."
     },
     {
       "id": "harper",
       "name": "Harper (Agentic Systems & Memory)",
       "capabilities": ["memory", "research", "verify", "reflection"],
-      "description": "AgentBrain receipt memory + goal stack + reflection. Drives research/verify in Civ Game mechanics extensions."
+      "description": "In-game AgentBrain persona. Drives research/verify in governance cycles."
     },
     {
       "id": "sebastian",
       "name": "Sebastian (Governance & Safety)",
       "capabilities": ["funforge-gate", "proposal-first", "separation-enforce", "literal-verify"],
-      "description": "FunForge scoring and GovernanceGate. Enforces quality and rules for all Civ Game and gravity work."
+      "description": "In-game FunForge/gate persona. Enforces quality in simulation."
     },
     {
       "id": "game-mechanic-designer",
       "name": "GameMechanicDesigner",
-      "capabilities": ["mechanics-propose", "simulation-layer", "pluggable-modules", "extendibility"],
-      "description": "Specialist for proposing and refining simple but infinitely extendible Civ Game mechanics (yields, events, strategies, victory conditions). Works in lane/civ-game-mechanics."
+      "capabilities": ["mechanics-propose", "simulation-layer", "pluggable-modules"],
+      "description": "Grok swarm lane specialist for mechanics work packs. Cursor implements."
     },
     {
       "id": "player-agent",
       "name": "PlayerAgent",
-      "capabilities": ["agent-play", "strategy-builder", "mcp-participation", "handoff-bootstrap"],
-      "description": "Enables external agents (or simulated) to play the Civ game or build strategies. Supports human/agent play end goal via API/MCP/auth."
+      "capabilities": ["agent-play", "mcp-participation"],
+      "description": "External agents play via MCP/CLI against :8080."
     },
     {
       "id": "mechanics-simulator",
       "name": "MechanicsSimulator",
-      "capabilities": ["what-if", "funforge-scoring", "extension-testing"],
-      "description": "Runs simulations of proposed mechanics extensions before FunForge gate. Feeds the governed play loop."
+      "capabilities": ["what-if", "funforge-scoring"],
+      "description": "Simulation / what_if lane."
     },
     {
       "id": "ui-coordinator",
       "name": "UICoordinator",
-      "capabilities": ["dashboard", "human-play-ui", "workstream-map", "fun-score-hud"],
-      "description": "Coordinates the required gamified Command Center for human play of the Civ game."
+      "capabilities": ["dashboard", "human-play-ui"],
+      "description": "Dashboard landed — extend only, no rebuild."
     },
     {
       "id": "infra-governor",
       "name": "InfraGovernor",
-      "capabilities": ["docker", "hosting", "mcp-exposure", "auth-hardening"],
-      "description": "Governs the required infra (Docker, hosting, MCP, auth) for the Civ Game and overall system."
+      "capabilities": ["docker", "hosting", "nexus-bridge"],
+      "description": "Infra work packs. Cursor executes; OpenClaw for wt cron sustainment."
     }
   ],
-  "notes": "Update this file + AGENTS.md + sim_api.py in a single governed work pack. Reference in bootstrap (AGENTS.md). Use for lane assignment and Civ Game development. dawsos-mcp-leverage and full-terminal-civ-exec capabilities (on grok) formalize user-approved config for terminal freedom + full dawsOS tool use (gitnexus impact, memory profiles, trivium governance) inside CivForge only."
+  "notes": "Local Grok terminal removed 2026-06-15. No .grok/config.toml in CivForge. Update with docs/EXECUTION_LANE_V2.md."
 }

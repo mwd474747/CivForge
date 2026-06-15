@@ -1,4 +1,6 @@
-# HANDOFF CONTEXT PACKAGE — CivForge + Related Workspaces (for successor Grok instance)
+# HANDOFF CONTEXT PACKAGE — CivForge (historical + lane v2 pointer)
+
+> **Lane model (2026-06-15):** See `docs/EXECUTION_LANE_V2.md`. Grok swarm runs on **grok.com only** (no local terminal). **Cursor** executes all Mac Studio work. **OpenClaw** escalates for wt promotion only. Current handoff: `receipts/HANDOFF-GROK-SWARM-20260615.md`.
 
 **Created**: 2026-06-13 (Mac Studio canonical state)  
 **Purpose**: Self-contained snapshot so a Grok running in another workspace (or fresh session) can immediately resume exactly where this work left off, without re-deriving history, mechanics, or boundaries.  
@@ -22,7 +24,7 @@
 
   Key files: `backend/auth_api.py` (FastAPI :8081, real PyJWT, SQLite identities/tokens, receipt-style logging, auto-seed from `~/.openclaw/identity`), `core/identity_patterns.py` (IdentityReceiptStore, AgentAuthBrain, AuthQualityScorer — FunForge-inspired), `tools/auth_cli.py`, `tests/test_auth_flows.py` (4/4 passing), `docs/INTEROPERABILITY.md`, `AGENTS.md`, `run_prototype.sh`.  
   Thin CivForge client only: `CivForge/tools/dawsos_auth_client.py` (HTTP calls only; no code merge).  
-  **Clone + enable bridge in CivForge**: `tools/auth-prototype/{clone.sh, start.sh, README.md}` (see "Cloning and Enabling..." section below).
+  **Enable auth**: use the existing sibling repo at `/Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype`; CivForge keeps only the thin client at `tools/dawsos_auth_client.py`.
 
 - **Related dawsOS roots** (for context/interop seeds, patterns):  
   `~/.openclaw/dawsos-workspace-wt` (main dawsOS workspace)  
@@ -62,8 +64,8 @@ Key non-negotiables:
 - **Persistence**: Active (SQLite + disk receipts). On startup, backend restores last "game_state" snapshot if present. ~8 receipts/*.md + 20kB db at handoff.
 - **Optional auth integration** (demo complete, end-to-end tested): `tools/dawsos_auth_client.py` (register-device, token, verify against :8081). `sim_api.py` has `require_govern_token` dependency + `/governance/protected_advance` (requires valid "govern" scope token from the separate prototype). Prototype itself has full flows (device/agent register, /token, /verify, JWT, seeds from ~/.openclaw, receipt logging, tests passing).
 - **Drivers**:
-  - `tools/civforge_cli.py` (status, advance, found, propose, gate, recommend, advisor, mcp-stub).
-  - `bridge/grok_macstudio_bridge.py` (get_state, advance_cycle, propose_work, gate_proposal, get_gravity_recommendation, send_work_pack — direct HTTP to 8080 for swarm/Grok control).
+  - `tools/civforge_cli.py` (status, advance, found, propose, gate, recommend, advisor, MCP serve, Nexus poll, auth subcommands).
+  - `bridge/civforge_http_bridge.py` (get_state, advance_cycle, propose_work, gate_proposal, get_gravity_recommendation — HTTP to :8080; used by Cursor local executor).
   - `tools/gravity_advisor.py` — safe_recommend_deploy (advisory only; explicitly refuses to touch gravity; points to deploy.sh).
 - **Gravity deploy (sacred)**: `tools/deploy-gravity-mosaic/deploy.sh` + README (hardcoded paths noted as production caveat; literal verifs + git).
 - **Godot MVP**: Fully removed and archived in `_archive/godot-mvp-deprecated/` (trimmed of .godot/ caches / shader caches during hygiene). Never referenced in active flow.
@@ -202,7 +204,7 @@ cd /Users/michaeldawson/CivForge
 **Grok/swarm bridge**:
 ```bash
 cd /Users/michaeldawson/CivForge
-python3 bridge/grok_macstudio_bridge.py   # or import and call methods
+python3 bridge/civforge_http_bridge.py   # or tools/civforge_cli.py
 ```
 
 **Full hygiene / verification before any push**:
@@ -214,18 +216,11 @@ python3 bridge/grok_macstudio_bridge.py   # or import and call methods
 **Stop servers**: `pkill -f 'uvicorn.*sim_api'` and `pkill -f 'uvicorn.*auth_api'`.
 
 
-Now that the prototype repo exists on GitHub, use the dedicated CivForge bridge to create the local clone and turn on auth.
-
-From CivForge root (after literal review of this handoff + tools/auth-prototype/README.md):
+The auth prototype repo exists as a separate sibling checkout. Use that checkout directly; CivForge does not vendor clone/start scripts.
 
 ```bash
-cd /Users/michaeldawson/CivForge
-
-# Create or update the local clone at the canonical separate location
-./tools/auth-prototype/clone.sh
-
-# Enable the auth function (starts the separate prototype on 8081)
-./tools/auth-prototype/start.sh     # run in background / another terminal
+cd /Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype
+python3 -m uvicorn backend.auth_api:app --reload --host 0.0.0.0 --port 8081
 ```
 
 Verification after start:
@@ -246,12 +241,9 @@ curl -H "Authorization: Bearer $TOKEN" -X POST http://localhost:8080/governance/
 
 Without a valid "govern" token the protected endpoint returns 401/403.
 
-The new bridge lives at `tools/auth-prototype/` (README.md + clone.sh + start.sh). It follows the same separation + literal verification philosophy as `tools/deploy-gravity-mosaic/`.
-
 See also:
 - `tools/dawsos_auth_client.py` (direct client)
 - `backend/sim_api.py` (the require_govern_token dependency + protected_advance)
-- `tools/auth-prototype/README.md` (full docs)
 - Updated `tools/civforge_cli.py auth ...` subcommands
 
 This completes the "create the local clone and steps to enable this function" request. The auth function is now first-class and documented for any workspace using the handoff package.

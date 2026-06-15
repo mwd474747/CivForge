@@ -65,6 +65,6 @@ These patterns are designed to be repeatable and borrowable for governing other 
 4. Run backend + CLI for governance.
 5. Use receipts/ for all history.
 6. For game-like layers: Adopt Civ Game patterns (simple extendible mechanics + governed proposals + role registry + lanes).
-7. Cross-workspace: Use HANDOFF_CONTEXT.md + prompts/other_grok_context_update.md for bootstrap.
+7. Cross-workspace: Grok swarm on grok.com uses `prompts/grok_swarm_handoff_seed.md`; Cursor executes locally.
 
 These keep workspaces clean, projects separate, and work auditable/low-waste. Extend the patterns for "Civ Game as first-class governed playable layer".
