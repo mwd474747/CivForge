@@ -66,5 +66,6 @@ These patterns are designed to be repeatable and borrowable for governing other 
 5. Use receipts/ for all history.
 6. For game-like layers: Adopt Civ Game patterns (simple extendible mechanics + governed proposals + role registry + lanes).
 7. Cross-workspace: Grok swarm on grok.com uses `prompts/grok_swarm_handoff_seed.md`; Cursor executes locally.
+8. Swarm-class alignment: `docs/CIVFORGE_SWARM_CLASS_V1.md`, `docs/WORK_PACK_TEMPLATE_V1.md`, `agents/role_registry.json` (dawsOS role map, not registry entry).
 
 These keep workspaces clean, projects separate, and work auditable/low-waste. Extend the patterns for "Civ Game as first-class governed playable layer".

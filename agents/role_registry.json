@@ -6,41 +6,84 @@
     "grok_swarm": {
       "runtime": "grok.com",
       "role": "planning",
-      "executes_locally": false
+      "executes_locally": false,
+      "dawsos_analogue": "planning",
+      "dawsos_max_tier": "Stage"
     },
     "cursor": {
       "runtime": "cursor_ide",
       "role": "local_executor",
-      "executes_locally": true
+      "executes_locally": true,
+      "dawsos_analogue": "engineering",
+      "dawsos_max_tier": "Stage"
     },
     "openclaw": {
       "runtime": "openclaw_wt",
       "role": "escalation",
-      "executes_locally": "on_trigger_only"
+      "executes_locally": "on_trigger_only",
+      "dawsos_analogue": "chief_of_staff",
+      "dawsos_max_tier": "Execute"
     }
+  },
+  "naming_notes": {
+    "grok_swarm_vs_forge_coordinator": "grok-swarm (grok.com) is Layer 1 planning. In-kernel AgentBrain id 'grok' in sim_api.py is Layer 2 forge-coordinator persona — not the cloud swarm. Do not conflate."
+  },
+  "dawsos_role_map": {
+    "discovery": ["grok-swarm", "harper"],
+    "planning": ["grok-swarm"],
+    "evidence": ["harper"],
+    "review": ["sebastian"],
+    "engineering": ["cursor-executor"],
+    "chief_of_staff": ["openclaw-chief-of-staff"],
+    "delivery": ["cursor-executor", "infra-governor"]
   },
   "roles": [
     {
       "id": "grok-swarm",
       "name": "Grok Swarm (grok.com planner)",
+      "execution_lane": "grok_swarm",
+      "dawsos_governed_agent": "planning",
       "capabilities": ["work-packs", "roadmap", "prime-receipts-planning", "lane-priority"],
       "description": "Cloud swarm on grok.com. Authors WP-* criteria and PRIME planning receipts. Does not execute on Mac Studio. Closes against Cursor execution receipts."
     },
     {
       "id": "cursor-executor",
       "name": "Cursor (local executor)",
+      "execution_lane": "cursor",
+      "dawsos_governed_agent": "engineering",
       "capabilities": ["implement", "test", "kernel", "git-push-civforge", "vercel", "execution-receipts"],
       "description": "All CivForge local work: code, kernel :8080, poller, validate-game, commits to CivForge main."
     },
     {
+      "id": "openclaw-chief-of-staff",
+      "name": "OpenClaw (wt chief of staff)",
+      "execution_lane": "openclaw",
+      "dawsos_governed_agent": "chief_of_staff",
+      "capabilities": ["wt-receipts", "boundary-menu", "projection", "c2-escalation", "nexus-fleet-mirrors"],
+      "description": "dawsOS wt authority on escalation only. Not routine CivForge ops. Maps to agent-spec chief_of_staff."
+    },
+    {
+      "id": "forge-coordinator",
+      "name": "Forge Coordinator (in-kernel AgentBrain)",
+      "execution_lane": null,
+      "dawsos_governed_agent": null,
+      "kernel_agent_id": "grok",
+      "capabilities": ["orchestrate-cycle", "propose-work", "advance-turn"],
+      "description": "Layer 2 simulation persona (sim_api AgentBrain id 'grok'). NOT grok.com swarm. See naming_notes."
+    },
+    {
       "id": "harper",
       "name": "Harper (Agentic Systems & Memory)",
+      "execution_lane": null,
+      "dawsos_governed_agent": "evidence",
       "capabilities": ["memory", "research", "verify", "reflection"],
       "description": "In-game AgentBrain persona. Drives research/verify in governance cycles."
     },
     {
       "id": "sebastian",
       "name": "Sebastian (Governance & Safety)",
+      "execution_lane": null,
+      "dawsos_governed_agent": "review",
       "capabilities": ["funforge-gate", "proposal-first", "separation-enforce", "literal-verify"],
       "description": "In-game FunForge/gate persona. Enforces quality in simulation."
     },
@@ -75,5 +118,5 @@
       "description": "Infra work packs. Cursor executes; OpenClaw for wt cron sustainment."
     }
   ],
-  "notes": "Local Grok terminal removed 2026-06-15. No .grok/config.toml in CivForge. Update with docs/EXECUTION_LANE_V2.md."
+  "notes": "Local Grok terminal removed 2026-06-15. WP template: docs/WORK_PACK_TEMPLATE_V1.md. Swarm class: docs/CIVFORGE_SWARM_CLASS_V1.md."
 }

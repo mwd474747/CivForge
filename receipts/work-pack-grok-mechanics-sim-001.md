@@ -1,10 +1,22 @@
 # Work Pack: Grok Mechanics + CivStudy Sim 001
 
-**ID:** `WP-GROK-MECHANICS-SIM-001`
-**Lane:** `lane/civ-game-mechanics` + `lane/simulation`
-**Owner:** Grok swarm (grok.com planning) → **Cursor** (execution)
-**Label:** `prototype-only` until `validate-game.sh` + swarm receipt
+**ID:** `WP-GROK-MECHANICS-SIM-001`  
+**Lane:** `lane/civ-game-mechanics` + `lane/simulation`  
+**Owner:** Grok swarm (grok.com planning) → **Cursor** (execution)  
+**Label:** `prototype-only` until `validate-game.sh` + swarm receipt  
 **Supersedes:** false WP-025 metadata-only claims — simulation hooks now in tree
+
+## Swarm alignment
+
+| Field | Value |
+|-------|-------|
+| `receipt_class` | `execution` |
+| `authority_lane` | `cursor` |
+| `side_effect_class` | `local_kernel` |
+| `human_review_required` | `false` |
+| `required_receipt_links` | `receipts/swarm-mechanics-sim-001-closure-*.md`, `receipts/cursor-execution-*.md` |
+
+Template: `docs/WORK_PACK_TEMPLATE_V1.md`
 
 ---
 

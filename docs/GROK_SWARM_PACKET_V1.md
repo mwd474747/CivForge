@@ -73,7 +73,9 @@ See `prompts/grok_swarm_handoff_seed.md` § dawsOS MCP tools.
 
 ## 7. Work pack template
 
-`receipts/work-pack-grok-mechanics-sim-001.md`
+`docs/WORK_PACK_TEMPLATE_V1.md` — swarm-field aligned (`side_effect_class`, `required_receipt_links`)
+
+`receipts/work-pack-grok-mechanics-sim-001.md` (example)
 
 ---
 

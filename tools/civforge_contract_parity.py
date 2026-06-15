@@ -66,16 +66,83 @@ def stale_auth_bridge_refs() -> List[str]:
 
 
 def bridge_expectations() -> Dict[str, Any]:
-    bridge_files = sorted((ROOT / "bridge").glob("*.py"))
-    bridge_text = "\n".join(read_text(path) for path in bridge_files)
-    wants_post_integrate = bool(re.search(r"requests\.post\([^)]*/integrate/civforge", bridge_text, re.S))
+    bridge = read_text(ROOT / "bridge" / "civforge_http_bridge.py")
+    wants_post_integrate = bool(re.search(r"requests\.post\([^)]*/integrate/civforge", bridge, re.S))
     routes = route_methods()
     return {
-        "bridge_files": [str(path.relative_to(ROOT)) for path in bridge_files],
         "bridge_posts_integrate": wants_post_integrate,
         "integrate_methods": routes.get("/integrate/civforge", []),
         "post_integrate_supported": "POST" in routes.get("/integrate/civforge", []),
     }
+
+
+def swarm_alignment_checks() -> Dict[str, Any]:
+    """Verify swarm-class docs and role_registry align with EXECUTION_LANE_V2."""
+    registry_path = ROOT / "agents" / "role_registry.json"
+    lane_doc = read_text(ROOT / "docs" / "EXECUTION_LANE_V2.md")
+    swarm_doc = read_text(ROOT / "docs" / "CIVFORGE_SWARM_CLASS_V1.md")
+    wp_template = read_text(ROOT / "docs" / "WORK_PACK_TEMPLATE_V1.md")
+    agents_md = read_text(ROOT / "AGENTS.md")
+
+    registry: Dict[str, Any] = {}
+    if registry_path.exists():
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+
+    role_ids = {r.get("id") for r in registry.get("roles", []) if isinstance(r, dict)}
+    lanes = registry.get("execution_lanes", {})
+    lane_keys = set(lanes.keys()) if isinstance(lanes, dict) else set()
+
+    return {
+        "swarm_class_doc_present": bool(swarm_doc.strip()),
+        "work_pack_template_present": bool(wp_template.strip()),
+        "lane_doc_refs_swarm_class": "CIVFORGE_SWARM_CLASS_V1" in lane_doc,
+        "agents_md_refs_swarm_class": "CIVFORGE_SWARM_CLASS_V1" in agents_md,
+        "execution_lanes": sorted(lane_keys),
+        "required_lane_keys": ["grok_swarm", "cursor", "openclaw"],
+        "role_openclaw_chief_of_staff": "openclaw-chief-of-staff" in role_ids,
+        "role_forge_coordinator": "forge-coordinator" in role_ids,
+        "role_grok_swarm": "grok-swarm" in role_ids,
+        "dawsos_role_map_present": bool(registry.get("dawsos_role_map")),
+        "naming_notes_present": bool(registry.get("naming_notes")),
+        "wp_template_has_side_effect_class": "side_effect_class" in wp_template,
+    }
+
+
+def swarm_alignment_findings(checks: Dict[str, Any]) -> List[Dict[str, str]]:
+    findings: List[Dict[str, str]] = []
+    if not checks["swarm_class_doc_present"]:
+        findings.append({"id": "swarm_doc_missing", "severity": "fail", "detail": "docs/CIVFORGE_SWARM_CLASS_V1.md missing"})
+    if not checks["work_pack_template_present"]:
+        findings.append({"id": "wp_template_missing", "severity": "fail", "detail": "docs/WORK_PACK_TEMPLATE_V1.md missing"})
+    if not checks["lane_doc_refs_swarm_class"]:
+        findings.append({"id": "lane_doc_swarm_ref", "severity": "fail", "detail": "EXECUTION_LANE_V2.md must reference CIVFORGE_SWARM_CLASS_V1"})
+    if not checks["agents_md_refs_swarm_class"]:
+        findings.append({"id": "agents_md_swarm_ref", "severity": "warn", "detail": "AGENTS.md should reference CIVFORGE_SWARM_CLASS_V1"})
+    missing_lanes = sorted(set(checks["required_lane_keys"]) - set(checks["execution_lanes"]))
+    if missing_lanes:
+        findings.append({
+            "id": "role_registry_lanes",
+            "severity": "fail",
+            "detail": f"role_registry missing execution_lanes: {missing_lanes}",
+        })
+    for key, label in (
+        ("role_openclaw_chief_of_staff", "openclaw-chief-of-staff"),
+        ("role_forge_coordinator", "forge-coordinator"),
+        ("role_grok_swarm", "grok-swarm"),
+    ):
+        if not checks[key]:
+            findings.append({
+                "id": f"role_registry_missing:{label}",
+                "severity": "fail",
+                "detail": f"agents/role_registry.json missing role id {label}",
+            })
+    if not checks["dawsos_role_map_present"]:
+        findings.append({"id": "dawsos_role_map_missing", "severity": "fail", "detail": "role_registry missing dawsos_role_map"})
+    if not checks["naming_notes_present"]:
+        findings.append({"id": "naming_notes_missing", "severity": "warn", "detail": "role_registry missing naming_notes for grok vs forge-coordinator"})
+    if not checks["wp_template_has_side_effect_class"]:
+        findings.append({"id": "wp_template_side_effect", "severity": "fail", "detail": "WORK_PACK_TEMPLATE must define side_effect_class taxonomy"})
+    return findings
 
 
 def _findings_from_missing(prefix: str, missing: Iterable[str], severity: str) -> List[Dict[str, str]]:
@@ -89,8 +156,10 @@ def build_report(write_files: bool = True) -> Dict[str, Any]:
     bridge = bridge_expectations()
     allowed = allowed_actions_from_boundary()
     poller_text = read_text(ROOT / "tools" / "nexus_command_poller.py")
+    swarm_checks = swarm_alignment_checks()
 
     findings: List[Dict[str, str]] = []
+    findings.extend(swarm_alignment_findings(swarm_checks))
     findings.extend(_findings_from_missing("mcp_tool_missing_from_guide", actual_tools - guide_tools, "warn"))
     findings.extend(_findings_from_missing("guide_tool_not_implemented", guide_tools - actual_tools, "fail"))
     if bridge["bridge_posts_integrate"] and not bridge["post_integrate_supported"]:
@@ -138,6 +207,7 @@ def build_report(write_files: bool = True) -> Dict[str, Any]:
         "documented_mcp_tools": sorted(guide_tools),
         "nexus_allowed_actions": allowed,
         "bridge": bridge,
+        "swarm_alignment": swarm_checks,
         "findings": findings,
     }
     if write_files:

@@ -73,12 +73,19 @@ wt `agent-spec.yaml` defines orchestrator roles: discovery, planning, evidence, 
 | Sebastian AgentBrain | review / separation delegate | In-sim only |
 | Grok swarm WP | planning lane | grok.com, not registry row |
 | Cursor executor | engineering delegate | Mac Studio, CivForge git |
-| OpenClaw escalation | chief_of_staff + wt truth | wt only when triggered |
+| OpenClaw escalation | chief_of_staff + wt truth | wt only when triggered (`openclaw-chief-of-staff` in role_registry) |
 | Nexus poller | command intent bridge | propose-only |
+| In-kernel `grok` AgentBrain | forge-coordinator (Layer 2) | **Not** grok.com swarm — see `agents/role_registry.json` naming_notes |
 
 ---
 
-## Validation tools — stateful caveat
+## Work packs (swarm-field borrow)
+
+CivForge WPs borrow dawsOS swarm-registry **fields** locally without wt registration:
+
+- `receipt_class`, `authority_lane`, `side_effect_class`, `required_receipt_links`
+- Template: `docs/WORK_PACK_TEMPLATE_V1.md`
+
 
 | Tool | Advances turns? | Use when |
 |------|-----------------|----------|
