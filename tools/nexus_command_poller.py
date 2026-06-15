@@ -134,12 +134,19 @@ def ack_command(cmd_id: str, status: str = "ACKNOWLEDGED", note: str = "") -> bo
 
 
 def handle_command(cmd: Dict[str, Any]) -> str:
-    """Map command to local governed proposal (never direct mutate game state). Return local action taken."""
+    """Map command to local governed proposal (never direct mutate game state). Return local action taken.
+    Per user boundary answers: strictly honor registry allowed_actions=["sync_config"] only.
+    Other actions: log + ack only, no local propose.
+    """
     action = (cmd.get("action") or cmd.get("type") or "").lower()
+    if action != "sync_config":
+        note = f"Command {action} received for civforge-kernel but registry allows only sync_config; ack only (no propose per boundary)."
+        return note
+
     local_action = COMMAND_ACTION_MAP.get(action, f"nexus_{action or 'unknown'}")
     payload = cmd.get("payload") or cmd.get("details") or {}
 
-    # Surface as proposal on 8080 (governed path)
+    # Surface as proposal on 8080 (governed path) — only for allowed sync_config
     propose_resp = _post_local("/governance/propose", {
         "action": local_action,
         "investment": 1,
@@ -148,7 +155,7 @@ def handle_command(cmd: Dict[str, Any]) -> str:
             "nexus_cmd_id": cmd.get("id") or cmd.get("_id"),
             "nexus_action": action,
             "payload": payload,
-            "note": "Command received via thin bridge. This is a proposal (per SEPARATION: commands propose, not execute)."
+            "note": "Command received via thin bridge. This is a proposal (per SEPARATION: commands propose, not execute). Registry limited to sync_config for this governance_kernel."
         }
     })
 
@@ -156,9 +163,7 @@ def handle_command(cmd: Dict[str, Any]) -> str:
     if propose_resp and propose_resp.get("proposal"):
         note += f" (proposal_id={propose_resp['proposal'].get('id')})"
 
-    # Proposals only — no direct state mutation (per boundary: commands propose, then FunForge gate on 8080).
-    # No /found_city or other side effects here.
-
+    # Proposals only for allowed actions — no direct state mutation.
     return note
 
 

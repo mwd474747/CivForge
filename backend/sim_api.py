@@ -356,30 +356,24 @@ NEXUS_OPERATOR = os.environ.get("NEXUS_OPERATOR_TOKEN", "")
 
 def require_govern_token(authorization: str = Header(None)):
     """Validate machine govern credential from dawsos-nexus (governance_kernel satellite).
-    Accepts: Bearer <NEXUS_OPERATOR_TOKEN>, x-nexus-api-key (preferred for apps), or health fallback.
-    Thin HTTP only. This is **machine/command context**, not product identity.
-    Long-term identity via auth-prototype :8081. Local dev permissive is explicit Mac Studio bypass (documented in SEPARATION).
+    Per user boundary answers (alignment questions): NO local dev permissive fallback.
+    Accepts: Bearer <NEXUS_OPERATOR_TOKEN> (if configured) or x-nexus-api-key (preferred for machine/satellite).
+    Must verify via health or exact match. Thin HTTP only. Machine/command context only.
+    Identity via auth-prototype :8081. No bypass.
     """
     if not authorization:
-        # Allow dev/demo with operator token in env for local Mac Studio
-        if NEXUS_OPERATOR:
-            return {"scope": "govern", "identity": "operator-dev", "source": "env-operator"}
-        raise HTTPException(401, "Auth token required (dawsos-nexus govern scope)")
+        raise HTTPException(401, "Auth token required (dawsos-nexus govern scope for governance_kernel)")
     token = authorization.split(" ")[-1] if " " in authorization else authorization
     if NEXUS_OPERATOR and token == NEXUS_OPERATOR:
         return {"scope": "govern", "identity": "operator", "source": "nexus-operator"}
-    # Try client-style or health with token (nexus uses header auth primarily)
+    # Verify via header style (x-nexus-api-key or Bearer)
     try:
-        # Prefer header style for apps
         r = requests.get(f"{NEXUS_AUTH_BASE}/api/health", headers={"Authorization": f"Bearer {token}", "x-nexus-api-key": token}, timeout=4)
         if r.status_code == 200:
             return {"scope": "govern", "identity": "nexus-auth", "source": "nexus-verify"}
     except Exception:
         pass
-    # Fallback: if no operator set, be permissive for local dev (governed by 8080 kernel anyway)
-    if not NEXUS_OPERATOR:
-        return {"scope": "govern", "identity": "local-dev", "warning": "no operator token; dev mode"}
-    raise HTTPException(401, "Invalid or insufficient dawsos-nexus token for govern action")
+    raise HTTPException(401, "Invalid or insufficient dawsos-nexus token for govern action (no dev bypass per boundary)")
 
 @app.post("/governance/protected_advance")
 async def protected_advance(claims: dict = Depends(require_govern_token)):
