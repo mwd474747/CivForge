@@ -64,13 +64,14 @@ ACK_ENDPOINT_TEMPLATES = [
 
 def _headers() -> Dict[str, str]:
     h = {"Content-Type": "application/json"}
-    # Q3 satellite key posture + agent rec: API_KEY (x-nexus-api-key) first for CivForge governance_kernel.
-    # Never fall back to OPERATOR_TOKEN in satellite paths (machine key only).
-    if API_KEY:
-        h["x-nexus-api-key"] = API_KEY
-    elif OPERATOR_TOKEN:
-        h["Authorization"] = f"Bearer {OPERATOR_TOKEN}"
-        h["x-nexus-api-key"] = OPERATOR_TOKEN
+    # Per agent rec + Q3: NEXUS_API_KEY (x-nexus-api-key) only for CivForge governance_kernel satellite.
+    # Never use or fall back to OPERATOR_TOKEN in poller/client.
+    api_key = os.environ.get("NEXUS_API_KEY", "")
+    if api_key:
+        h["x-nexus-api-key"] = api_key
+    else:
+        # Strict: no operator fallback. Caller should set NEXUS_API_KEY.
+        pass
     return h
 
 

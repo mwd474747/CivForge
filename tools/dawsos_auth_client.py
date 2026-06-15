@@ -6,8 +6,8 @@ Per boundary contract:
 - Nexus = telemetry (heartbeats with customMetrics/agentState) + command queue (proposals).
 - Register app (governance_kernel type) + x-nexus-api-key for heartbeats/poll.
 - **Not** product identity. Scoped "govern" here is machine context only.
-- Identity / JWT / user scopes long-term via dawsos-auth-prototype :8081 (or explicit local dev operator bypass documented in SEPARATION.md).
-- Does not replace auth-prototype. "Replaces" language limited to old prototype's machine satellite parts only.
+- Identity / JWT / user scopes long-term via dawsos-auth-prototype :8081.
+- Does not replace auth-prototype. Machine satellite key (x-nexus-api-key) only for Nexus paths. No dev bypass.
 
 Usage (machine only):
   python tools/dawsos_auth_client.py register-device civforge-kernel
@@ -25,9 +25,12 @@ import os
 NEXUS_BASE = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
 
 def register_device(device_id: str, public_key: str = None):
-    # Per agent rec + Q3: type governance_kernel (canon); prefer NEXUS_API_KEY (x-nexus-api-key) for satellite register.
+    # Per agent rec + Q3: type governance_kernel (canon); NEXUS_API_KEY (x-nexus-api-key) only for satellite register. No operator fallback.
     api_key = os.environ.get("NEXUS_API_KEY", "")
-    headers = {"x-nexus-api-key": api_key} if api_key else {"Authorization": f"Bearer {os.environ.get('NEXUS_OPERATOR_TOKEN', '')}"}
+    if not api_key:
+        print("ERROR: NEXUS_API_KEY required for governance_kernel satellite registration (no operator fallback per boundary).")
+        return {"error": "NEXUS_API_KEY required"}
+    headers = {"x-nexus-api-key": api_key}
     r = requests.post(f"{NEXUS_BASE}/api/apps", json={"appId": device_id, "name": device_id, "type": "governance_kernel", "telemetryMode": "push"}, headers=headers)
     print(json.dumps(r.json(), indent=2))
     return r.json()
