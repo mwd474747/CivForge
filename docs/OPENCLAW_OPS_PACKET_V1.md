@@ -1,7 +1,7 @@
 # OpenClaw Ops Packet v1
 
-**Status:** `current` — **escalation reference** (routine CivForge ops → Cursor)
-**Primary:** `docs/OPENCLAW_ESCALATION_PACKET_V1.md`
+**Status:** `current` — **escalation reference** (routine CivForge ops → Cursor)  
+**Primary:** `docs/OPENCLAW_ESCALATION_PACKET_V1.md`  
 **Lane model:** `~/CivForge/docs/EXECUTION_LANE_V2.md`
 
 ---
@@ -11,10 +11,13 @@
 ```bash
 cd ~/CivForge
 git pull origin main
+bash tools/turnkey-governance-posture.sh          # OpenClaw CF-GOV-* posture (read-only)
 bash tools/turnkey-openclaw-ops.sh          # probes + poller --once + receipt scaffold
 bash tools/turnkey-openclaw-ops.sh --daemon   # start poller daemon (needs key + 8082)
-bash tools/turnkey-gaps-all.sh --restart      # full stack: tests + grok + openclaw
+bash tools/turnkey-gaps-all.sh --restart      # full stack: posture + tests + cursor + openclaw
 ```
+
+**Governance proposal closure:** `receipts/work-pack-openclaw-civforge-governance-001.md`
 
 ---
 

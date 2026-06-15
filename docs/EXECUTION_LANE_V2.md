@@ -49,7 +49,8 @@
 - Storage cleanup apply, LaunchAgent mutation, Trivium mutation
 - Claim dawsOS promotion truth (`reports/ops/*`)
 
-**Verify packet:** `bash tools/turnkey-cursor-local.sh`
+**Verify packet:** `bash tools/turnkey-cursor-local.sh`  
+**Governance posture (read-only):** `bash tools/turnkey-governance-posture.sh`
 
 ---
 
