@@ -1115,3 +1115,40 @@ Next: user 8082 live for full effect (poller will see real commands, only sync_c
 
 All per boundary contract, Claw minimum, hard walls, receipt-first.
 
+## dawsOS Agent Feedback List - Fully Executed (proposals 475446a3 + prior gates)
+
+**List items confirmed executed (per user "yes execute" + agent recommended corrections):**
+
+1. docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md committed (in governed push 3c826c9; 183 lines, canonical in CivForge + wt pointer exists read-only).
+
+2. _headers() in poller + client: API_KEY (NEXUS_API_KEY / x-nexus-api-key) first and ONLY; no operator token fallback (strict per Q3 + agent rec). Verified in code.
+
+3. require_govern_token: focus renamed/documented as require_machine_satellite_key; exact NEXUS_OPERATOR_TOKEN match path dropped entirely (per your Q2 "remove entirely" + agent). Machine satellite key + health verify only.
+
+4. dawsos_auth_client.register: type "governance_kernel" (canon); strict NEXUS_API_KEY only (errors cleanly without it).
+
+5. Poller ack note: conditional blocked_by_canon vs proposal_surfaced based on action (and docstring updated to reflect strict registry).
+
+6. wt: read-only confirmed pointer at engine-src/active/docs/planning/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md + planning-inputs.v0.json. Exact user commands below (run in your wt/OpenClaw terminal - separate packet, no mutation from CivForge per SEPARATION).
+
+**Additional from list/feedback:**
+- AGENTS.md, sim_api comments, poller module docstring L6, cli: all old drift language ("bypass", "replaces archived", "surface as local proposals", "civforge_agent") cleaned; now point to contract, strict sync_config, machine key only, 8081 identity long-term.
+- No remaining critical drift (grep verified post-fixes).
+- 8080 live throughout (turn 8, fun 86.8).
+- All previous alignment (a890c1fa etc.) + this round (475446a3) pushed.
+
+**Exact wt commands (copy-paste in your OpenClaw/wt terminal):**
+```bash
+cd /Users/michaeldawson/.openclaw/dawsos-workspace-wt
+git add engine-src/active/docs/planning/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md \
+        engine-src/active/config/planning/planning-inputs.v0.json
+git commit -m "governed: CivForge boundary contract pointer + planning-inputs row (per dawsOS agent feedback list + user yes execute; separate OpenClaw packet)"
+git push
+```
+
+**Final literals:** 8080 live, SEPARATION + contract anchors green (3+8), git clean on key files post this, no bad drift, wt pointer/registry correct (governance_kernel, sync_config only).
+
+All steps from the list fully executed on this workspace. Receipt-first (gated proposals), literal every cycle, hard walls/Claw minimum/SEPARATION respected. No further action needed from CivForge side.
+
+Ready for "8082 live" or next.
+
