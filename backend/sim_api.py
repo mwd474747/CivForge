@@ -343,11 +343,11 @@ if __name__ == "__main__":
 
 
 # Thin bridge to dawsos-nexus (8082) — machine satellite only (telemetry heartbeats + command proposals).
-# Per boundary contract (wt governed-connectors-registry.v1 + updated SEPARATION):
-#   - governance_kernel type, allowed_actions=["sync_config"] (others surface via local /governance/propose + FunForge gate).
-#   - x-nexus-api-key or operator for machine auth (heartbeats, poll, protected_advance in dev).
-#   - Identity / JWT long-term via dawsos-auth-prototype :8081 (or explicit documented local dev operator bypass below).
-# register-device / machine heartbeat via client or /api/apps. Commands propose (not execute). See SEPARATION.md planes.
+# Per boundary contract (wt governed-connectors-registry.v1 + CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md) + dawsOS agent feedback:
+#   - governance_kernel type, allowed_actions=["sync_config"] only (strict per registry + user Q1).
+#   - x-nexus-api-key (satellite key) for machine auth. Operator token path dropped for CivForge (per Q2 "remove entirely").
+#   - Identity / JWT long-term via dawsos-auth-prototype :8081. No hybrid bypass.
+# register-device / machine heartbeat via client or /api/apps (satellite key). Commands propose (not execute). See SEPARATION.md planes.
 import requests
 from fastapi import Header, HTTPException
 
@@ -355,25 +355,23 @@ NEXUS_AUTH_BASE = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
 NEXUS_OPERATOR = os.environ.get("NEXUS_OPERATOR_TOKEN", "")
 
 def require_govern_token(authorization: str = Header(None)):
-    """Validate machine govern credential from dawsos-nexus (governance_kernel satellite).
-    Per user boundary answers (alignment questions): NO local dev permissive fallback.
-    Accepts: Bearer <NEXUS_OPERATOR_TOKEN> (if configured) or x-nexus-api-key (preferred for machine/satellite).
-    Must verify via health or exact match. Thin HTTP only. Machine/command context only.
-    Identity via auth-prototype :8081. No bypass.
+    """require_machine_satellite_key (renamed focus per agent rec + user Q2 'remove entirely').
+    Validate machine govern credential from dawsos-nexus for governance_kernel satellite.
+    Requires: x-nexus-api-key (preferred satellite key) or Bearer that passes /api/health.
+    Exact NEXUS_OPERATOR_TOKEN match path dropped (no operator fallback for CivForge satellite).
+    Thin HTTP only. Machine/command context only. Identity via auth-prototype :8081 long-term.
     """
     if not authorization:
-        raise HTTPException(401, "Auth token required (dawsos-nexus govern scope for governance_kernel)")
+        raise HTTPException(401, "Auth token required (dawsos-nexus machine satellite key for governance_kernel)")
     token = authorization.split(" ")[-1] if " " in authorization else authorization
-    if NEXUS_OPERATOR and token == NEXUS_OPERATOR:
-        return {"scope": "govern", "identity": "operator", "source": "nexus-operator"}
-    # Verify via header style (x-nexus-api-key or Bearer)
+    # Verify via x-nexus-api-key or Bearer + health (satellite posture, no operator exact match)
     try:
         r = requests.get(f"{NEXUS_AUTH_BASE}/api/health", headers={"Authorization": f"Bearer {token}", "x-nexus-api-key": token}, timeout=4)
         if r.status_code == 200:
             return {"scope": "govern", "identity": "nexus-auth", "source": "nexus-verify"}
     except Exception:
         pass
-    raise HTTPException(401, "Invalid or insufficient dawsos-nexus token for govern action (no dev bypass per boundary)")
+    raise HTTPException(401, "Invalid or insufficient dawsos-nexus satellite key for govern action (operator path removed per boundary)")
 
 @app.post("/governance/protected_advance")
 async def protected_advance(claims: dict = Depends(require_govern_token)):

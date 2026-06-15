@@ -100,7 +100,7 @@ def main():
     sub.add_parser("advisor", help="Safe gravity advisor (proposal-only, never auto-executes deploy.sh)")
     sub.add_parser("nexus-poll", help="Poll dawsos-nexus (8082) for pending commands and surface as governed proposals (thin bridge, commands propose not execute). Supports --once/--loop.")
 
-    # Auth/control via dawsos-nexus (8082) thin client (replaces archived prototype)
+    # Auth/control: Nexus 8082 machine satellite (telemetry + proposals, governance_kernel). Identity long-term auth-prototype 8081. No "replaces" per boundary contract.
     auth_p = sub.add_parser("auth", help="Auth prototype commands (separate identity plane :8081). Nexus 8082 is machine satellite only (telemetry + proposals). See SEPARATION planes.")
     auth_p.add_argument("action", nargs="?", default="status", choices=["status", "start", "register-device", "token", "verify"])
     auth_p.add_argument("arg1", nargs="?", default=None)

@@ -2,18 +2,17 @@
 """
 CivForge Nexus Command Poller (thin bidirectional control bridge to dawsos-nexus 8082).
 
-Per updated boundary contract (SEPARATION.md + wt governed-connectors-registry.v1):
-- CivForge is governance_kernel (nexus_satellite), allowed_actions=["sync_config"] (canon). Other actions surface as local proposals only.
-- Nexus = observability (heartbeats) + command queue. Commands propose, never direct execute.
-- Thin HTTP only. Sister issues commands via POST /api/apps/:appId/commands (PENDING). Satellites poll defensively.
-- No state mutation on ingest. No mutation of dawsos-nexus tree (reference only).
-- Identity separate (auth-prototype 8081 or documented local dev bypass).
+Per updated boundary contract (SEPARATION.md + wt governed-connectors-registry.v1) + dawsOS agent feedback correction:
+- CivForge is governance_kernel (nexus_satellite), allowed_actions=["sync_config"] (canon).
+- Other actions: log + ack only (blocked_by_canon); no local propose.
+- Nexus = observability (heartbeats) + command queue. Commands propose (only allowed), never direct execute.
+- Thin HTTP only. Sister issues via POST /api/apps/:appId/commands. Canonical poll: GET /api/apps/civforge-kernel/commands/pending (or enriched apps); ack via /acknowledge or /complete.
+- No state mutation on ingest. No dawsos-nexus tree mutation (reference only).
+- Identity: auth-prototype 8081 long-term (machine satellite key only for Nexus paths).
 
-On receive pending: create governance proposal (nexus_<action>) + ack (IN_PROGRESS then COMPLETED). Defensive no-op when 8082 down.
+On receive: if sync_config then propose else blocked; ack accordingly. Defensive.
 
-Run: python tools/civforge_cli.py nexus-poll [--loop] or direct --once/--loop.
-
-Register as governance_kernel (matches canon row).
+Run via CLI or direct. Register as governance_kernel. Satellite key (NEXUS_API_KEY) preferred.
 """
 
 import argparse
@@ -45,13 +44,19 @@ COMMAND_ACTION_MAP = {
     "cancel_task": "nexus_cancel_task",
 }
 
-# Reasonable endpoint variants (sister uses /api/commands + insert schema; apps enriched)
+# Sister-canonical per CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md + agent feedback:
+# GET /api/apps/civforge-kernel/commands/pending (or enriched /api/apps), ack /acknowledge or /complete.
+# Defensive fallbacks kept.
 COMMAND_ENDPOINTS = [
-    f"{NEXUS_BASE}/api/commands",
-    f"{NEXUS_BASE}/api/commands?status=pending",
+    f"{NEXUS_BASE}/api/apps/{CIV_APP_ID}/commands/pending",
     f"{NEXUS_BASE}/api/apps/{CIV_APP_ID}/commands",
+    f"{NEXUS_BASE}/api/commands?status=pending",
+    f"{NEXUS_BASE}/api/commands",
+    f"{NEXUS_BASE}/api/apps/{CIV_APP_ID}",
 ]
 ACK_ENDPOINT_TEMPLATES = [
+    f"{NEXUS_BASE}/api/commands/{{cmd_id}}/acknowledge",
+    f"{NEXUS_BASE}/api/commands/{{cmd_id}}/complete",
     f"{NEXUS_BASE}/api/commands/{{cmd_id}}",
     f"{NEXUS_BASE}/api/commands/{{cmd_id}}/ack",
 ]
@@ -59,11 +64,13 @@ ACK_ENDPOINT_TEMPLATES = [
 
 def _headers() -> Dict[str, str]:
     h = {"Content-Type": "application/json"}
-    if OPERATOR_TOKEN:
+    # Q3 satellite key posture + agent rec: API_KEY (x-nexus-api-key) first for CivForge governance_kernel.
+    # Never fall back to OPERATOR_TOKEN in satellite paths (machine key only).
+    if API_KEY:
+        h["x-nexus-api-key"] = API_KEY
+    elif OPERATOR_TOKEN:
         h["Authorization"] = f"Bearer {OPERATOR_TOKEN}"
         h["x-nexus-api-key"] = OPERATOR_TOKEN
-    elif API_KEY:
-        h["x-nexus-api-key"] = API_KEY
     return h
 
 
@@ -164,6 +171,7 @@ def handle_command(cmd: Dict[str, Any]) -> str:
         note += f" (proposal_id={propose_resp['proposal'].get('id')})"
 
     # Proposals only for allowed actions — no direct state mutation.
+    # For blocked: caller will see "blocked_by_canon" in note.
     return note
 
 
@@ -177,8 +185,11 @@ def poll_once() -> Dict[str, Any]:
         try:
             note = handle_command(cmd)
             acked = ack_command(cmd_id, status="IN_PROGRESS", note=note)
-            # Mark completed after propose surfaced
-            ack_command(cmd_id, status="COMPLETED", note=note + " (proposal surfaced on CivForge)")
+            if "blocked_by_canon" in note:
+                ack_command(cmd_id, status="COMPLETED", note=note + " (blocked_by_canon per registry)")
+            else:
+                # Only for actual proposals
+                ack_command(cmd_id, status="COMPLETED", note=note + " (proposal surfaced on CivForge)")
             processed.append({"id": cmd_id, "action": cmd.get("action"), "acked": acked, "note": note})
         except Exception as e:
             ack_command(cmd_id, status="FAILED", note=f"error: {e}")

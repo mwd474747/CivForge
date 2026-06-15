@@ -6,11 +6,12 @@
 Before doing anything else (no mental notes, text > brain):
 
 1. Read `SEPARATION.md` — the canonical three-project contract (CivForge governance root, gravity-mosaic as independent target artifact, dawsos-auth-prototype as sister identity root). Do not conflate.
+2. Read `docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md` — cross-plane rules with dawsOS wt and dawsos-nexus (execution, receipts, identity, telemetry).
 2. If this is a fresh or other-workspace context: Read `HANDOFF_CONTEXT.md` (the portable bootstrap artifact) + `prompts/other_grok_context_update.md` (context sync for less-context agents).
 3. Read `PROJECT_MANIFESTO.md` (or equivalent SOUL) — who CivForge is and its intention.
 4. Read latest in `receipts/` (or `receipts/github-sync-*.md`, governance-cycle-*.md) for continuity.
 5. Run literal verification: `git status --short`, `wc -l` on key files (SEPARATION, HANDOFF, core/*.py, tools/auth-prototype/*), `grep` for golden anchors ("separate projects", "literal verification", "FunForge >=80", "auth-prototype", "handoff").
-6. Confirm working targets: localhost:8080 (CivForge backend + /state probe). Nexus :8082 for machine telemetry heartbeats + command proposals (governance_kernel per wt canon). Auth prototype :8081 for identity/JWT when enabled (or explicit local dev operator bypass per SEPARATION boundary note). Do not conflate.
+6. Confirm working targets: localhost:8080 (CivForge backend + /state probe). Nexus :8082 for machine telemetry heartbeats + command proposals (governance_kernel per wt canon, strict allowed_actions=["sync_config"]). Auth prototype :8081 for identity/JWT (machine satellite key only for Nexus paths; no dev bypass per boundary contract). Do not conflate. See docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md.
 
 **Write It Down discipline**: Capture decisions, context, lessons in receipts/ or daily notes. No mental notes. When you learn or mistake — document so future-you (or other Grok) doesn't repeat it.
 

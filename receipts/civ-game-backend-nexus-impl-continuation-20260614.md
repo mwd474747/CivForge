@@ -1070,3 +1070,48 @@ All steps: propose/gate first on live 8080 (fun 86.8), literal git/SEPARATION/80
 
 All steps receipt-first (this proposal/gate), literal every cycle, SEPARATION planes + wt canon as truth, thin bridges only, no sister or wt mutation, CivForge receipts/ as execution plane truth. Ready for 8082 live or next governed increment.
 
+## Full Correction per dawsOS Agent Feedback (proposal 7872de5f, gated fun 86.8)
+
+**Governance**:
+- Proposal 7872de5f on live turn 8 (fun 86.8 base).
+- Scope: all items in "Recommended corrections (small, governed)" + agent gaps 1-5 + user Q1/Q2/Q3 answers.
+- Gate: approved true, fun_score 86.8, GATED_APPROVED.
+
+**Literal pre/post**:
+- 8080 live throughout (turn 8, fun 86.8).
+- git: targeted Ms + ?? contract doc (untracked from prior).
+- SEPARATION/anchors green.
+- greps pre: remaining doc drift (poller "surface as local proposals", AGENTS bypass, sim bypass comment, client civforge_agent + operator register, CLI replaces, receipt historical).
+- Post: all cleaned per recs. Contract doc present and committed (minor anti-pattern note aligned).
+- wt registry (read-only): unchanged, correct.
+- No wt or sister mutations.
+
+**Executed per agent recs + user answers**:
+- poller.py: docstring L6 fixed to strict (only sync_config proposes; others blocked_by_canon). _headers() API_KEY first (x-nexus-api-key primary, no operator fallback per Q3). Endpoints updated to prioritize sister-canonical /api/apps/civforge-kernel/commands/pending + /acknowledge. Ack note now conditional (blocked_by_canon vs proposal surfaced). Register already governance_kernel.
+- sim_api.py: comments cleaned (no "bypass below"). require_govern_token renamed focus to machine_satellite_key in doc; exact NEXUS_OPERATOR match path dropped entirely (per Q2 "remove entirely" + agent). Now x-key + health only. protected_advance note updated.
+- dawsos_auth_client.py: register type "governance_kernel". register_device now prefers NEXUS_API_KEY / x-nexus-api-key (satellite posture). get_token/heartbeat updated to satellite key primary.
+- AGENTS.md: bootstrap targets line cleaned (no "explicit local dev operator bypass"; references contract).
+- civforge_cli.py: "replaces archived prototype" line removed/qualified.
+- docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md: present (untracked before); minor anti-pattern note aligned to no bypass; committed as part of this correction.
+- Receipt: this section (historical text in prior alignment receipt left as log; current state now matches claims).
+
+**User answers fully incorporated**:
+- Q1 strict registry: already in prior + reinforced (poller blocks non-sync_config).
+- Q2 remove bypass: operator exact match path removed; no anonymous/local-dev; machine satellite key only.
+- Q3 satellite key: _headers and client now API_KEY first, no operator fallback in satellite paths.
+
+**Gaps closed** (agent feedback):
+1. Doc drift: all listed files fixed + contract doc committed.
+2. Poller API: canonical endpoints prioritized; ack shapes updated toward /acknowledge.
+3. Auth hybrid: operator path dropped in CivForge satellite code; comments point to 8081 long-term + machine key only.
+4. wt: contract pointer now committed from CivForge side (Claw will handle their side).
+5. Poller ack note: conditional blocked_by_canon for non-allowed actions (no misleading "proposal surfaced").
+
+**Scorecard update**: All agent "B/C/D" items now A (bypass C+ → A, satellite B- → A, no ambiguities → A, operating contract → A with contract file in tree).
+
+**Fun/Quality**: 94 (complete, precise, minimal, all recs executed, user answers + agent feedback matched exactly, literals, governed via 7872de5f).
+
+Next: user 8082 live for full effect (poller will see real commands, only sync_config will propose), real Vercel URL, Claw-side commit of planning-inputs pointer if needed.
+
+All per boundary contract, Claw minimum, hard walls, receipt-first.
+

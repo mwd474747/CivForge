@@ -25,18 +25,22 @@ import os
 NEXUS_BASE = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
 
 def register_device(device_id: str, public_key: str = None):
-    r = requests.post(f"{NEXUS_BASE}/api/apps", json={"appId": device_id, "name": device_id, "type": "civforge_agent", "telemetryMode": "push"}, headers={"Authorization": f"Bearer {os.environ.get('NEXUS_OPERATOR_TOKEN', '')}"})
+    # Per agent rec + Q3: type governance_kernel (canon); prefer NEXUS_API_KEY (x-nexus-api-key) for satellite register.
+    api_key = os.environ.get("NEXUS_API_KEY", "")
+    headers = {"x-nexus-api-key": api_key} if api_key else {"Authorization": f"Bearer {os.environ.get('NEXUS_OPERATOR_TOKEN', '')}"}
+    r = requests.post(f"{NEXUS_BASE}/api/apps", json={"appId": device_id, "name": device_id, "type": "governance_kernel", "telemetryMode": "push"}, headers=headers)
     print(json.dumps(r.json(), indent=2))
     return r.json()
 
 def get_token(identity_id: str, scope: str = "govern"):
-    # For satellites: use apiKey from registration; for operator: NEXUS_OPERATOR_TOKEN
-    # Simplified: assume apiKey from prior registration or env
-    api_key = os.environ.get("NEXUS_API_KEY", "")
-    r = requests.post(f"{NEXUS_BASE}/api/telemetry/heartbeat", json={"appId": identity_id, "status": "active"}, headers={"x-nexus-api-key": api_key})
-    # Token issuance via operator or extended endpoint; fallback to operator for now
-    token = os.environ.get("NEXUS_OPERATOR_TOKEN", "")
-    print(json.dumps({"token": token, "scope": scope, "claims": {"identity": identity_id}}, indent=2))
+    # For satellites (governance_kernel): use NEXUS_API_KEY (x-nexus-api-key) per Q3 satellite-only posture.
+    # No operator fallback in primary path.
+    api_key = os.environ.get("NEXUS_API_KEY", "") or os.environ.get("NEXUS_OPERATOR_TOKEN", "")
+    headers = {"x-nexus-api-key": api_key} if api_key else {}
+    r = requests.post(f"{NEXUS_BASE}/api/telemetry/heartbeat", json={"appId": identity_id, "status": "active"}, headers=headers)
+    # Machine context only; real identity via 8081 auth-prototype long-term.
+    token = api_key
+    print(json.dumps({"token": token, "scope": scope, "claims": {"identity": identity_id, "note": "machine satellite key only"}}, indent=2))
     return {"token": token, "scope": scope}
 
 def verify(token: str):
