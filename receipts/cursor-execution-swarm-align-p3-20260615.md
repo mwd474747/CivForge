@@ -21,4 +21,4 @@ bash tools/turnkey-governance-posture.sh
 
 ## HEAD
 
-Set after commit.
+`e8ec957` on `origin/main`
