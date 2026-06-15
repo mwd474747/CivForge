@@ -132,7 +132,7 @@ def main():
         os.execv(sys.executable, [sys.executable, str(mcp)])
     elif args.cmd == "mcp-stub":
         print("MCP is implemented: use `python3 tools/civforge_cli.py mcp-serve` (stdio JSON-RPC).")
-        print("Tools: civforge_status, civforge_advance_turn, civforge_found_city, civforge_negotiate, civforge_what_if")
+        print("Tools: civforge_status, civforge_advance_turn, civforge_found_city, civforge_negotiate, civforge_negotiate_respond, civforge_what_if, civforge_governance_propose, civforge_governance_gate")
     elif args.cmd == "advisor":
         print("=== Gravity Safety Advisor (Mac Studio canonical) ===")
         print("This layer only advises. It never calls deploy.sh.")

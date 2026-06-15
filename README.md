@@ -20,7 +20,18 @@ cd ~/CivForge
 bash tools/start-kernel-8080.sh
 open http://127.0.0.1:8080/dashboard
 bash tools/validate-game.sh          # pytest + API + turnkey
+bash tools/turnkey-gaps-all.sh       # Grok + OpenClaw packets + all tests
 ```
+
+**Turnkey lane packets (Grok + OpenClaw):**
+
+| Lane | Doc | Script |
+|------|-----|--------|
+| Grok swarm play/verify | `docs/GROK_SWARM_PACKET_V1.md` | `bash tools/turnkey-grok-play.sh` |
+| OpenClaw ops (8082, wt) | `docs/OPENCLAW_OPS_PACKET_V1.md` | `bash tools/turnkey-openclaw-ops.sh` |
+| wt mirror apply | `docs/OPENCLAW_WT_APPLY_PACKET_V1.md` | (OpenClaw authority) |
+| Work packs | `receipts/work-pack-grok-mechanics-sim-001.md`, `receipts/work-pack-openclaw-civforge-ops-001.md` | — |
+
 
 **Multi-agent dashboard:** agent tabs, 5×5 map, negotiations, alliances, victory bar, mechanics lanes. See `docs/GAME_PLAY_GUIDE_V1.md`.
 

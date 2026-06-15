@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from core import AgentBrain, FunForge, GovernanceOrchestrator, ReceiptStore
 from core.mechanics_registry import build_default_registry, default_mechanics_lanes
 from backend.civstudy_metadata import civstudy_reference_panel
+from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
 from backend.multi_agent_state import (
     AGENT_LABELS,
     FACTION_COLORS,
@@ -132,6 +133,7 @@ if restored:
     game_state.update(restored)
     print("[CivForge] Restored previous state snapshot from SQLite (persistence active)")
 ensure_multi_agent_state(game_state)
+ensure_civstudy_sim_state(game_state)
 orchestrator.turn = int(game_state.get("turn", 1))
 
 def telemetry_extra_from_state() -> Dict[str, Any]:
@@ -204,6 +206,7 @@ async def get_state() -> Dict[str, Any]:
         "work_packs": game_state.get("work_packs", [])[-6:],
         "mechanics_lanes": game_state.get("mechanics_lanes", default_mechanics_lanes()),
         "civstudy_reference": civstudy_reference_panel(),
+        "civstudy_sim": civstudy_sim_summary(game_state),
         "note": "CivForge governance workspace with multi-agent map, alliances, negotiations, mechanics lanes, and joint victory.",
     }
 

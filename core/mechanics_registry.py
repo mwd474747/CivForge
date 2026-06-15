@@ -90,4 +90,10 @@ def build_default_registry() -> MechanicsRegistry:
     reg.register("military", _tick_military)
     reg.register("economic", _tick_economic)
     reg.register("cultural", _tick_cultural)
+    try:
+        from backend.civstudy_mechanics_bridge import register_civstudy_mechanics
+
+        register_civstudy_mechanics(reg)
+    except ImportError:
+        pass
     return reg

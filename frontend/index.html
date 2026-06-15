@@ -43,12 +43,23 @@
     .events { font-size: 0.8rem; color: var(--muted); max-height: 8rem; overflow: auto; }
     .events li { margin-bottom: 0.25rem; }
     .hidden { display: none !important; }
+    .outcome-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.92); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .outcome-card { background: var(--panel); border: 2px solid var(--ok); border-radius: 12px; padding: 2rem; max-width: 28rem; text-align: center; }
+    .outcome-card h2 { color: var(--ok); margin: 0 0 0.5rem; }
     code { font-size: 0.85em; }
   </style>
 </head>
 <body>
   <h1>CivForge Multi-Agent Command</h1>
   <p class="sub">Governance kernel + agent tabs, shared map, negotiations, alliances, joint victory</p>
+
+  <div id="outcome-overlay" class="outcome-overlay hidden">
+    <div class="outcome-card">
+      <h2>Joint Victory</h2>
+      <p id="outcome-text">All milestones complete. Governance quorum achieved across factions.</p>
+      <button type="button" onclick="document.getElementById('outcome-overlay').classList.add('hidden')">Continue governing</button>
+    </div>
+  </div>
 
   <div id="setup-panel" class="setup hidden">
     <strong>Remote dashboard (HTTPS)</strong>
@@ -300,6 +311,10 @@
           "<li>" + (m.done ? "✅" : "⬜") + " " + m.name + "</li>"
         ).join("");
         document.getElementById("hud-victory").textContent = pct + "%";
+        const overlay = document.getElementById("outcome-overlay");
+        if (vp.outcome === "victory" || pct >= 100) {
+          overlay.classList.remove("hidden");
+        }
       }
 
       function renderHud(data) {

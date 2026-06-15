@@ -192,6 +192,8 @@ def sync_victory_milestones(vp: Dict[str, Any], turn: Optional[int] = None) -> L
             milestones[idx]["done"] = True
             prefix = f"Turn {turn}: " if turn is not None else ""
             events.append(f"{prefix}Milestone unlocked — {label}.")
+    if progress >= target:
+        vp["outcome"] = "victory"
     return events
 
 

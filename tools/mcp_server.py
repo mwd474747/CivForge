@@ -47,6 +47,20 @@ TOOLS = [
         "type": "object",
         "properties": {"investment": {"type": "integer", "default": 5}},
     }},
+    {"name": "civforge_governance_propose", "description": "Create a governed proposal (gravity/meta work)", "inputSchema": {
+        "type": "object",
+        "properties": {
+            "action": {"type": "string"},
+            "investment": {"type": "integer", "default": 3},
+            "details": {"type": "object"},
+        },
+        "required": ["action"],
+    }},
+    {"name": "civforge_governance_gate", "description": "Run FunForge gate on a proposal", "inputSchema": {
+        "type": "object",
+        "properties": {"proposal_id": {"type": "string"}},
+        "required": ["proposal_id"],
+    }},
 ]
 
 
@@ -88,6 +102,14 @@ def _call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         })
     elif name == "civforge_what_if":
         result = _http("POST", "/simulation/what_if", {"investment": int(arguments.get("investment", 5))})
+    elif name == "civforge_governance_propose":
+        result = _http("POST", "/governance/propose", {
+            "action": arguments["action"],
+            "investment": int(arguments.get("investment", 3)),
+            "details": arguments.get("details") or {"via": "mcp"},
+        })
+    elif name == "civforge_governance_gate":
+        result = _http("POST", "/governance/gate", {"proposal_id": arguments["proposal_id"]})
     else:
         result = {"error": f"unknown tool: {name}"}
     text = json.dumps(result, indent=2)

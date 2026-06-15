@@ -23,7 +23,7 @@ else
 fi
 
 echo "2. Unit tests..."
-python3 -m pytest tests/test_multi_agent_state.py tests/test_civstudy_metadata.py -q
+python3 -m pytest tests/test_multi_agent_state.py tests/test_civstudy_metadata.py tests/test_civstudy_mechanics_bridge.py -q
 
 echo "3. API contract probes..."
 python3 <<'PY'
@@ -51,6 +51,8 @@ assert set((s.get("mechanics_lanes") or {}).keys()) == {"military", "economic", 
 cs = s.get("civstudy_reference", {})
 for key in ("districts", "policy_tree", "discovery_forks", "cultural_event_chains"):
     assert key in cs, f"missing civstudy_reference.{key}"
+sim = s.get("civstudy_sim", {})
+assert "active_district" in sim, "missing civstudy_sim.active_district"
 vp = s.get("victory_progress", {})
 if vp.get("joint_progress", 0) >= vp.get("target", 100):
     assert vp["milestones"][3]["done"] is True, "Joint victory milestone should sync at 100%"
@@ -67,6 +69,8 @@ proc = subprocess.run(
 tools = json.loads(proc.stdout.strip().splitlines()[0])["result"]["tools"]
 names = {t["name"] for t in tools}
 assert "civforge_negotiate_respond" in names
+assert "civforge_governance_propose" in names
+assert "civforge_governance_gate" in names
 print("  API + MCP probes OK")
 PY
 
