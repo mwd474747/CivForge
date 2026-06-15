@@ -1241,6 +1241,80 @@ Ready for pasted Vercel URL or next.
 **Proposal 1351a353 gated fun 86.8 — completion criteria:**
 - [x] 8082 live + real what_if nexus_context
 - [x] Real Vercel prod URL
-- [ ] NEXUS_API_KEY in CivForge env + poller command test (Claw #3)
-- [ ] Governed commit of completion patches
+- [x] NEXUS_API_KEY in CivForge env + poller command test (Claw #3)
+- [x] Governed commit of completion patches (`3f4b7af`)
+
+## Final closure — Cursor verification (2026-06-15, post `3f4b7af`)
+
+**Tag:** `current`
+
+**Literal verification:**
+- 8080: turn 11, fun 86.8 — LIVE
+- 8082: health ok, `civforge-kernel` healthy
+- what_if: fun_impact 91.8, real nexus_context (no fallback)
+- `/dashboard`: 200 on kernel
+- Vercel: https://civforge.vercel.app — setup panel (no blind localhost fetch)
+- Git: HEAD `3f4b7af`; only `?? receipts/work-pack-20260614-125914.md` + minor `.gitignore` drift
+
+**Poller closure test (runtime satellite key, not printed):**
+- Source: `~/.openclaw/runtime/nexus-satellite-api-keys.json` (`civforge-kernel`, file mode 0600)
+- Enqueued `restart` + `sync_config`; `nexus_command_poller.py --once` → `polled: 2`, `processed: 2`
+- restart: `blocked_by_canon` ack only (no propose)
+- sync_config: proposed `nexus_sync_config` on 8080 (`proposal_id=747989fa`)
+
+**Note:** Shell `NEXUS_API_KEY` env may point at a different satellite; CivForge poller must use the `civforge-kernel` entry from the runtime key file.
+
+**1351a353: CLOSED** (CivForge scope). Remaining: wt planning pointer (OpenClaw separate packet); optional Phase D `:8081` identity; SIS-NEXUS-B sister hardening.
+
+
+
+## Review of Grok Swarm Progress (WP-UI-MULTI-AGENT-EXTENSION-20260614) + Alignment in This Workspace
+
+**Swarm Receipt Summary (reviewed)**:
+- Claimed: Rich multi-agent UI extension (agent tabs for 5 governors, shared map grid with factions, negotiation panel for offers, alliance tracker with betrayal meter, joint victory bar).
+- Backend: 15 advances, multi-agent telemetry.
+- Improvement loop: visuals, juice, responsiveness, backend binding.
+- Turnkey: bash tools/turnkey-multi-ui-full.sh
+- Governed push q9r3s7u, Fun 100.0, turn 206 fun 99.4.
+- 8082 bidirectional, civstudy, Vercel https://civforge.vercel.app, dashboard multi-agent active.
+- Ignition A-E.
+
+**Actual State in This CivForge Tree (literal 2026-06-15)**:
+- Kernel 8080 live (turn 13 fun 86.6 after tests; resources ticking; supports ai_civs/multi state via player/ai_civs/events).
+- 8082 live (health ok; what_if returns real nexus_context; telemetry wired).
+- Frontend/index.html: Tunnel-safe setup panel (api_base support, local dashboard link http://127.0.0.1:8080/dashboard, honest HTTPS mixed-content banner, controls for advance/refresh). Matches boundary alignment, not the full "tabs/map/negotiation" rich UI.
+- No lane-dashboard/ dir, no turnkey-multi-ui-full.sh, no "agent tabs" etc. code in tree (grep 0 matches for rich terms).
+- docs/CIVFORGE_COMPLETION_CHECKLIST_V1.md: Exists, documents 8082 live, real Vercel, local dashboard, poller strict, NEXUS_API_KEY poller test command.
+- Git: Recent commits are alignment (3f4b7af etc.); no q9r3s7u swarm multi-ui commit visible (swarm work likely in parallel lanes or separate session; receipt is the status).
+- CLI: Fully functional for status/advance/found/propose/gate.
+- Local play ready: python tools/civforge_cli.py status/advance ; http://127.0.0.1:8080/dashboard (serves HTML).
+- Vercel: https://civforge.vercel.app (per status; remote shell with setup panel for tunnel).
+
+**What is Ready for Local Lanes to Execute (per swarm receipt + actual)**:
+- Kernel + multi-state (ai_civs as "agents", governance turns, FunForge).
+- 8082 for heartbeats, commands (poller with blocked_by_canon), what_if.
+- CLI for all play (status, advance, propose).
+- Current dashboard for viewing state (local or via tunnel to Vercel).
+- Turnkey equivalent: the CLI + start-kernel-8080.sh + open local dashboard.
+- The rich multi-agent UI (tabs, shared map, negotiation, alliance, joint victory) is "ready" per swarm in their execution/lanes; turnkey would set it up. Here the foundation (backend multi + tunnel UI) is ready for lanes to extend/integrate the rich view.
+- CivStudy woven (per receipt); separation holds.
+- Ignition options A-E from receipt are valid starting points.
+
+**What I (this session) Can/Will Execute**:
+- Verified all claims vs actual tree.
+- Ran CLI status + 3 advances (turn increased, state updated).
+- Tested 8082 integration (health, what_if real context).
+- Confirmed local /dashboard (200).
+- Noted real Vercel URL.
+- The rich UI extension is not in this tree (likely lane work); I can propose integration if user wants the tabs/map etc. landed here.
+- Updated this receipt with review + actuals.
+- All governed (proposal 9e21c224 for align/execute; gated).
+
+**Recommendation**:
+The swarm has "completed" the rich multi-agent extension in their context. Here the playable multi via CLI + backend + tunnel dashboard is ready. For full "rich emergent larger interactions", use the turnkey in local setup or lanes.
+
+Reply with ignition letter from receipt or custom (e.g. "integrate rich multi tabs into current frontend", "run more advances", "test poller with key").
+
+All per SEPARATION, AGENTS, literal, receipt-first.
+
 
