@@ -11,7 +11,12 @@ Before doing anything else (no mental notes, text > brain):
 3. Read `PROJECT_MANIFESTO.md` (or equivalent SOUL) — who CivForge is and its intention.
 4. Read latest in `receipts/` (or `receipts/github-sync-*.md`, governance-cycle-*.md) for continuity.
 5. Run literal verification: `git status --short`, `wc -l` on key files (SEPARATION, HANDOFF, core/*.py, tools/auth-prototype/*), `grep` for golden anchors ("separate projects", "literal verification", "FunForge >=80", "auth-prototype", "handoff").
-6. Confirm working targets: localhost:8080 (CivForge backend + /state probe). Nexus :8082 for machine telemetry heartbeats + command proposals (governance_kernel per wt canon, strict allowed_actions=["sync_config"]). Auth prototype :8081 for identity/JWT (machine satellite key only for Nexus paths; no dev bypass per boundary contract). Do not conflate. See docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md.
+6. Read swarm alignment receipts (canonical truth plane, do not skip):
+   - `receipts/swarm-alignment-ingest-020-continuation-20260615.md`
+   - `receipts/swarm-alignment-correction-ingest-021-20260615.md`
+   - `receipts/swarm-correction-validation-024-20260615.md` (after landed)
+   - `docs/GAME_PLAY_GUIDE_V1.md`
+7. Confirm working targets: localhost:8080 (CivForge backend + /state probe). Nexus :8082 for machine telemetry heartbeats + command proposals (governance_kernel per wt canon). Auth prototype :8081 for identity/JWT when enabled (or explicit local dev operator bypass per SEPARATION boundary note). Do not conflate.
 
 **Write It Down discipline**: Capture decisions, context, lessons in receipts/ or daily notes. No mental notes. When you learn or mistake — document so future-you (or other Grok) doesn't repeat it.
 
@@ -50,7 +55,8 @@ The FastAPI (backend/sim_api.py) + core/ (AgentBrain, FunForge, GovernanceOrches
 
 **Current Reality Tie-in (post recent locks + Git tools work + orphan cleanup)**: 
 - Auth bridge live, handoff package + context prompt for other agents, governed syncs with receipts, full literal process on CivForge itself.
-- Locked Civ Game plan (see receipts/LOCKED-CIV-GAME-PLAN-*.md and planning/): All prior optionals (simulation layer, dashboard, MCP, expanded agents, Docker/hosting) now REQUIRED. Simple base mechanics + infinite extendibility via governed proposals.
+- **Swarm truth plane (locked 2026-06-15, commit `5eff73b`+):** Real multi-agent dashboard at `GET /dashboard` (`frontend/index.html`, 426 lines). Vercel static shell live at https://civforge.vercel.app (remote play uses `?api_base=` HTTPS tunnel to Mac Studio `:8080`). **Next governed work defaults to mechanics + CivStudy metadata + 8082 extensions only** — no UI rebuild, no new Vercel over-claims. Verify with `bash tools/validate-game.sh` and §2.1 commands in receipt 021; never use `civforge_cli.py status | grep vercel`.
+- Locked Civ Game plan (see receipts/LOCKED-CIV-GAME-PLAN-*.md and planning/): simulation layer, MCP, expanded agents, Docker/hosting remain required; **dashboard lane is landed in main** — extend, do not rebuild from scratch.
 - Git lanes active via docs/GIT_LANES_POLICY.md (worktrees + gh + Draft PRs for parallel Civ Game tracks: mechanics, simulation, dashboard, agent-play, infra). Use for safe multi-lane development without violating separation.
 - Pre-realign orphans cleaned (moved to _archive/pre-realign-orphans/ and receipts/_archive/); see receipts/orphan-cleanup-*.md and docs/CIV_GAME_MECHANICS_INSPIRATION.md (abstract concepts only, e.g., emergent dynamics for the required simulation layer).
 - agents/role_registry.json created as machine-readable registry (dawsOS-inspired; keep synced with this doc and core/orchestrator.py).

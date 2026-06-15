@@ -1,5 +1,11 @@
 # HANDOFF ARTIFACT FOR GROK SWARM: CivForge Backend — Updates, Implemented, Ready & Usable
 
+> **Superseded for swarm truth plane (2026-06-15):** Read alignment receipts first:
+> `receipts/swarm-alignment-ingest-020-continuation-20260615.md`,
+> `receipts/swarm-alignment-correction-ingest-021-20260615.md`,
+> `receipts/swarm-correction-validation-024-20260615.md`,
+> and `docs/GAME_PLAY_GUIDE_V1.md`. This handoff remains useful for Nexus/bootstrap history; do not treat it as sole UI truth (dashboard + Vercel are landed per 020/021).
+
 **Date**: 2026-06-14 (after governed commit 2f09e99 to main, bootstrap execution with explicit user approval, comprehensive docs+stubs+implementation audit, continued execution to turn 104+)
 **Primary artifacts to read first (in order)**:
 1. This file (focused backend summary)

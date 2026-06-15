@@ -56,3 +56,7 @@ This SEPARATION.md is the canonical declaration. All planning, code, and future 
 - **Telemetry + command queue only** for CivForge (thin HTTP bridge).
 - **Identity** remains `dawsos-auth-prototype` (`:8081`) per `docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md` — Nexus operator token is not CivForge product identity.
 - Full cross-plane rules: `docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md`.
+
+## Swarm alignment note (2026-06-15)
+
+Execution truth for Grok swarm: `:8080` kernel + alignment receipts 020/021/024. Dashboard and Vercel are **landed** in tree; next extensions are mechanics/CivStudy metadata/8082 thin bridge only. CivForge receipts do not confer dawsOS wt promotion authority.

@@ -62,3 +62,9 @@ Per user "execute all the turnkey ready work swarm did to completion, or lane bo
 All governed, literals, separation. Lanes can now execute the turnkey independently in worktrees if needed.
 
 See receipts/civ-game-backend-nexus-impl-continuation-20260614.md for full.
+
+## Swarm priority lane (2026-06-15, receipts 020/021/024)
+
+- **Landed (do not rebuild):** `lane/dashboard` — real UI at `GET /dashboard` + https://civforge.vercel.app
+- **Default next work:** `lane/civ-game-mechanics`, CivStudy metadata (`civstudy_reference`), `lane/infra-required` (8082 poller/telemetry) only
+- **Verify:** `bash tools/validate-game.sh`; reject WP-022-style doc claims without `git log` proof
