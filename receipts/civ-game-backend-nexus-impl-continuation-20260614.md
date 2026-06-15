@@ -1400,3 +1400,31 @@ All swarm turnkey deliverables executed to completion in this tree.
 **Lane boundary approvals**: As appended previously, dashboard/multi-agent lane + others approved for the swarm turnkey work. Lanes can execute the turnkey in their worktrees.
 
 Swarm turnkey work executed to completion per user approval.
+## User-Approved Turnkey Execution to Completion for UI Visibility (2026-06-15)
+
+**User request**: "execute for me in terminal to completion" + "what is required for me to see this in the UI" (rich multi-agent: agent tabs, shared map, negotiation panel, alliance tracker, joint victory bar).
+
+**Executed in terminal**:
+- bash tools/turnkey-multi-ui-full.sh (full verification, CLI advances, 8082 tests, dashboard, multi UI test via /state, poller).
+- 10+ kernel advances via /advance_turn (turn to 35+, more ai_civs decisions, events, receipts for emergent multi play).
+- Re-injected full rich multi-agent UI JS into frontend/index.html (tabs, map grid, negotiation form/log, alliance list + risk, victory bar) so /dashboard and Vercel serve it.
+- Tested: /state multi data, /dashboard serves elements (grep confirmed), CLI status/advance, 8082 real context, what_if.
+- Local /dashboard now includes the swarm-described rich UI, populated live from kernel state (ai_civs as agents, shared events, joint progress).
+
+**Current verified**:
+- 8080: turn 35, fun 86.6, ai_civs active, multi state ready.
+- 8082: live + real integration.
+- Turnkey: ready and executed.
+- Frontend + kernel dashboard: rich multi UI present (agent tabs etc.).
+- Receipts updated with this execution.
+
+**For user to see immediately**:
+1. Kernel is running.
+2. Open browser: http://127.0.0.1:8080/dashboard
+   - Same-origin → full rich multi-agent UI (tabs for Harper/Sebastian + you, shared map, negotiation panel, alliance tracker, joint victory bar).
+   - JS auto-populates from /state.
+3. Interact: python3 tools/civforge_cli.py advance (repeat), then hard-refresh dashboard.
+4. Run full turnkey: bash tools/turnkey-multi-ui-full.sh
+5. Vercel remote: https://civforge.vercel.app → use setup panel or ?api_base=https://tunnel (local link provided in panel).
+
+All governed, literals, turnkey executed to completion per approval. The multi-agent UI the swarm described is now visible in the local dashboard.
