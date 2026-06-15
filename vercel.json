@@ -1,1 +1,8 @@
-{"rewrites": [{"source": "/(.*)", "destination": "/frontend/index.html"}]}
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "",
+  "buildCommand": "",
+  "outputDirectory": "frontend",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

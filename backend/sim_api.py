@@ -1,4 +1,6 @@
 from fastapi import FastAPI, Depends, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 import requests, os
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
@@ -47,6 +49,25 @@ app = FastAPI(
         "The actual gravity changes always live in /Users/michaeldawson/gravity-mosaic-knowledge-graph and are deployed ONLY via tools/deploy-gravity-mosaic/deploy.sh."
     ),
 )
+
+_cors_raw = os.environ.get(
+    "CIVFORGE_CORS_ORIGINS",
+    "https://civforge.vercel.app,http://127.0.0.1:8080,http://localhost:8080",
+)
+_cors_origins = [o.strip() for o in _cors_raw.split(",") if o.strip()]
+if _cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_cors_origins,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["*"],
+    )
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def local_dashboard():
+    """Same-origin dashboard for Mac Studio — works over http://127.0.0.1:8080 (no mixed-content)."""
+    path = Path(__file__).parent.parent / "frontend" / "index.html"
+    return path.read_text(encoding="utf-8")
 
 # === Core governance runtime (replaces Godot TurnManager / MVP driver) ===
 # Persistence enabled per Mac Studio canonical lock-in (WP-BACKEND-REALIGN-EXEC-001)

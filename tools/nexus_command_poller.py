@@ -148,7 +148,7 @@ def handle_command(cmd: Dict[str, Any]) -> str:
     """
     action = (cmd.get("action") or cmd.get("type") or "").lower()
     if action != "sync_config":
-        note = f"Command {action} received for civforge-kernel but registry allows only sync_config; ack only (no propose per boundary)."
+        note = f"blocked_by_canon: Command {action} received for civforge-kernel but registry allows only sync_config; ack only (no propose per boundary)."
         return note
 
     local_action = COMMAND_ACTION_MAP.get(action, f"nexus_{action or 'unknown'}")

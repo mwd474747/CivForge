@@ -1,7 +1,182 @@
 <!DOCTYPE html>
-<html><head><title>CivForge Empire • Live</title><script src="https://unpkg.com/htmx.org"></script></head><body>
-<h1>CivForge Live Dashboard</h1>
-<button onclick="fetch('http://localhost:8080/advance_turn').then(()=>location.reload())">Advance Turn</button>
-<div id="state">Loading...</div>
-<script>fetch('http://localhost:8080/state').then(r=>r.text()).then(t=>document.getElementById('state').innerHTML=t);</script>
-</body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>CivForge Empire • Live</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.45; }
+    .banner { background: #1e293b; color: #e2e8f0; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; }
+    .setup { background: #fef3c7; color: #78350f; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+    .ok { color: #86efac; }
+    .warn { color: #fbbf24; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow: auto; font-size: 0.85rem; }
+    button { margin-right: 0.5rem; margin-top: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    input[type=url] { width: 100%; max-width: 32rem; padding: 0.5rem; font-family: inherit; }
+    code { font-size: 0.9em; }
+    .links a { margin-right: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>CivForge Live Dashboard</h1>
+
+  <div id="setup-panel" class="setup" hidden>
+    <strong>Connect your Mac Studio kernel</strong>
+    <p>
+      This page is served over <strong>HTTPS</strong> (Vercel). Browsers block it from calling
+      <code>http://127.0.0.1:8080</code> on your machine.
+    </p>
+    <p><strong>Option A — play on the host (simplest)</strong></p>
+    <p class="links">
+      <a href="http://127.0.0.1:8080/dashboard" target="_blank" rel="noopener">Open local dashboard</a>
+      · CLI: <code>python3 tools/civforge_cli.py status</code>
+    </p>
+    <p><strong>Option B — remote via HTTPS tunnel</strong></p>
+    <ol>
+      <li>Expose <code>:8080</code> with Cloudflare Tunnel, ngrok, etc. (must be <code>https://…</code>)</li>
+      <li>Paste the public base URL below (no trailing slash)</li>
+    </ol>
+    <label for="api-base-input">Kernel API base</label><br />
+    <input id="api-base-input" type="url" placeholder="https://your-tunnel.example.com" />
+    <br />
+    <button id="save-base-btn" type="button">Save &amp; connect</button>
+    <p class="links"><small>Or append <code>?api_base=https://your-tunnel</code> to this page URL.</small></p>
+  </div>
+
+  <p id="connected-banner" class="banner" hidden>
+    Connected to kernel at <code id="api-base-label"></code>.
+    <span id="https-note" class="warn" hidden> — tunnel must stay up while you play.</span>
+  </p>
+
+  <div id="controls" hidden>
+    <button id="advance-btn">Advance Turn</button>
+    <button id="refresh-btn">Refresh State</button>
+    <button id="change-base-btn" type="button">Change API base</button>
+  </div>
+
+  <div id="state"><em>Configure connection above to load state.</em></div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "civforge_api_base";
+      const pageIsHttps = window.location.protocol === "https:";
+      const params = new URLSearchParams(window.location.search);
+
+      const setupPanel = document.getElementById("setup-panel");
+      const connectedBanner = document.getElementById("connected-banner");
+      const controls = document.getElementById("controls");
+      const stateEl = document.getElementById("state");
+      const apiBaseLabel = document.getElementById("api-base-label");
+      const apiBaseInput = document.getElementById("api-base-input");
+      const httpsNote = document.getElementById("https-note");
+
+      function normalizeBase(url) {
+        return (url || "").trim().replace(/\/$/, "");
+      }
+
+      function isValidBase(url) {
+        if (!url) return false;
+        try {
+          const u = new URL(url);
+          if (pageIsHttps && u.protocol !== "https:") return false;
+          return u.protocol === "http:" || u.protocol === "https:";
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function resolveApiBase() {
+        const fromQuery = normalizeBase(params.get("api_base"));
+        if (isValidBase(fromQuery)) return fromQuery;
+        const fromStorage = normalizeBase(localStorage.getItem(STORAGE_KEY));
+        if (isValidBase(fromStorage)) return fromStorage;
+        if (!pageIsHttps) return "http://127.0.0.1:8080";
+        return "";
+      }
+
+      let apiBase = resolveApiBase();
+
+      function showSetup(message) {
+        setupPanel.hidden = false;
+        connectedBanner.hidden = true;
+        controls.hidden = true;
+        if (message) {
+          stateEl.innerHTML = "<p class='warn'>" + message + "</p>";
+        } else if (!apiBase) {
+          stateEl.innerHTML = "<p>Waiting for kernel URL.</p>";
+        }
+      }
+
+      function showConnected() {
+        setupPanel.hidden = true;
+        connectedBanner.hidden = false;
+        controls.hidden = false;
+        apiBaseLabel.textContent = apiBase;
+        httpsNote.hidden = !pageIsHttps;
+        if (apiBaseInput.value !== apiBase) apiBaseInput.value = apiBase;
+      }
+
+      function saveBase() {
+        const candidate = normalizeBase(apiBaseInput.value);
+        if (!isValidBase(candidate)) {
+          alert(pageIsHttps
+            ? "Use a full https:// URL for your tunnel (http://127.0.0.1 will not work from this page)."
+            : "Enter a valid http:// or https:// API base URL.");
+          return;
+        }
+        apiBase = candidate;
+        localStorage.setItem(STORAGE_KEY, apiBase);
+        const next = new URL(window.location.href);
+        next.searchParams.set("api_base", apiBase);
+        window.history.replaceState({}, "", next);
+        showConnected();
+        loadState();
+      }
+
+      async function loadState() {
+        if (!apiBase) {
+          showSetup();
+          return;
+        }
+        stateEl.innerHTML = "<em>Loading…</em>";
+        try {
+          const r = await fetch(apiBase + "/state");
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const text = await r.text();
+          stateEl.innerHTML = "<pre>" + text.replace(/</g, "&lt;") + "</pre>";
+        } catch (e) {
+          showSetup();
+          stateEl.innerHTML =
+            "<p class='warn'>Cannot reach kernel at <code>" + apiBase + "</code>.</p>" +
+            "<p>Check the tunnel is running, CORS allows <code>https://civforge.vercel.app</code> " +
+            "(set <code>CIVFORGE_CORS_ORIGINS</code> on the kernel), or use the " +
+            "<a href='http://127.0.0.1:8080/dashboard' target='_blank' rel='noopener'>local dashboard</a>.</p>";
+        }
+      }
+
+      document.getElementById("save-base-btn").onclick = saveBase;
+      document.getElementById("change-base-btn").onclick = function () {
+        showSetup("Enter a new API base URL.");
+        apiBaseInput.focus();
+      };
+      document.getElementById("refresh-btn").onclick = loadState;
+      document.getElementById("advance-btn").onclick = async function () {
+        try {
+          const r = await fetch(apiBase + "/advance_turn", { method: "POST" });
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          await loadState();
+        } catch (e) {
+          alert("Advance failed — kernel unreachable. Check tunnel or use local dashboard.");
+        }
+      };
+
+      if (apiBase) {
+        showConnected();
+        loadState();
+      } else {
+        showSetup();
+      }
+    })();
+  </script>
+</body>
+</html>

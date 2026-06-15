@@ -1,0 +1,11 @@
+backend/
+core/
+tools/
+receipts/
+docs/
+planning/
+_archive/
+*.db
+*.sqlite
+.env
+.env.*

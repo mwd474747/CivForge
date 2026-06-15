@@ -38,8 +38,11 @@ def register_device(device_id: str, public_key: str = None):
 def get_token(identity_id: str, scope: str = "govern"):
     # For satellites (governance_kernel): use NEXUS_API_KEY (x-nexus-api-key) per Q3 satellite-only posture.
     # No operator fallback in primary path.
-    api_key = os.environ.get("NEXUS_API_KEY", "") or os.environ.get("NEXUS_OPERATOR_TOKEN", "")
-    headers = {"x-nexus-api-key": api_key} if api_key else {}
+    api_key = os.environ.get("NEXUS_API_KEY", "")
+    if not api_key:
+        print(json.dumps({"error": "NEXUS_API_KEY required for satellite heartbeat"}, indent=2))
+        return {"error": "NEXUS_API_KEY required"}
+    headers = {"x-nexus-api-key": api_key}
     r = requests.post(f"{NEXUS_BASE}/api/telemetry/heartbeat", json={"appId": identity_id, "status": "active"}, headers=headers)
     # Machine context only; real identity via 8081 auth-prototype long-term.
     token = api_key

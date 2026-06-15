@@ -1209,3 +1209,38 @@ All per SEPARATION (thin bridge only), AGENTS (full terminal + dawsOS leverage),
 
 Ready for pasted Vercel URL or next.
 
+## Completion round — Cursor partner lane (2026-06-15)
+
+**Tag:** `current` (live probes) + `prototype-only` (uncommitted CivForge patches below)
+
+**Vercel production URL (deployed):**
+- **Canonical alias:** https://civforge.vercel.app
+- Deployment: `dpl_HRSrDhEGFVHN7Lw71QtTxnT2JWDn`
+- Inspect: https://vercel.com/michaelwjdawson-3889s-projects/civforge/HRSrDhEGFVHN7Lw71QtTxnT2JWDn
+
+**Deploy fix:** First attempt failed (FastAPI auto-detect on `backend/sim_api.py`). Resolved with static-only `vercel.json` (`framework: null`, `outputDirectory: frontend`) + `.vercelignore` (backend/tools excluded).
+
+**Literal verification (this round):**
+- 8080: turn 11, fun 86.6 — LIVE
+- 8082: `{"status":"ok","service":"dawsos-nexus","version":"0.2.0-rebirth","bind":"127.0.0.1","port":"8082"}` — LIVE
+- what_if: fun_impact 91.6, real nexus_context (no fallback) — LIVE
+- Vercel: https://civforge.vercel.app loads dashboard shell — LIVE
+
+**Partner-lane patches (uncommitted):**
+- `frontend/index.html` — honesty banner; `?api_base=` for HTTPS tunnel (HTTPS→localhost blocked)
+- `vercel.json` + `.vercelignore` — static prod deploy
+- `tools/nexus_command_poller.py` — `blocked_by_canon` in ack note for non-sync_config commands
+- `tools/dawsos_auth_client.py` — `get_token()` NEXUS_API_KEY only (no operator fallback)
+- `docs/CIVFORGE_COMPLETION_CHECKLIST_V1.md` — completion checklist
+
+**Still operator/Claw:**
+- Export full `NEXUS_API_KEY` for `civforge-kernel` (masked in operator API) → poller `--once` with pending commands
+- Remote dashboard from Vercel requires `?api_base=https://<tunnel-to-8080>` or local CLI on Mac Studio
+- Governed CivForge commit for completion patches (proposal 1351a353 family)
+
+**Proposal 1351a353 gated fun 86.8 — completion criteria:**
+- [x] 8082 live + real what_if nexus_context
+- [x] Real Vercel prod URL
+- [ ] NEXUS_API_KEY in CivForge env + poller command test (Claw #3)
+- [ ] Governed commit of completion patches
+
