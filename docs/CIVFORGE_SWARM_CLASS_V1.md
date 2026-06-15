@@ -86,6 +86,18 @@ CivForge WPs borrow dawsOS swarm-registry **fields** locally without wt registra
 - `receipt_class`, `authority_lane`, `side_effect_class`, `required_receipt_links`
 - Template: `docs/WORK_PACK_TEMPLATE_V1.md`
 
+### P2 — Sequential join (implemented)
+
+`GovernanceOrchestrator.advance_cycle()` uses `core/swarm_join.py`:
+
+- **Join order:** harper → sebastian → grok (`evidence_then_review`)
+- **fanout_max:** 3
+- **Conflict:** deploy vs verify/research → `delegate_conflict` → `NEEDS_REVIEW`
+- Receipt index classifies files by `receipt_class`
+
+---
+
+## Validation tools — stateful caveat
 
 | Tool | Advances turns? | Use when |
 |------|-----------------|----------|

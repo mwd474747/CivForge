@@ -54,9 +54,43 @@ def sqlite_counts() -> Dict[str, Any]:
         return {"exists": True, "error": f"{type(exc).__name__}: {exc}"}
 
 
+def classify_receipt_path(path: str) -> str:
+    """Classify local receipt files (mirrors dawsOS receipt_class taxonomy)."""
+    name = Path(path).name.lower()
+    if name.startswith("work-pack") or name.startswith("handoff"):
+        return "planning"
+    if name.startswith("cursor-execution") or name.startswith("swarm-"):
+        return "execution"
+    if "posture" in name or "contract-parity" in name or "receipt-index" in name:
+        return "posture"
+    if name.startswith("governance-cycle") or name.startswith("governance-proposal") or name.startswith("governance-gate"):
+        return "governance_cycle"
+    if name.startswith("openclaw"):
+        return "openclaw_ops"
+    if name.startswith("gravity-rec"):
+        return "governance_cycle"
+    return "other"
+
+
+def classified_receipt_summary(limit: int = 40) -> Dict[str, Any]:
+    if not RECEIPTS.exists():
+        return {"by_class": {}, "samples": []}
+    files = sorted(RECEIPTS.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True)
+    by_class: Dict[str, int] = {}
+    samples: List[Dict[str, str]] = []
+    for path in files[:limit]:
+        rel = str(path.relative_to(ROOT))
+        cls = classify_receipt_path(rel)
+        by_class[cls] = by_class.get(cls, 0) + 1
+        if len(samples) < 12:
+            samples.append({"path": rel, "receipt_class": cls})
+    return {"by_class": by_class, "samples": samples}
+
+
 def build_report(write_files: bool = True) -> Dict[str, Any]:
     latest_files = latest_receipt_files()
     db = sqlite_counts()
+    classified = classified_receipt_summary()
     report = {
         "schema": "civforge.receipt_index.v1",
         "generated_at": utc_now(),
@@ -65,8 +99,10 @@ def build_report(write_files: bool = True) -> Dict[str, Any]:
             "latest_file_count": len(latest_files),
             "sqlite_receipts": db.get("receipts"),
             "sqlite_state_snapshots": db.get("state_snapshots"),
+            "receipt_classes": classified.get("by_class", {}),
         },
         "latest_files": latest_files,
+        "classified_samples": classified.get("samples", []),
         "sqlite": db,
     }
     if write_files:

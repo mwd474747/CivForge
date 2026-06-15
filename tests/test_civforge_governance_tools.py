@@ -39,3 +39,5 @@ def test_receipt_index_builds_without_live_kernel():
     report = build_receipt_index(write_files=False)
     assert report["schema"] == "civforge.receipt_index.v1"
     assert "latest_file_count" in report["summary"]
+    assert "receipt_classes" in report["summary"]
+    assert isinstance(report.get("classified_samples"), list)

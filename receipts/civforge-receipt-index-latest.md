@@ -1,19 +1,19 @@
 # CivForge Receipt Index
 
-- generated_at: `2026-06-15T18:54:46Z`
+- generated_at: `2026-06-15T20:33:57Z`
 - status: `pass`
-- sqlite_receipts: `320`
+- sqlite_receipts: `322`
 
 ## Latest Files
-- `receipts/civforge-contract-parity-latest.md` `2026-06-15T18:54:46Z` `152` bytes
-- `receipts/synthesis-lane-v2-nexus-governance-20260615.md` `2026-06-15T18:54:41Z` `4507` bytes
-- `receipts/openclaw-civforge-governance-hardening-20260615-1450.md` `2026-06-15T18:50:16Z` `2658` bytes
-- `receipts/civforge-governance-posture-latest.md` `2026-06-15T18:48:57Z` `189` bytes
-- `receipts/work-pack-grok-mechanics-sim-001.md` `2026-06-15T18:48:44Z` `2209` bytes
-- `receipts/HANDOFF-GROK-SWARM-20260615.md` `2026-06-15T18:48:44Z` `5850` bytes
-- `receipts/gravity-rec-20260615-184743.md` `2026-06-15T18:47:43Z` `589` bytes
-- `receipts/lane-v2-migration-20260615.md` `2026-06-15T18:47:05Z` `1328` bytes
-- `receipts/civforge-receipt-index-latest.md` `2026-06-15T18:46:06Z` `1135` bytes
-- `receipts/governance-cycle-20260615-184551.md` `2026-06-15T18:45:51Z` `1071` bytes
-- `receipts/civforge-poller-posture-latest.md` `2026-06-15T18:45:07Z` `157` bytes
-- `receipts/governance-gate-20260615-184343.md` `2026-06-15T18:43:43Z` `683` bytes
+- `receipts/civforge-poller-posture-latest.md` `2026-06-15T20:33:57Z` `157` bytes
+- `receipts/civforge-contract-parity-latest.md` `2026-06-15T20:33:57Z` `152` bytes
+- `receipts/cursor-execution-swarm-align-p2-20260615.md` `2026-06-15T20:33:28Z` `530` bytes
+- `receipts/cursor-execution-swarm-align-p1-20260615.md` `2026-06-15T19:53:09Z` `603` bytes
+- `receipts/work-pack-grok-mechanics-sim-001.md` `2026-06-15T19:51:26Z` `2575` bytes
+- `receipts/work-pack-template-v1-example.md` `2026-06-15T19:49:39Z` `901` bytes
+- `receipts/openclaw-governance-turnkey-20260615-192632.md` `2026-06-15T19:26:32Z` `557` bytes
+- `receipts/civforge-governance-posture-latest.md` `2026-06-15T19:26:32Z` `189` bytes
+- `receipts/civforge-receipt-index-latest.md` `2026-06-15T19:26:31Z` `1183` bytes
+- `receipts/work-pack-openclaw-civforge-governance-001.md` `2026-06-15T19:26:21Z` `2262` bytes
+- `receipts/cursor-execution-governance-swarm-class-20260615.md` `2026-06-15T19:14:12Z` `1322` bytes
+- `receipts/governance-cycle-20260615-185446.md` `2026-06-15T18:54:46Z` `1072` bytes

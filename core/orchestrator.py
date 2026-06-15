@@ -15,6 +15,13 @@ from typing import Dict, Any, List
 from .agent_brain import AgentBrain
 from .fun_forge import FunForge
 from .governance import GovernanceGate, Receipt
+from .swarm_join import (
+    CONFLICT_RESOLUTION_MODE,
+    FANOUT_MAX,
+    JOIN_STRATEGY,
+    detect_delegate_conflict,
+    ordered_agent_ids,
+)
 
 
 class GovernanceOrchestrator:
@@ -40,19 +47,26 @@ class GovernanceOrchestrator:
         for k in self.workstream_resources:
             self.workstream_resources[k] += 1 if k != "deploy_budget" else 0
 
-        # Agent decisions (main Grok + sub-agents)
-        decisions = {}
-        for aid, brain in self.brains.items():
-            state = {"resources": self.workstream_resources}
+        # Agent decisions — sequential join (harper → sebastian → grok), fanout capped
+        decisions: Dict[str, str] = {}
+        state = {"resources": self.workstream_resources}
+        for aid in ordered_agent_ids(self.brains.keys()):
+            brain = self.brains[aid]
             decision = brain.decide_action(state)
             decisions[aid] = decision
             brain.record_receipt({"turn": self.turn, "decision": decision})
+
+        delegate_conflict = detect_delegate_conflict(decisions)
 
         # Propose a representative work item this cycle (often gravity-related)
         proposal = self.gate.propose(
             self.turn,
             "govern_gravity_work",
-            {"player_actions": player_actions, "decisions": decisions}
+            {
+                "player_actions": player_actions,
+                "decisions": decisions,
+                "delegate_conflict": delegate_conflict,
+            }
         )
 
         # Score with FunForge (rigor of the cycle)
@@ -66,16 +80,20 @@ class GovernanceOrchestrator:
 
         gate_result = self.gate.gate(proposal.id, fun_score, agent_comment=decisions.get("grok", ""))
 
-        # Build rich receipt (this is what gets logged to disk + returned)
+        approved = bool(gate_result.get("approved")) and not delegate_conflict
         receipt = {
             "turn": self.turn,
-            "status": "PASS" if gate_result.get("approved") else "NEEDS_REVIEW",
+            "status": "PASS" if approved else "NEEDS_REVIEW",
             "fun_score": fun_score,
             "comment": FunForge.comment(fun_score),
             "decisions": decisions,
             "proposal_id": proposal.id,
             "gate": gate_result,
             "resources": dict(self.workstream_resources),
+            "join_strategy": JOIN_STRATEGY,
+            "fanout_max": FANOUT_MAX,
+            "delegate_conflict": delegate_conflict,
+            "conflict_resolution_mode": CONFLICT_RESOLUTION_MODE if delegate_conflict else None,
         }
         self.receipts.append(receipt)
 

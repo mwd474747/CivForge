@@ -1,71 +1,135 @@
 {
-  "generated_at": "2026-06-15T18:54:46Z",
+  "classified_samples": [
+    {
+      "path": "receipts/civforge-poller-posture-latest.md",
+      "receipt_class": "posture"
+    },
+    {
+      "path": "receipts/civforge-contract-parity-latest.md",
+      "receipt_class": "posture"
+    },
+    {
+      "path": "receipts/cursor-execution-swarm-align-p2-20260615.md",
+      "receipt_class": "execution"
+    },
+    {
+      "path": "receipts/cursor-execution-swarm-align-p1-20260615.md",
+      "receipt_class": "execution"
+    },
+    {
+      "path": "receipts/work-pack-grok-mechanics-sim-001.md",
+      "receipt_class": "planning"
+    },
+    {
+      "path": "receipts/work-pack-template-v1-example.md",
+      "receipt_class": "planning"
+    },
+    {
+      "path": "receipts/openclaw-governance-turnkey-20260615-192632.md",
+      "receipt_class": "openclaw_ops"
+    },
+    {
+      "path": "receipts/civforge-governance-posture-latest.md",
+      "receipt_class": "posture"
+    },
+    {
+      "path": "receipts/civforge-receipt-index-latest.md",
+      "receipt_class": "posture"
+    },
+    {
+      "path": "receipts/work-pack-openclaw-civforge-governance-001.md",
+      "receipt_class": "planning"
+    },
+    {
+      "path": "receipts/cursor-execution-governance-swarm-class-20260615.md",
+      "receipt_class": "execution"
+    },
+    {
+      "path": "receipts/governance-cycle-20260615-185446.md",
+      "receipt_class": "governance_cycle"
+    }
+  ],
+  "generated_at": "2026-06-15T20:33:57Z",
   "latest_files": [
     {
-      "mtime": "2026-06-15T18:54:46Z",
-      "path": "receipts/civforge-contract-parity-latest.md",
-      "size": 152
-    },
-    {
-      "mtime": "2026-06-15T18:54:41Z",
-      "path": "receipts/synthesis-lane-v2-nexus-governance-20260615.md",
-      "size": 4507
-    },
-    {
-      "mtime": "2026-06-15T18:50:16Z",
-      "path": "receipts/openclaw-civforge-governance-hardening-20260615-1450.md",
-      "size": 2658
-    },
-    {
-      "mtime": "2026-06-15T18:48:57Z",
-      "path": "receipts/civforge-governance-posture-latest.md",
-      "size": 189
-    },
-    {
-      "mtime": "2026-06-15T18:48:44Z",
-      "path": "receipts/work-pack-grok-mechanics-sim-001.md",
-      "size": 2209
-    },
-    {
-      "mtime": "2026-06-15T18:48:44Z",
-      "path": "receipts/HANDOFF-GROK-SWARM-20260615.md",
-      "size": 5850
-    },
-    {
-      "mtime": "2026-06-15T18:47:43Z",
-      "path": "receipts/gravity-rec-20260615-184743.md",
-      "size": 589
-    },
-    {
-      "mtime": "2026-06-15T18:47:05Z",
-      "path": "receipts/lane-v2-migration-20260615.md",
-      "size": 1328
-    },
-    {
-      "mtime": "2026-06-15T18:46:06Z",
-      "path": "receipts/civforge-receipt-index-latest.md",
-      "size": 1135
-    },
-    {
-      "mtime": "2026-06-15T18:45:51Z",
-      "path": "receipts/governance-cycle-20260615-184551.md",
-      "size": 1071
-    },
-    {
-      "mtime": "2026-06-15T18:45:07Z",
+      "mtime": "2026-06-15T20:33:57Z",
       "path": "receipts/civforge-poller-posture-latest.md",
       "size": 157
     },
     {
-      "mtime": "2026-06-15T18:43:43Z",
-      "path": "receipts/governance-gate-20260615-184343.md",
-      "size": 683
+      "mtime": "2026-06-15T20:33:57Z",
+      "path": "receipts/civforge-contract-parity-latest.md",
+      "size": 152
+    },
+    {
+      "mtime": "2026-06-15T20:33:28Z",
+      "path": "receipts/cursor-execution-swarm-align-p2-20260615.md",
+      "size": 530
+    },
+    {
+      "mtime": "2026-06-15T19:53:09Z",
+      "path": "receipts/cursor-execution-swarm-align-p1-20260615.md",
+      "size": 603
+    },
+    {
+      "mtime": "2026-06-15T19:51:26Z",
+      "path": "receipts/work-pack-grok-mechanics-sim-001.md",
+      "size": 2575
+    },
+    {
+      "mtime": "2026-06-15T19:49:39Z",
+      "path": "receipts/work-pack-template-v1-example.md",
+      "size": 901
+    },
+    {
+      "mtime": "2026-06-15T19:26:32Z",
+      "path": "receipts/openclaw-governance-turnkey-20260615-192632.md",
+      "size": 557
+    },
+    {
+      "mtime": "2026-06-15T19:26:32Z",
+      "path": "receipts/civforge-governance-posture-latest.md",
+      "size": 189
+    },
+    {
+      "mtime": "2026-06-15T19:26:31Z",
+      "path": "receipts/civforge-receipt-index-latest.md",
+      "size": 1183
+    },
+    {
+      "mtime": "2026-06-15T19:26:21Z",
+      "path": "receipts/work-pack-openclaw-civforge-governance-001.md",
+      "size": 2262
+    },
+    {
+      "mtime": "2026-06-15T19:14:12Z",
+      "path": "receipts/cursor-execution-governance-swarm-class-20260615.md",
+      "size": 1322
+    },
+    {
+      "mtime": "2026-06-15T18:54:46Z",
+      "path": "receipts/governance-cycle-20260615-185446.md",
+      "size": 1072
     }
   ],
   "schema": "civforge.receipt_index.v1",
   "sqlite": {
     "exists": true,
     "latest": [
+      {
+        "action": "PASS",
+        "created_at": "2026-06-15T18:54:46.631892",
+        "id": "r-76-20260615-185446",
+        "status": "PASS",
+        "turn": 76
+      },
+      {
+        "action": "PASS",
+        "created_at": "2026-06-15T18:54:46.513272",
+        "id": "r-75-20260615-185446",
+        "status": "PASS",
+        "turn": 75
+      },
       {
         "action": "gravity_recommendation",
         "created_at": "2026-06-15T18:47:43.048264",
@@ -86,29 +150,23 @@
         "id": "r-73-20260615-184551",
         "status": "PASS",
         "turn": 73
-      },
-      {
-        "action": "governance_gate",
-        "created_at": "2026-06-15T18:43:43.795428",
-        "id": "3591c2c9-gate-20260615184343",
-        "status": "GATED_APPROVED",
-        "turn": 72
-      },
-      {
-        "action": "civforge_governance_hardening_validation",
-        "created_at": "2026-06-15T18:43:43.789525",
-        "id": "3591c2c9",
-        "status": "PROPOSED",
-        "turn": 72
       }
     ],
-    "receipts": 320,
+    "receipts": 322,
     "state_snapshots": 1
   },
   "status": "pass",
   "summary": {
     "latest_file_count": 12,
-    "sqlite_receipts": 320,
+    "receipt_classes": {
+      "execution": 7,
+      "governance_cycle": 17,
+      "openclaw_ops": 4,
+      "other": 2,
+      "planning": 6,
+      "posture": 4
+    },
+    "sqlite_receipts": 322,
     "sqlite_state_snapshots": 1
   }
 }
