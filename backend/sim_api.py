@@ -13,6 +13,7 @@ import hmac
 # Add core to path for the realigned Python agentic patterns (no more Godot MVP)
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core import AgentBrain, FunForge, GovernanceOrchestrator, ReceiptStore
+from core.swarm_join import FORGE_COORDINATOR_ID
 from core.mechanics_registry import build_default_registry, default_mechanics_lanes
 from backend.civstudy_metadata import civstudy_reference_panel
 from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
@@ -216,7 +217,9 @@ def telemetry_extra_from_state() -> Dict[str, Any]:
         },
     }
 
-grok = orchestrator.register_agent("grok", "Grok (Main Orchestrator)")
+forge_coordinator = orchestrator.register_agent(
+    FORGE_COORDINATOR_ID, "Forge Coordinator (in-kernel)"
+)
 orchestrator.register_agent("harper", "Harper (Agentic Systems & Memory)")
 orchestrator.register_agent("sebastian", "Sebastian (Governance & Safety)")
 
@@ -479,7 +482,7 @@ async def gravity_deploy_recommendation() -> Dict[str, Any]:
     Real deploys must still be executed via the strict deploy.sh (this only advises + logs receipt).
     """
     state = {"resources": game_state["player"]["resources"]}
-    decision = grok.decide_action(state)
+    decision = forge_coordinator.decide_action(state)
     fun = FunForge.calculate_fun_metrics({"agency": 0.95, "emergence": 0.9, "pacing": 0.85, "juice": 0.88})
     comment = FunForge.comment(fun)
     rec = {

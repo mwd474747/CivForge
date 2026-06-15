@@ -8,6 +8,7 @@ sys.path.insert(0, str(ROOT))
 
 from core.orchestrator import GovernanceOrchestrator  # noqa: E402
 from core.swarm_join import (  # noqa: E402
+    FORGE_COORDINATOR_ID,
     JOIN_ORDER,
     action_kind,
     detect_delegate_conflict,
@@ -16,7 +17,7 @@ from core.swarm_join import (  # noqa: E402
 
 
 def test_join_order_and_fanout():
-    ids = ordered_agent_ids(["grok", "harper", "sebastian", "extra"])
+    ids = ordered_agent_ids([FORGE_COORDINATOR_ID, "harper", "sebastian", "extra"])
     assert ids[:3] == JOIN_ORDER
     assert len(ids) == 3
 
@@ -45,7 +46,7 @@ def test_advance_cycle_includes_join_metadata():
     orch = GovernanceOrchestrator()
     orch.register_agent("harper", "Harper")
     orch.register_agent("sebastian", "Sebastian")
-    orch.register_agent("grok", "Grok")
+    orch.register_agent(FORGE_COORDINATOR_ID, "Forge Coordinator")
     result = orch.advance_cycle(player_actions=0)
     receipt = result["receipt"]
     assert receipt["join_strategy"] == "evidence_then_review"

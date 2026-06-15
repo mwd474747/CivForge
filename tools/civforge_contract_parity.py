@@ -88,6 +88,17 @@ def swarm_alignment_checks() -> Dict[str, Any]:
     if registry_path.exists():
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
 
+    sim_api = read_text(ROOT / "backend" / "sim_api.py")
+    forge_role = next(
+        (r for r in registry.get("roles", []) if isinstance(r, dict) and r.get("id") == "forge-coordinator"),
+        {},
+    )
+    kernel_id = forge_role.get("kernel_agent_id", "")
+    sim_registers_kernel = bool(
+        re.search(r"register_agent\(\s*FORGE_COORDINATOR_ID", sim_api)
+        and 'FORGE_COORDINATOR_ID = "forge-coordinator"' in read_text(ROOT / "core" / "swarm_join.py")
+    )
+
     role_ids = {r.get("id") for r in registry.get("roles", []) if isinstance(r, dict)}
     lanes = registry.get("execution_lanes", {})
     lane_keys = set(lanes.keys()) if isinstance(lanes, dict) else set()
@@ -105,6 +116,8 @@ def swarm_alignment_checks() -> Dict[str, Any]:
         "dawsos_role_map_present": bool(registry.get("dawsos_role_map")),
         "naming_notes_present": bool(registry.get("naming_notes")),
         "wp_template_has_side_effect_class": "side_effect_class" in wp_template,
+        "forge_coordinator_kernel_id": kernel_id,
+        "sim_api_registers_kernel_id": sim_registers_kernel,
     }
 
 
@@ -142,6 +155,18 @@ def swarm_alignment_findings(checks: Dict[str, Any]) -> List[Dict[str, str]]:
         findings.append({"id": "naming_notes_missing", "severity": "warn", "detail": "role_registry missing naming_notes for grok vs forge-coordinator"})
     if not checks["wp_template_has_side_effect_class"]:
         findings.append({"id": "wp_template_side_effect", "severity": "fail", "detail": "WORK_PACK_TEMPLATE must define side_effect_class taxonomy"})
+    if checks.get("forge_coordinator_kernel_id") != "forge-coordinator":
+        findings.append({
+            "id": "forge_coordinator_kernel_id",
+            "severity": "fail",
+            "detail": "role_registry forge-coordinator.kernel_agent_id must be forge-coordinator",
+        })
+    if not checks.get("sim_api_registers_kernel_id"):
+        findings.append({
+            "id": "sim_api_kernel_registration",
+            "severity": "fail",
+            "detail": "sim_api.py must register forge-coordinator kernel AgentBrain id",
+        })
     return findings
 
 

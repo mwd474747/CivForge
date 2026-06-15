@@ -5,7 +5,8 @@ from __future__ import annotations
 from typing import Dict, Iterable, Tuple
 
 # Mirrors dawsOS secretary_reconciliation_swarm join: evidence → review → coordinator
-JOIN_ORDER: Tuple[str, ...] = ("harper", "sebastian", "grok")
+FORGE_COORDINATOR_ID = "forge-coordinator"
+JOIN_ORDER: Tuple[str, ...] = ("harper", "sebastian", FORGE_COORDINATOR_ID)
 FANOUT_MAX = 3
 JOIN_STRATEGY = "evidence_then_review"
 CONFLICT_RESOLUTION_MODE = "review_gate_on_disagreement"

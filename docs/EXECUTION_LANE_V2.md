@@ -115,7 +115,7 @@ CivForge is **dawsOS-shaped** (proposal-first, receipt-first, bounded bridges) b
 Three layers — do not conflate:
 
 1. **Grok swarm** (grok.com) — planning / work packs only
-2. **AgentBrain personas** (`grok`, `harper`, `sebastian`) — in-kernel simulation/governance
+2. **AgentBrain personas** (`forge-coordinator`, `harper`, `sebastian`) — in-kernel simulation/governance
 3. **dawsos-nexus bridge** — telemetry + propose-only command intake
 
 Full comparison: `docs/CIVFORGE_SWARM_CLASS_V1.md`

@@ -18,6 +18,7 @@ from .governance import GovernanceGate, Receipt
 from .swarm_join import (
     CONFLICT_RESOLUTION_MODE,
     FANOUT_MAX,
+    FORGE_COORDINATOR_ID,
     JOIN_STRATEGY,
     detect_delegate_conflict,
     ordered_agent_ids,
@@ -47,7 +48,7 @@ class GovernanceOrchestrator:
         for k in self.workstream_resources:
             self.workstream_resources[k] += 1 if k != "deploy_budget" else 0
 
-        # Agent decisions — sequential join (harper → sebastian → grok), fanout capped
+        # Agent decisions — sequential join (harper → sebastian → forge-coordinator), fanout capped
         decisions: Dict[str, str] = {}
         state = {"resources": self.workstream_resources}
         for aid in ordered_agent_ids(self.brains.keys()):
@@ -78,7 +79,9 @@ class GovernanceOrchestrator:
         }
         fun_score = FunForge.calculate_fun_metrics(fun_state)
 
-        gate_result = self.gate.gate(proposal.id, fun_score, agent_comment=decisions.get("grok", ""))
+        gate_result = self.gate.gate(
+            proposal.id, fun_score, agent_comment=decisions.get(FORGE_COORDINATOR_ID, "")
+        )
 
         approved = bool(gate_result.get("approved")) and not delegate_conflict
         receipt = {

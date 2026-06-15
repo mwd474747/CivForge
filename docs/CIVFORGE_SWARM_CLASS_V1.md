@@ -35,7 +35,7 @@ CivForge is **recognizably dawsOS-shaped** (proposal-first, receipt-first, bound
 
 ### Layer 2 — Local kernel agents (lightweight game/governance personas)
 
-- `grok`, `harper`, `sebastian` (and lane specialists) are **`AgentBrain`** simulation personas
+- `forge-coordinator`, `harper`, `sebastian` (and lane specialists) are **`AgentBrain`** simulation personas
 - `GovernanceOrchestrator.advance_cycle()` drives: decide → propose → FunForge → gate → receipt
 - These are **in-kernel gameplay/governance actors**, not grok.com swarm delegates and not wt `chief_of_staff` / `evidence` roles
 - See `core/orchestrator.py`, `core/agent_brain.py`, `agents/role_registry.json`
@@ -75,7 +75,7 @@ wt `agent-spec.yaml` defines orchestrator roles: discovery, planning, evidence, 
 | Cursor executor | engineering delegate | Mac Studio, CivForge git |
 | OpenClaw escalation | chief_of_staff + wt truth | wt only when triggered (`openclaw-chief-of-staff` in role_registry) |
 | Nexus poller | command intent bridge | propose-only |
-| In-kernel `grok` AgentBrain | forge-coordinator (Layer 2) | **Not** grok.com swarm — see `agents/role_registry.json` naming_notes |
+| In-kernel AgentBrain | `forge-coordinator` (Layer 2) | **Not** grok.com swarm — see `agents/role_registry.json` naming_notes |
 
 ---
 
@@ -90,7 +90,7 @@ CivForge WPs borrow dawsOS swarm-registry **fields** locally without wt registra
 
 `GovernanceOrchestrator.advance_cycle()` uses `core/swarm_join.py`:
 
-- **Join order:** harper → sebastian → grok (`evidence_then_review`)
+- **Join order:** harper → sebastian → `forge-coordinator` (`evidence_then_review`)
 - **fanout_max:** 3
 - **Conflict:** deploy vs verify/research → `delegate_conflict` → `NEEDS_REVIEW`
 - Receipt index classifies files by `receipt_class`

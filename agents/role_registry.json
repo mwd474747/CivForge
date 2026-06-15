@@ -26,7 +26,7 @@
     }
   },
   "naming_notes": {
-    "grok_swarm_vs_forge_coordinator": "grok-swarm (grok.com) is Layer 1 planning. In-kernel AgentBrain id 'grok' in sim_api.py is Layer 2 forge-coordinator persona — not the cloud swarm. Do not conflate."
+    "grok_swarm_vs_forge_coordinator": "grok-swarm (grok.com) is Layer 1 planning. In-kernel AgentBrain id 'forge-coordinator' in sim_api.py is Layer 2 coordinator persona — not the cloud swarm. Do not conflate."
   },
   "dawsos_role_map": {
     "discovery": ["grok-swarm", "harper"],
@@ -67,9 +67,9 @@
       "name": "Forge Coordinator (in-kernel AgentBrain)",
       "execution_lane": null,
       "dawsos_governed_agent": null,
-      "kernel_agent_id": "grok",
+      "kernel_agent_id": "forge-coordinator",
       "capabilities": ["orchestrate-cycle", "propose-work", "advance-turn"],
-      "description": "Layer 2 simulation persona (sim_api AgentBrain id 'grok'). NOT grok.com swarm. See naming_notes."
+      "description": "Layer 2 simulation persona (sim_api AgentBrain id 'forge-coordinator'). NOT grok.com swarm. See naming_notes."
     },
     {
       "id": "harper",
