@@ -1,80 +1,71 @@
 # CivForge completion checklist v1
 
-**Status:** `current` — proposal **1351a353** closed 2026-06-15 (`3f4b7af` landed)
+**Status:** `current` — swarm multi-agent layer landed (`227da70`+); review patches applied 2026-06-15
 **Boundary:** `docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md`
+**Play guide:** `docs/GAME_PLAY_GUIDE_V1.md`
 
 ---
 
-## Done (verified 2026-06-15)
+## Done (verified live)
 
 | Item | Evidence |
 |------|----------|
-| Kernel `:8080` live | `GET /state` → turn 11, fun 86.8 |
-| Nexus `:8082` health | `{"status":"ok","service":"dawsos-nexus",...}` |
-| `civforge-kernel` registered | `governance_kernel`, healthy, `allowedActions: ["sync_config"]` |
-| `what_if` real Nexus context | fun_impact ~91.8; no fallback |
-| Poller strict `sync_config` | `blocked_by_canon` on restart; propose on sync_config |
-| Satellite key | `~/.openclaw/runtime/nexus-satellite-api-keys.json` (mode 0600) |
-| Vercel prod | https://civforge.vercel.app |
-| Local dashboard | http://127.0.0.1:8080/dashboard (200) |
-| Governed land | commit `3f4b7af` pushed to main |
+| Kernel `:8080` live | `bash tools/start-kernel-8080.sh` → `GET /state` |
+| Multi-agent `/state` | 25 `map_tiles`, `alliances`, `negotiations`, `victory_progress`, `mechanics_lanes` |
+| Local dashboard | http://127.0.0.1:8080/dashboard — Multi-Agent Command + view tabs |
+| Nexus `:8082` health | `GET /api/health` → ok |
+| `civforge-kernel` satellite | registered; telemetry on advance/found |
+| MCP agent-play | `tools/mcp_server.py` — 6 tools incl. `civforge_negotiate_respond` |
+| Docker compose | `docker-compose.yml`; DB volume → `/app/gravity_backend.db` |
+| Unit tests | `tests/test_multi_agent_state.py` |
+| Full validation | `bash tools/validate-game.sh --restart` |
+| Vercel static shell | https://civforge.vercel.app (`?api_base=` for live kernel) |
 
 ---
 
-## Closed — proposal 1351a353
+## Review fixes (2026-06-15)
 
-- [x] 8082 live + real `what_if` nexus_context
-- [x] `NEXUS_API_KEY` provisioned + poller `--once` command handling (2/2)
-- [x] Real Vercel prod URL
-- [x] Completion patches committed (`3f4b7af`)
-- [ ] wt planning pointer (OpenClaw packet — separate repo)
+- [x] Docker SQLite volume aligned to `gravity_backend.db`
+- [x] Negotiation IDs sequenced (`neg-player-harper-48-1`, `-2`, …)
+- [x] `/state` returns all pending negotiations + resolved tail
+- [x] Joint victory milestone syncs when progress ≥ target
+- [x] MCP `civforge_negotiate_respond` tool
 
-### Poller test (closure round)
+---
+
+## Multi-Agent UI (WP-UI-MULTI-AGENT-EXTENSION)
+
+| Layer | Path |
+|-------|------|
+| State engine | `backend/multi_agent_state.py` |
+| Mechanics | `core/mechanics_registry.py` |
+| API | `backend/sim_api.py` |
+| Dashboard | `frontend/index.html` |
+| Turnkey | `tools/turnkey-multi-ui-full.sh` |
+
+---
+
+## Quick validation
 
 ```bash
-# Key from runtime file (never commit):
+bash tools/validate-game.sh --restart
+open http://127.0.0.1:8080/dashboard
+```
+
+Poller (optional):
+
+```bash
 export NEXUS_API_KEY="$(python3 -c "import json;print(json.load(open('$HOME/.openclaw/runtime/nexus-satellite-api-keys.json'))['civforge-kernel']['apiKey'])")"
 export NEXUS_URL=http://127.0.0.1:8082
 python3 tools/nexus_command_poller.py --once
 ```
 
-Observed: `polled: 2`, `processed: 2` — restart `blocked_by_canon`; sync_config proposed (`proposal_id=747989fa`).
-
-### Dashboard
-
-- **Local (works now):** http://127.0.0.1:8080/dashboard
-- **Vercel (remote shell):** https://civforge.vercel.app — setup panel; tunnel via `?api_base=https://…`
-
 ---
 
 ## Out of scope / later
 
-- Auth-prototype `:8081` for product identity (Phase D)
-- Sister SIS-NEXUS-B: ack/complete API-key auth; control proxy reject for `governance_kernel`
-- wt `CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md` pointer commit
-
----
-
-## Quick validation (Mac Studio)
-
-```bash
-curl -sf http://127.0.0.1:8080/state | head -c 120
-curl -sf http://127.0.0.1:8082/api/health
-open http://127.0.0.1:8080/dashboard
-curl -sf -X POST http://127.0.0.1:8080/simulation/what_if -H 'Content-Type: application/json' -d '{"investment":5}' | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('fun_impact_estimate'), 'fallback' not in str(d.get('nexus_context','')))"
-```
-
----
-
-## Multi-Agent UI (WP-UI-MULTI-AGENT-EXTENSION) — `current`
-
-Implemented in code (not receipt-only):
-
-| Layer | Path |
-|-------|------|
-| State engine | `backend/multi_agent_state.py` |
-| API | `backend/sim_api.py` — `/state`, `/game/negotiate`, `/game/negotiate/respond` |
-| Dashboard | `frontend/index.html` — tabs, map, negotiation, alliances, victory |
-
-**Open:** http://127.0.0.1:8080/dashboard
-
+- Auth-prototype `:8081` for product identity
+- Live civstudy corpus (reference panel only today)
+- wt `CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md` pointer (OpenClaw packet)
+- Railway/Render/Fly hosting push (operator)
+- Git lane worktrees + draft PRs per `GIT_LANES_POLICY.md`

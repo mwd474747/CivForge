@@ -35,6 +35,14 @@ TOOLS = [
         "properties": {"to": {"type": "string"}, "offer": {"type": "string"}},
         "required": ["to", "offer"],
     }},
+    {"name": "civforge_negotiate_respond", "description": "Accept or decline a pending negotiation", "inputSchema": {
+        "type": "object",
+        "properties": {
+            "negotiation_id": {"type": "string"},
+            "accept": {"type": "boolean", "default": True},
+        },
+        "required": ["negotiation_id"],
+    }},
     {"name": "civforge_what_if", "description": "Simulation what-if with investment", "inputSchema": {
         "type": "object",
         "properties": {"investment": {"type": "integer", "default": 5}},
@@ -72,6 +80,11 @@ def _call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         result = _http("POST", "/game/negotiate", {
             "to": arguments["to"],
             "offer": arguments["offer"],
+        })
+    elif name == "civforge_negotiate_respond":
+        result = _http("POST", "/game/negotiate/respond", {
+            "negotiation_id": arguments["negotiation_id"],
+            "accept": bool(arguments.get("accept", True)),
         })
     elif name == "civforge_what_if":
         result = _http("POST", "/simulation/what_if", {"investment": int(arguments.get("investment", 5))})

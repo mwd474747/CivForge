@@ -13,7 +13,18 @@ All changes to gravity-mosaic are made exclusively on disk at `/Users/michaeldaw
 
 The Godot 4X MVP (playable UI, map, end-turn loops, etc.) has been removed in favour of the earlier FastAPI version + Python core so the original intent is fully implemented: CivForge is the intelligent local governance layer, not the game itself.
 
-## Quick Start (exactly as the original pasted Codespaces instructions, now local)
+## Quick Start (Mac Studio — recommended)
+
+```bash
+cd ~/CivForge
+bash tools/start-kernel-8080.sh
+open http://127.0.0.1:8080/dashboard
+bash tools/validate-game.sh          # pytest + API + turnkey
+```
+
+**Multi-agent dashboard:** agent tabs, 5×5 map, negotiations, alliances, victory bar, mechanics lanes. See `docs/GAME_PLAY_GUIDE_V1.md`.
+
+**Legacy FastAPI start** (if you prefer manual uvicorn):
 
 ```bash
 cd /Users/michaeldawson/CivForge/backend

@@ -133,6 +133,7 @@ def ensure_multi_agent_state(game_state: Dict[str, Any]) -> None:
         game_state["negotiations"] = default_negotiations()
     if "victory_progress" not in game_state:
         game_state["victory_progress"] = default_victory_progress()
+    sync_victory_milestones(game_state["victory_progress"])
 
     existing_ids = {c.get("id") or c.get("name", "").split()[0].lower() for c in game_state.get("ai_civs", [])}
     for civ in default_extra_ai_civs():
@@ -142,6 +143,56 @@ def ensure_multi_agent_state(game_state: Dict[str, Any]) -> None:
     for civ in game_state.get("ai_civs", []):
         if "id" not in civ:
             civ["id"] = civ.get("name", "agent").split()[0].lower().replace("(", "").strip()
+
+
+def next_negotiation_id(game_state: Dict[str, Any], from_agent: str, to: str) -> str:
+    """Unique negotiation id per from/to/turn (suffix seq avoids same-turn collisions)."""
+    turn = game_state["turn"]
+    prefix = f"neg-{from_agent}-{to}-{turn}-"
+    taken = {n.get("id") for n in game_state.get("negotiations", []) if n.get("id")}
+    seq = 1
+    while f"{prefix}{seq}" in taken:
+        seq += 1
+    return f"{prefix}{seq}"
+
+
+def negotiations_for_api(game_state: Dict[str, Any], resolved_limit: int = 8) -> List[Dict[str, Any]]:
+    """All pending negotiations plus a short tail of resolved history for /state."""
+    negs = game_state.get("negotiations", [])
+    pending = [n for n in negs if n.get("status") == "pending"]
+    resolved = [n for n in negs if n.get("status") != "pending"]
+    seen: set[str] = set()
+    out: List[Dict[str, Any]] = []
+    for n in pending:
+        nid = n.get("id")
+        if nid and nid not in seen:
+            seen.add(nid)
+            out.append(n)
+    for n in resolved[-resolved_limit:]:
+        nid = n.get("id")
+        if nid and nid not in seen:
+            seen.add(nid)
+            out.append(n)
+    return out
+
+
+def sync_victory_milestones(vp: Dict[str, Any], turn: Optional[int] = None) -> List[str]:
+    """Align milestone flags with joint_progress (including restored snapshots at 100%)."""
+    events: List[str] = []
+    target = vp.get("target", 100)
+    progress = vp.get("joint_progress", 0)
+    milestones = vp.get("milestones", [])
+    checks = (
+        (25, 1, "Shared map control"),
+        (60, 2, "Governance quorum"),
+        (target, 3, "Joint victory"),
+    )
+    for threshold, idx, label in checks:
+        if progress >= threshold and len(milestones) > idx and not milestones[idx].get("done"):
+            milestones[idx]["done"] = True
+            prefix = f"Turn {turn}: " if turn is not None else ""
+            events.append(f"{prefix}Milestone unlocked — {label}.")
+    return events
 
 
 def _agent_id_from_decisions(decisions: Dict[str, Any]) -> Optional[str]:
@@ -161,12 +212,7 @@ def tick_multi_agent_state(game_state: Dict[str, Any], decisions: Optional[Dict[
 
     # Victory progress ticks with successful governance
     vp["joint_progress"] = min(vp["target"], vp.get("joint_progress", 0) + random.randint(1, 3))
-    if vp["joint_progress"] >= 25 and vp["milestones"][1]["done"] is False:
-        vp["milestones"][1]["done"] = True
-        events.append(f"Turn {turn}: Milestone unlocked — Shared map control.")
-    if vp["joint_progress"] >= 60 and vp["milestones"][2]["done"] is False:
-        vp["milestones"][2]["done"] = True
-        events.append(f"Turn {turn}: Milestone unlocked — Governance quorum.")
+    events.extend(sync_victory_milestones(vp, turn))
 
     # Drift betrayal risk on alliances
     for alliance in game_state["alliances"]:
@@ -195,7 +241,7 @@ def tick_multi_agent_state(game_state: Dict[str, Any], decisions: Optional[Dict[
             "Pause deploy lane for verification sprint",
         ]
         neg = {
-            "id": f"neg-{sender}-player-{turn}",
+            "id": next_negotiation_id(game_state, sender, "player"),
             "from": sender,
             "to": "player",
             "offer": random.choice(offers),
@@ -217,7 +263,7 @@ def tick_multi_agent_state(game_state: Dict[str, Any], decisions: Optional[Dict[
 def add_negotiation(game_state: Dict[str, Any], to: str, offer: str, from_agent: str = "player") -> Dict[str, Any]:
     ensure_multi_agent_state(game_state)
     entry = {
-        "id": f"neg-{from_agent}-{to}-{game_state['turn']}",
+        "id": next_negotiation_id(game_state, from_agent, to),
         "from": from_agent,
         "to": to,
         "offer": offer,
@@ -248,6 +294,7 @@ def respond_negotiation(game_state: Dict[str, Any], neg_id: str, accept: bool) -
                 game_state["alliances"].append(alliance)
                 vp = game_state["victory_progress"]
                 vp["joint_progress"] = min(vp["target"], vp.get("joint_progress", 0) + 8)
+                game_state["events"].extend(sync_victory_milestones(vp, game_state["turn"]))
             game_state["events"].append(
                 f"Turn {game_state['turn']}: Negotiation {neg_id} {'accepted' if accept else 'declined'}."
             )

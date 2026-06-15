@@ -1,36 +1,42 @@
 # Swarm open items — completion status (2026-06-15)
 
-## Implemented in this tree (`current`)
+## Implemented (`current`)
 
 | Item | Artifact |
 |------|----------|
-| Multi-agent UI (tabs, map, negotiation, alliance, victory) | `frontend/index.html`, `backend/multi_agent_state.py` |
+| Multi-agent UI | `frontend/index.html`, `backend/multi_agent_state.py` |
 | Military / Economic / Cultural lanes | `core/mechanics_registry.py`, dashboard view tabs |
-| MechanicsRegistry pluggable tick | wired in `advance_turn` |
-| Found City session UI | `GET /game/founding-session`, dashboard Found City tab |
-| CivStudy reference panel | `civstudy_reference` in `/state`, dashboard tab |
-| MCP agent-play server | `tools/mcp_server.py`, `civforge_cli.py mcp-serve` |
+| Found City session | `GET /game/founding-session`, Found City tab |
+| CivStudy reference panel | `civstudy_reference` in `/state` |
+| MCP agent-play (6 tools) | `tools/mcp_server.py`, `civforge_cli.py mcp-serve` |
 | Docker compose + healthcheck | `docker-compose.yml`, `tools/docker-smoke.sh` |
-| Poller daemon script | `tools/start-poller-daemon.sh` |
-| Richer 8082 telemetry | `telemetry_extra_from_state()` in `sim_api.py` |
-| Vercel static deploy | https://civforge.vercel.app |
+| Poller daemon | `tools/start-poller-daemon.sh` |
+| 8082 telemetry | `telemetry_extra_from_state()` in `sim_api.py` |
+| Game validation suite | `tools/validate-game.sh`, `tests/test_multi_agent_state.py` |
+| Play documentation | `docs/GAME_PLAY_GUIDE_V1.md` |
+
+## Review fixes applied
+
+| Gap | Fix |
+|-----|-----|
+| Docker DB not persisted | Volume `civforge-db:/app/gravity_backend.db` |
+| Duplicate negotiation IDs | `next_negotiation_id()` with `-1`, `-2` suffix |
+| Pending offers dropped from `/state` | `negotiations_for_api()` — all pending + resolved tail |
+| Victory 100% but milestone open | `sync_victory_milestones()` on tick + restore |
+| MCP missing respond | `civforge_negotiate_respond` tool |
 
 ## Quick validation
 
 ```bash
-bash tools/start-kernel-8080.sh
+bash tools/validate-game.sh --restart
 open http://127.0.0.1:8080/dashboard
-bash tools/turnkey-multi-ui-full.sh
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 tools/mcp_server.py
-bash tools/start-poller-daemon.sh   # optional; needs runtime NEXUS_API_KEY
-bash tools/docker-smoke.sh          # optional; uses port 8080
 ```
 
-## Still out of scope (SEPARATION / lanes / operator)
+## Still out of scope
 
-- Live civstudy corpus integration (reference panel only)
+- Live civstudy corpus integration
 - `:8081` JWT identity plane
-- Git lane worktrees + draft PRs per `GIT_LANES_POLICY.md`
-- Railway/Render/Fly hosting push (operator)
+- Git lane worktrees + draft PRs
+- Railway/Render/Fly hosting (operator)
 - wt planning pointer (OpenClaw packet)
-- OpenClaw handoff v3 / release candidate artifacts
+- Win/lose end-screen beyond milestone bar

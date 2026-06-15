@@ -21,6 +21,7 @@ from backend.multi_agent_state import (
     default_negotiations,
     default_victory_progress,
     ensure_multi_agent_state,
+    negotiations_for_api,
     respond_negotiation,
     tick_multi_agent_state,
 )
@@ -216,7 +217,7 @@ async def get_state() -> Dict[str, Any]:
         "receipts": recent,
         "map_tiles": game_state["map_tiles"],
         "alliances": game_state["alliances"],
-        "negotiations": game_state["negotiations"][-12:],
+        "negotiations": negotiations_for_api(game_state),
         "victory_progress": game_state["victory_progress"],
         "agent_labels": AGENT_LABELS,
         "faction_colors": FACTION_COLORS,
@@ -345,7 +346,7 @@ async def game_negotiate(req: NegotiateRequest) -> Dict[str, Any]:
     """Player proposes a negotiation offer to another agent."""
     entry = add_negotiation(game_state, req.to, req.offer, from_agent="player")
     receipt_store.save_state("game_state", game_state)
-    return {"negotiation": entry, "negotiations": game_state["negotiations"][-8:]}
+    return {"negotiation": entry, "negotiations": negotiations_for_api(game_state)}
 
 @app.post("/game/negotiate/respond")
 async def game_negotiate_respond(req: NegotiateRespondRequest) -> Dict[str, Any]:

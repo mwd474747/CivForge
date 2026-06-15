@@ -15,7 +15,7 @@ services:
       CIVFORGE_CORS_ORIGINS: ${CIVFORGE_CORS_ORIGINS:-https://civforge.vercel.app,http://127.0.0.1:8080}
     volumes:
       - civforge-receipts:/app/receipts
-      - civforge-db:/app/data
+      - civforge-db:/app/gravity_backend.db
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/state', timeout=3)"]
       interval: 15s
