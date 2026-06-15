@@ -46,3 +46,19 @@ This doc itself is a governed meta-action. Update only after propose â†’ gate â†
 
 All lanes must produce receipts. Literal verification is non-negotiable.
 # nexus_ctrl reference (dawsos-nexus local) added as per proposal for lane-required-infra and lane-meta-data-core
+---
+
+## Swarm Multi-Agent UI Execution Boundary Approvals (2026-06-15, proposal 47c37283)
+
+Per user "execute all the turnkey ready work swarm did to completion, or lane boundary approvals" (WP-UI-MULTI-AGENT-EXTENSION-20260614):
+
+- Dashboard lane: Foundation + rich multi-agent extension (tabs, shared map, negotiation, alliance, joint victory) landed in main via turnkey + frontend enhancement. Approved for integration.
+- Agent-player lane: Multi via ai_civs + negotiation/alliances ready; CLI + poller for agent play.
+- Simulation lane: what_if + backend multi-state tested with 8082.
+- Mechanics lane: emergent larger interactions via governance + joint victory.
+- Infra lane: turnkey script, Vercel static, 8082 bidirectional, local dashboard.
+- Required-infra: all lanes advanced per swarm; this execution provides main-tree boundary approval.
+
+All governed, literals, separation. Lanes can now execute the turnkey independently in worktrees if needed.
+
+See receipts/civ-game-backend-nexus-impl-continuation-20260614.md for full.

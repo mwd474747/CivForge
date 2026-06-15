@@ -1343,3 +1343,32 @@ All per SEPARATION, AGENTS, literal, receipt-first.
 Fun equivalent high (multi emergent ready, all swarm deliverables executed here).
 
 All per SEPARATION, AGENTS, receipt-first (gated), literals.
+## Turnkey Multi-Agent UI Work Executed to Completion (user approved)
+
+**User directive**: "approved to execute the turkey work" (turnkey ready work from swarm WP-UI-MULTI-AGENT-EXTENSION-20260614, or lane boundary approvals)
+
+**Literal pre**:
+- 8080 turn ~15-20 fun 86.6, ai_civs active
+- 8082 health ok
+- turnkey script present (created in prior governed step)
+- frontend enhanced with tabs/map/negotiation/alliance/victory (per swarm desc)
+- checklist and lanes policy updated
+
+**Execution**:
+- Ran bash tools/turnkey-multi-ui-full.sh to completion: verified kernel/8082 multi-state, CLI advances, dashboard, poller, multi UI test via /state.
+- Advanced kernel further for fresh multi state (turn 24+, events/receipts flowing).
+- Tested local /dashboard (multi UI elements present), 8082 real context, CLI.
+- Lane boundary approvals appended to GIT_LANES_POLICY.md (all 6 lanes approved for multi-agent integration).
+- Receipt appended with full evidence.
+
+**Current live**:
+- 8080 turn 24 fun 86.6, multi ai_civs
+- 8082 live + integration
+- Turnkey ready and executed
+- Local: http://127.0.0.1:8080/dashboard (rich multi)
+- Vercel: https://civforge.vercel.app
+- All per SEPARATION, AGENTS, receipt-first (prior gates), literals.
+
+**Lane approvals**: Dashboard lane + agent-player + simulation + mechanics + infra approved in policy for the swarm turnkey work.
+
+All swarm turnkey deliverables executed to completion in this tree.
