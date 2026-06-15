@@ -20,4 +20,4 @@ python3 tools/civforge_contract_parity.py
 
 ## HEAD
 
-Set after commit on `main`.
+`c8c9108` on `main` (pushed)
