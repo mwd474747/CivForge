@@ -102,8 +102,8 @@ docker compose up -d civforge-kernel
 
 SQLite volume: `civforge-db` → `/app/gravity_backend.db` (matches kernel `DB_PATH`).
 
-## Known limits
+## Known limits (non-engine)
 
-- Victory overlay is dismissible; turns continue after joint victory (no auto-reset API yet).
-- `:8081` JWT identity plane not wired.
+- `:8081` JWT identity plane not wired (Nexus satellite key / optional `CIVFORGE_REQUIRE_AUTH` only).
 - Live civstudy corpus not integrated (reference panel only).
+- Full PlayerAgent brain in orchestrator (lightweight player receipt line only).
