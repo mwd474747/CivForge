@@ -2,7 +2,7 @@
 
 **Generated:** 2026-06-16  
 **Authority:** `current`  
-**Anchor:** `d52c15f`  
+**Anchor:** `730beff`  
 **Scope:** Grok drift / lane correction hardening
 
 ---
