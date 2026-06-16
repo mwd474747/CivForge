@@ -59,8 +59,8 @@ Handoff seed: `prompts/grok_swarm_handoff_seed.md`
 **Does:**
 - Implement ignited WPs one family at a time
 - Write `receipts/cursor-execution-*.md` with `git rev-parse --short HEAD` + pytest count
-- Update `config/work_pack_registry.yaml` (`anchor.head`, `pytest_total`, WP lifecycle)
-- Run `bash tools/verify-truth-anchor.sh` and `bash tools/validate-game.sh`
+- Update `config/work_pack_registry.yaml` (`pytest_total`, WP lifecycle) — use `verify-truth-anchor.sh --sync` for `anchor.head`
+- Run `bash tools/verify-truth-anchor.sh` (read-only) and `bash tools/validate-game.sh`
 
 **Does not:**
 - wt commit / C2 / storage apply / LaunchAgents (escalate via `docs/OPENCLAW_ESCALATION_PACKET_V1.md`)
@@ -80,6 +80,8 @@ Handoff seed: `prompts/grok_swarm_handoff_seed.md`
 - **Routing gate:** `GET /state` includes `work_pack_registry` (registry summary)
 - **Restart after code change:** `bash tools/start-kernel-8080.sh`
 - **Verify:** `bash tools/verify-truth-anchor.sh` then `bash tools/validate-game.sh --read-only`
+- **After land commit:** `bash tools/verify-truth-anchor.sh --sync` and commit registry anchor
+- **Agent shell hygiene:** `bash tools/check-agent-shell-hygiene.sh` (`--kill` if stale wrappers found)
 
 ---
 
@@ -94,7 +96,9 @@ Registry: `agents/role_registry.json`
 
 | Item | Status |
 |------|--------|
-| Block A (wonder / cultural / policy) | **Closed** @ `1037950` — 113+ pytest |
+| Block A (wonder / cultural / policy) | **Closed** @ `1037950` |
+| Block B (competition / player agent) | **Closed** — see `BLOCK-B-CLOSURE-20260616.md` |
+| pytest | **129** |
 | Dashboard | `GET /dashboard` on `:8080` — extend, do not rebuild |
 | CorpusCardRegistry | `backend/corpus_card_registry.py` — **exists** |
 | MCP tools | 17 — see `tools/mcp_server.py` |

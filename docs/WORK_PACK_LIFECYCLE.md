@@ -42,9 +42,10 @@ planning ──(Mike: "Execute WP-…")──► ignited ──► executing ─
 
 1. One WP family per commit when possible.
 2. Write `receipts/cursor-execution-wp-<slug>-YYYYMMDD.md`.
-3. Update `config/work_pack_registry.yaml` (`head`, `pytest_total`, WP `lifecycle: closed`).
-4. Run full `pytest tests/ -q` + `bash tools/verify-truth-anchor.sh`.
-5. Restart kernel when routes/state shape change: `bash tools/start-kernel-8080.sh`.
+3. Update `config/work_pack_registry.yaml` (`pytest_total`, WP `lifecycle: closed`, `blocks.*.status`).
+4. Run `python3 -m pytest tests/ -q`, then `bash tools/verify-truth-anchor.sh` (read-only).
+5. Sync registry anchor after land commit: `bash tools/verify-truth-anchor.sh --sync` — commit registry in same land packet or immediate follow-up.
+6. Restart kernel when routes/state shape change: `bash tools/start-kernel-8080.sh`.
 
 ---
 

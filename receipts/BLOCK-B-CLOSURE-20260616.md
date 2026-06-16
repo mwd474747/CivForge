@@ -30,6 +30,7 @@
 
 ```bash
 cd ~/CivForge && bash tools/verify-truth-anchor.sh
+# After land: bash tools/verify-truth-anchor.sh --sync && commit registry
 python3 -m pytest tests/ -q
 bash tools/start-kernel-8080.sh   # operator
 curl -s http://127.0.0.1:8080/state | jq '.player_agent,.competition_mode.resolved'

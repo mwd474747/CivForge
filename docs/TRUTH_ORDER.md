@@ -37,7 +37,9 @@
 cd ~/CivForge
 git rev-parse --short HEAD
 python3 -m pytest tests/ -q
-bash tools/verify-truth-anchor.sh
+bash tools/verify-truth-anchor.sh              # read-only; fails if anchor.head drift
+bash tools/verify-truth-anchor.sh --sync       # after land commit only
+bash tools/check-agent-shell-hygiene.sh        # stale Cursor wrapper shells
 bash tools/validate-game.sh --read-only   # or --restart after code change
 ```
 

@@ -55,8 +55,19 @@ If previously tracked, remove with `git rm --cached` once; files may remain loca
 cd ~/CivForge
 git status --short
 python3 -m pytest tests/ -q
+bash tools/verify-truth-anchor.sh              # read-only anchor check
+bash tools/check-agent-shell-hygiene.sh        # optional; --kill stale Cursor wrappers
 bash tools/validate-game.sh    # optional; needs :8080
 ```
+
+**After a land commit** (when `anchor.head` should move):
+
+```bash
+bash tools/verify-truth-anchor.sh --sync
+git add config/work_pack_registry.yaml && git commit -m "Sync registry anchor.head to $(git rev-parse --short HEAD)."
+```
+
+Do **not** rely on verify auto-writing the registry — default mode is read-only (2026-06-16 hygiene fix).
 
 - No `_archive/` or Godot paths in active docs
 - No `tools/auth-prototype/` references (identity → sibling `dawsos-auth-prototype` repo)

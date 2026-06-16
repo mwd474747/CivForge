@@ -1,25 +1,44 @@
 #!/bin/bash
-# Verify truth-plane anchors: git HEAD, pytest count, registry coherence, Block A receipts.
+# Verify truth-plane anchors: git HEAD, pytest count, registry coherence, block closures.
+#
+# Default: read-only verify (fails if anchor.head != git HEAD — no silent registry writes).
+# After a land commit, update registry explicitly: bash tools/verify-truth-anchor.sh --sync
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+SYNC_ANCHOR=0
+for arg in "$@"; do
+  case "$arg" in
+    --sync) SYNC_ANCHOR=1 ;;
+    -h|--help)
+      echo "Usage: bash tools/verify-truth-anchor.sh [--sync]"
+      echo "  default  Fail if registry anchor.head != git HEAD (no file mutation)"
+      echo "  --sync   Write anchor.head to current git HEAD after checks pass"
+      exit 0
+      ;;
+  esac
+done
+
 echo "=== CivForge verify-truth-anchor ==="
+echo "git HEAD: $(git rev-parse --short HEAD)"
+if [[ "$SYNC_ANCHOR" == "1" ]]; then
+  echo "mode: --sync (will update config/work_pack_registry.yaml anchor.head on success)"
+else
+  echo "mode: verify-only (use --sync after land commit to update registry)"
+fi
 
-HEAD="$(git rev-parse --short HEAD)"
-echo "git HEAD: $HEAD"
-
-PYTEST_OUT="$(python3 -m pytest tests/ -q 2>&1)"
-echo "$PYTEST_OUT" | tail -3
-
-python3 <<PY
+export SYNC_ANCHOR
+export ROOT_OVERRIDE="$ROOT"
+python3 <<'PY'
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path("$ROOT")
+ROOT = Path(os.environ.get("ROOT_OVERRIDE", ".")).resolve()
 registry_path = ROOT / "config" / "work_pack_registry.yaml"
 text = registry_path.read_text(encoding="utf-8")
 
@@ -30,13 +49,20 @@ if not head_match or not pytest_match:
 
 registry_head = head_match.group(1)
 expected_pytest = int(pytest_match.group(1))
-live_head = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True).strip()
+live_head = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True, cwd=ROOT).strip()
+sync_anchor = os.environ.get("SYNC_ANCHOR", "0") == "1"
 
 errors = []
+
 if registry_head != live_head:
-    text = text.replace(f"  head: {registry_head}", f"  head: {live_head}", 1)
-    registry_path.write_text(text)
-    print(f"Updated registry anchor.head → {live_head}")
+    msg = f"registry anchor.head {registry_head} != git HEAD {live_head}"
+    if sync_anchor:
+        text = text.replace(f"  head: {registry_head}", f"  head: {live_head}", 1)
+        registry_path.write_text(text)
+        print(f"SYNC: updated registry anchor.head → {live_head}")
+        registry_head = live_head
+    else:
+        errors.append(msg + " (run: bash tools/verify-truth-anchor.sh --sync)")
 
 pytest_run = subprocess.run(
     ["python3", "-m", "pytest", "tests/", "-q"],
@@ -44,6 +70,13 @@ pytest_run = subprocess.run(
     text=True,
     cwd=ROOT,
 )
+print(pytest_run.stdout.strip().splitlines()[-1] if pytest_run.stdout.strip() else pytest_run.stdout)
+if pytest_run.returncode != 0:
+    errors.append("pytest failed")
+    if pytest_run.stdout:
+        for line in pytest_run.stdout.strip().splitlines()[-5:]:
+            print(line)
+
 m = re.search(r"(\d+) passed", pytest_run.stdout)
 if not m:
     errors.append("pytest did not report pass count")
@@ -52,21 +85,34 @@ else:
     if actual != expected_pytest:
         errors.append(f"registry pytest_total {expected_pytest} != actual {actual}")
 
-for wp in (
+CLOSED_WPS = (
     "WP-GROK-WONDER-PLACE-001",
     "WP-GROK-CULTURAL-VICTORY-001",
     "WP-GROK-POLICY-BRANCH-001",
-):
+    "WP-GROK-COMPETITION-DEPTH-001",
+    "WP-GROK-PLAYER-AGENT-001",
+)
+for wp in CLOSED_WPS:
     if f"{wp}:" not in text:
         errors.append(f"missing {wp} in registry")
     elif f"\n    lifecycle: closed" not in text.split(f"{wp}:")[1].split("\n\n", 1)[0]:
         errors.append(f"{wp} not closed in registry")
 
-closure = ROOT / "receipts" / "BLOCK-A-CLOSURE-20260616.md"
-exec_receipt = ROOT / "receipts" / "cursor-execution-wp-grok-block-a-20260616.md"
-for path in (closure, exec_receipt):
-    if not path.is_file():
-        errors.append(f"missing {path.relative_to(ROOT)}")
+for block_id in ("block_a", "block_b"):
+    marker = f"  {block_id}:"
+    if marker not in text:
+        errors.append(f"missing blocks.{block_id} in registry")
+    elif f"\n    status: closed" not in text.split(marker)[1].split("\n\n", 1)[0]:
+        errors.append(f"blocks.{block_id} not closed in registry")
+
+closure_docs = (
+    "receipts/BLOCK-A-CLOSURE-20260616.md",
+    "receipts/BLOCK-B-CLOSURE-20260616.md",
+    "receipts/cursor-execution-wp-grok-block-a-20260616.md",
+)
+for rel in closure_docs:
+    if not (ROOT / rel).is_file():
+        errors.append(f"missing {rel}")
 
 for doc in (
     "docs/TRUTH_ORDER.md",
@@ -82,7 +128,7 @@ if errors:
         print(" -", e)
     sys.exit(1)
 
-print("PASS: registry, docs, Block A closure, pytest count aligned with HEAD", live_head)
+print(f"PASS: registry, docs, block closures, pytest count aligned with HEAD {live_head}")
 PY
 
 echo "=== verify-truth-anchor OK ==="
