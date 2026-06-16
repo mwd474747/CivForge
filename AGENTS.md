@@ -98,7 +98,7 @@ Registry: `agents/role_registry.json`
 |------|--------|
 | Block A (wonder / cultural / policy) | **Closed** @ `1037950` |
 | Block B (competition / player agent) | **Closed** — see `BLOCK-B-CLOSURE-20260616.md` |
-| pytest | **129** |
+| pytest | **130** |
 | Dashboard | `GET /dashboard` on `:8080` — extend, do not rebuild |
 | CorpusCardRegistry | `backend/corpus_card_registry.py` — **exists** |
 | MCP tools | 17 — see `tools/mcp_server.py` |

@@ -53,7 +53,7 @@ bash tools/validate-game.sh --read-only   # or --restart after code change
 | Commit | `1037950` (+ receipt doc `b3f3eb3`) |
 | Receipt | `receipts/cursor-execution-wp-grok-block-a-20260616.md` |
 | Index | `receipts/BLOCK-A-CLOSURE-20260616.md` |
-| pytest | 129 (Block A: 12, Block B: 12) |
+| pytest | 130 (Block A: 12, Block B: 12, hygiene: 1) |
 
 **Do not re-ignite Block A.** Grok RESUBMIT-FINAL-ALIGNED PRIMEs are **superseded**.
 
