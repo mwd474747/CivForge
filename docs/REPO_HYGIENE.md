@@ -12,7 +12,7 @@
 | `backend/` | FastAPI kernel (`sim_api.py`), game mechanics modules |
 | `core/` | Orchestrator, AgentBrain, FunForge, MechanicsRegistry |
 | `frontend/` | Dashboard (`index.html`) |
-| `tools/` | CLI, MCP, validate-game, start-kernel-8080 |
+| `tools/` | CLI, MCP, validate-game, verify-truth-anchor, check-agent-shell-hygiene, start-kernel-8080 |
 | `docs/` | Lane model, boundary, play guide |
 | `receipts/` | **Execution + planning receipts only** (not runtime cycle dumps) |
 

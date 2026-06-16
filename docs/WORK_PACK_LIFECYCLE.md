@@ -51,8 +51,10 @@ planning ──(Mike: "Execute WP-…")──► ignited ──► executing ─
 
 ## Closure checklist
 
-- [ ] pytest pass count recorded
+- [ ] pytest pass count recorded in registry (`pytest_total`)
 - [ ] `git rev-parse --short HEAD` in receipt
-- [ ] Registry YAML updated
+- [ ] Registry YAML updated (`lifecycle`, `blocks.*.status`; `anchor.head` via `verify-truth-anchor.sh --sync`)
+- [ ] `bash tools/verify-truth-anchor.sh` (read-only) passes
+- [ ] `bash tools/check-agent-shell-hygiene.sh` (no stale Cursor wrappers)
 - [ ] Consolidated handoff §0 / closure doc updated if block completes
 - [ ] `IMPLEMENTATION_STATUS.md` factual counts only

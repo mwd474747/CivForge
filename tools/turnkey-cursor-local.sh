@@ -23,11 +23,14 @@ if $RESTART; then
   bash tools/start-kernel-8080.sh
 fi
 
-echo "1. Unit tests..."
-python3 -m pytest tests/test_multi_agent_state.py tests/test_civstudy_metadata.py tests/test_civstudy_mechanics_bridge.py -q
+echo "1. Truth anchor + shell hygiene..."
+bash tools/verify-truth-anchor.sh
+bash tools/check-agent-shell-hygiene.sh || {
+  echo "  WARN: stale Cursor wrapper shells — bash tools/check-agent-shell-hygiene.sh --kill"
+}
 
-echo "2. validate-game..."
-bash tools/validate-game.sh
+echo "2. validate-game (full pytest + API probes)..."
+bash tools/validate-game.sh --read-only
 
 echo "3. MCP tools..."
 python3 -c '
@@ -39,6 +42,7 @@ proc = subprocess.run(
 )
 tools = json.loads(proc.stdout.strip().splitlines()[0])["result"]["tools"]
 print("  tools:", len(tools))
+assert len(tools) == 17, "expected 17 MCP tools"
 '
 
 echo "4. Advance $ADVANCES turns..."
@@ -53,6 +57,8 @@ curl -sf http://127.0.0.1:8080/state | python3 -c '
 import json, sys
 d = json.load(sys.stdin)
 print("  turn:", d.get("current_turn"), "fun:", d.get("fun_score"))
+print("  player_agent:", (d.get("player_agent") or {}).get("strategy"))
+print("  block_b:", (d.get("work_pack_registry") or {}).get("blocks", {}).get("block_b", {}).get("status"))
 sim = d.get("civstudy_sim") or {}
 print("  civstudy_sim:", sim.get("active_district"))
 '

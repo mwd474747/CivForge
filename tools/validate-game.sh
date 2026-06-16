@@ -71,6 +71,8 @@ assert "commissioned_wonders" in sim, "missing civstudy_sim.commissioned_wonders
 assert "cultural_path" in s.get("victory_progress", {}), "missing victory_progress.cultural_path (Block A)"
 assert "work_pack_registry" in s, "missing work_pack_registry on /state"
 assert s["work_pack_registry"].get("closed_block_a") is True, "Block A should be closed in registry"
+assert s["work_pack_registry"]["blocks"]["block_b"]["status"] == "closed", "Block B should be closed in registry"
+assert "player_agent" in s, "missing player_agent on /state (Block B)"
 cat = s.get("action_catalog", {})
 assert len(cat.get("wonders", [])) == 3, "expected 3 commissionable wonders in action_catalog"
 vp = s.get("victory_progress", {})
@@ -110,7 +112,17 @@ while inf < 10:
 post("/game/wonder/commission", {"wonder_id": "wonder-oracle"})
 s2 = get("/state")
 assert len(s2["civstudy_sim"]["commissioned_wonders"]) >= 1
-print("  API + MCP + Block A probes OK")
+
+# Block B route smoke
+post("/game/competition/mode", {"mode": "pva_duel"})
+post("/game/competition/autoplay/start")
+st = get("/game/competition/status")
+assert st.get("mode") == "pva_duel"
+assert st.get("autoplay", {}).get("active") is True
+post("/game/player/strategy", {"strategy": "science"})
+s3 = get("/state")
+assert s3["player_agent"]["strategy"] == "science"
+print("  API + MCP + Block A + Block B probes OK")
 PY
 
 if $READ_ONLY; then

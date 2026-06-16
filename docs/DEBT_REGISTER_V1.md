@@ -1,6 +1,6 @@
 # Debt Register v1
 
-**Status:** `current` (post Block A @ `1037950`)  
+**Status:** `current` (post Block B @ `2530fc2`, hygiene @ `80dfbbf`)  
 **Not promotion truth** — engineering backlog for CivForge kernel only.
 
 ---
@@ -21,7 +21,7 @@
 |----|------|-------|
 | D-M1 | Policy branch metadata split | `policy_branch_extensions()` in metadata; checklist in `policy_branching.py` — intentional, document in wiring inventory |
 | D-M2 | Wonder effects are soft lane bumps | Not full card-text simulation |
-| D-M3 | `validate-game.sh` subset pytest | Full suite via `verify-truth-anchor.sh` / CI habit |
+| D-M3 | ~~validate-game Block B probes missing~~ | **Fixed** — competition + player_agent probes in validate-game |
 | D-OPS-1 | ~~verify auto-sync anchor chase~~ | **Fixed** — verify read-only; `--sync` explicit after land |
 | D-M4 | ~~Block B not started~~ | **Closed** — Block B @ BLOCK-B-CLOSURE-20260616 |
 

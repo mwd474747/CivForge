@@ -1,12 +1,12 @@
 # Grok Consolidated Handoff — Block A Review + Block B Redirect
 
 **Generated:** 2026-06-16  
-**Authority:** `report-only` (planning lane; Block A execution closed — see BLOCK-A-CLOSURE)  
-> **UPDATE 2026-06-16:** Block A **closed** @ `1037950` — see `receipts/BLOCK-A-CLOSURE-20260616.md` and `config/work_pack_registry.yaml`. §5 remains scope authority for Block B. Do **not** re-issue Block A RESUBMIT PRIMEs.
-
+**Authority:** `report-only` (planning lane; not promotion truth)  
 **Anchor:** CivForge `main` — pull then `git rev-parse --short HEAD`  
 **Execution baseline:** `0f1aad8` (101 pytest); prior handoff `receipts/HANDOFF-GROK-PLANNING-QUEUE-20260616.md`  
 **Cursor review author:** Cursor partner lane (validation only)
+
+> **UPDATE 2026-06-16 (post-land):** Block A **closed** @ `1037950`; Block B **closed** @ `2530fc2` — see `BLOCK-A-CLOSURE`, `BLOCK-B-CLOSURE`, `config/work_pack_registry.yaml`. **130 pytest.** §5 remains historical scope authority. Grok: **closure PRIMEs only** — do not re-plan Block A/B or RESUBMIT PRIMEs.
 
 ---
 
@@ -14,8 +14,9 @@
 
 | Item | Verdict |
 |------|---------|
-| **Block A** (CULTURAL-VICTORY, POLICY-BRANCH, WONDER-PLACE) | **Closed** @ `1037950` — Cursor receipt + 113 pytest. Grok: closure PRIMEs only. |
-| **WP-GROK-AGENT-VS-AGENT-003** | **Reject for execution.** Split into Block B (`COMPETITION-DEPTH-001` + `PLAYER-AGENT-001`); extend existing modules. |
+| **Block A** (CULTURAL-VICTORY, POLICY-BRANCH, WONDER-PLACE) | **Closed** @ `1037950` — see `BLOCK-A-CLOSURE-20260616.md`. Grok: closure PRIMEs only. |
+| **Block B** (COMPETITION-DEPTH, PLAYER-AGENT) | **Closed** @ `2530fc2` — see `BLOCK-B-CLOSURE-20260616.md`. Grok: closure PRIMEs only. |
+| **WP-GROK-AGENT-VS-AGENT-003** | **Retired** — use Block B receipts; do not re-ignite. |
 | **Grok role** | Planning PRIMEs with full envelopes only — no execution claims, no parallel subsystems. |
 | **Cursor role** | One WP per ignition; pytest + execution receipt. |
 | **Mike role** | One-line ignition per WP after Grok resubmit. |
@@ -136,9 +137,10 @@ orchestrator.advance_cycle()
 
 ### 4.3 Execution order (Mike)
 
-1. ~~Block A~~ **Done** — `receipts/cursor-execution-wp-grok-block-a-20260616.md`
-2. Grok authors Block B PRIMEs from §5 (COMPETITION-DEPTH, PLAYER-AGENT) — planning only.
-3. Mike ignites one Block B WP at a time → Cursor → receipt → registry update.
+1. Grok resubmits Block A refined PRIMEs (§5).
+2. Mike: `Execute WP-GROK-CULTURAL-VICTORY-001` → Cursor → receipt → pytest.
+3. Repeat for POLICY-BRANCH-001, then WONDER-PLACE-001 (one WP per ignition).
+4. After Block A, Grok authors Block B refined PRIMEs; Mike ignites one at a time.
 
 ---
 

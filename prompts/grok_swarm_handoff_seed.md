@@ -55,7 +55,7 @@ Keep these connected in grok.com project settings:
 | trivium | Governance health, predictions (read-only planning) |
 | grok_com_github | CivForge repo read (not local git claims) |
 
-**CivForge kernel MCP** (`tools/mcp_server.py`, 8 tools): runs on Mac `:8080`. grok.com does not call it directly unless you add a remote MCP bridge/tunnel in grok.com settings. Default: assign work packs → Cursor executes → paste `turnkey-cursor-local.sh` output.
+**CivForge kernel MCP** (`tools/mcp_server.py`, **17 tools**): runs on Mac `:8080`. grok.com does not call it directly unless you add a remote MCP bridge/tunnel in grok.com settings. Default: assign work packs → Cursor executes → paste `turnkey-cursor-local.sh` output.
 
 **Removed (do not reference):** CivForge `.grok/config.toml`, `Bash(*)` local terminal approval, `grok_macstudio_bridge.py`.
 

@@ -19,14 +19,15 @@ The pre-pivot Godot 4X MVP was removed; CivForge is FastAPI + Python `core/` onl
 cd ~/CivForge
 bash tools/start-kernel-8080.sh
 open http://127.0.0.1:8080/dashboard
-bash tools/validate-game.sh          # pytest + API + turnkey
+bash tools/verify-truth-anchor.sh       # read-only truth plane
+bash tools/validate-game.sh --read-only # pytest + API probes (no turn advances)
 bash tools/turnkey-cursor-local.sh       # Cursor local verify (primary)
 bash tools/turnkey-gaps-all.sh           # tests + cursor + openclaw escalation probe
 ```
 
 **Execution lanes:** `docs/EXECUTION_LANE_V2.md` — Grok swarm (grok.com) plans; Cursor executes locally; OpenClaw on escalation only.
 
-**Truth plane (anti-drift):** `docs/TRUTH_ORDER.md` · `config/work_pack_registry.yaml` · `bash tools/verify-truth-anchor.sh`
+**Truth plane (anti-drift):** `docs/TRUTH_ORDER.md` · `config/work_pack_registry.yaml` · `bash tools/verify-truth-anchor.sh` · `bash tools/check-agent-shell-hygiene.sh`
 
 **Turnkey lane packets:**
 
