@@ -6,7 +6,7 @@
 **Execution baseline:** `0f1aad8` (101 pytest); prior handoff `receipts/HANDOFF-GROK-PLANNING-QUEUE-20260616.md`  
 **Cursor review author:** Cursor partner lane (validation only)
 
-> **UPDATE 2026-06-16 (post-land):** Block A **closed** @ `1037950`; Block B **closed** @ `2530fc2` — see `BLOCK-A-CLOSURE`, `BLOCK-B-CLOSURE`, `config/work_pack_registry.yaml`. **130 pytest.** §5 remains historical scope authority. Grok: **closure PRIMEs only** — do not re-plan Block A/B or RESUBMIT PRIMEs.
+> **UPDATE 2026-06-16 (post-land):** Block A **closed** @ `1037950`; Block B **closed** @ `2530fc2`; Block C **closed** @ `a78e185` — see `BLOCK-*-CLOSURE`, `config/work_pack_registry.yaml`. **138 pytest.** §5 remains historical scope authority. Grok: **closure PRIMEs only** — do not re-plan Block A/B/C or RESUBMIT PRIMEs.
 
 ---
 
@@ -16,6 +16,7 @@
 |------|---------|
 | **Block A** (CULTURAL-VICTORY, POLICY-BRANCH, WONDER-PLACE) | **Closed** @ `1037950` — see `BLOCK-A-CLOSURE-20260616.md`. Grok: closure PRIMEs only. |
 | **Block B** (COMPETITION-DEPTH, PLAYER-AGENT) | **Closed** @ `2530fc2` — see `BLOCK-B-CLOSURE-20260616.md`. Grok: closure PRIMEs only. |
+| **Block C** (alternate victory, soak, AI diplomacy, tooling) | **Closed** @ `a78e185` — see `BLOCK-C-CLOSURE-20260616.md`. Grok: closure PRIMEs only. |
 | **WP-GROK-AGENT-VS-AGENT-003** | **Retired** — use Block B receipts; do not re-ignite. |
 | **Grok role** | Planning PRIMEs with full envelopes only — no execution claims, no parallel subsystems. |
 | **Cursor role** | One WP per ignition; pytest + execution receipt. |

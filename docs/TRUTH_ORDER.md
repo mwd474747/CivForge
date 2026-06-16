@@ -53,17 +53,31 @@ bash tools/validate-game.sh --read-only   # or --restart after code change
 | Commit | `1037950` (+ receipt doc `b3f3eb3`) |
 | Receipt | `receipts/cursor-execution-wp-grok-block-a-20260616.md` |
 | Index | `receipts/BLOCK-A-CLOSURE-20260616.md` |
-| pytest | 130 (Block A: 12, Block B: 12, hygiene: 1) |
+| pytest | 138 (Block A: 12, Block B: 12, Block C: 8, hygiene + baseline) |
 
-**Do not re-ignite Block A.** Grok RESUBMIT-FINAL-ALIGNED PRIMEs are **superseded**.
+**Do not re-ignite Block A or Block B.** Grok RESUBMIT PRIMEs are **superseded**.
+
+---
+
+## 4b. Block C closure (Cursor execution)
+
+| Field | Value |
+|-------|--------|
+| Status | **closed** |
+| Receipt | `receipts/cursor-execution-wp-grok-block-c-20260616.md` |
+| Closure | `receipts/BLOCK-C-CLOSURE-20260616.md` |
+| Index | `config/work_pack_registry.yaml` → `blocks.block_c` |
+| pytest | 138 |
+
+**Do not re-ignite Block C.** Alternate victory, soak, AI diplomacy, and tooling WPs are closed.
 
 ---
 
 ## 5. Next open work
 
-Block A and Block B are **closed** — see `receipts/BLOCK-A-CLOSURE-20260616.md` and `receipts/BLOCK-B-CLOSURE-20260616.md`.
+Blocks A, B, and C are **closed** — see closure receipts under `receipts/BLOCK-*-CLOSURE-20260616.md`.
 
-Grok: emit closure PRIMEs only; next planning is post-Block-B roadmap (mechanics debt, `:8081` JWT) — no duplicate subsystems.
+Grok: emit closure PRIMEs only; next planning is platform debt (`:8081` JWT, save slots, turn pacing) — no duplicate subsystems.
 
 ---
 

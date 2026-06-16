@@ -28,6 +28,22 @@ Closure doc: `receipts/BLOCK-B-CLOSURE-20260616.md`
 
 ---
 
+## Closed — Block C @ `a78e185`
+
+| WP | Receipt |
+|----|---------|
+| WP-GROK-CULTURAL-EPILOGUE-001 (D-H1) | `receipts/cursor-execution-wp-grok-block-c-20260616.md` |
+| WP-GROK-SOAK-001 | same |
+| WP-GROK-AI-DIPLOMACY-001 | same |
+| WP-GROK-DOMINATION-PATH-001 | same |
+| WP-TOOLING-AWARENESS-001 | same |
+| WP-GROK-DOC-SYNC-001 | same |
+| WP-GROK-REFRACTOR-SIM-002 | same → `docs/SIM_MILESTONE_SYNC_DECISION_V1.md` |
+
+Closure doc: `receipts/BLOCK-C-CLOSURE-20260616.md`
+
+---
+
 ## Retired / superseded
 
 | ID | Reason |
@@ -37,6 +53,8 @@ Closure doc: `receipts/BLOCK-B-CLOSURE-20260616.md`
 | WP-BIAS-ROOT-CAUSE-ANALYSIS-041 | → `docs/AGENT_CLAIMS_POLICY.md` |
 | WP-ROOT-CAUSE-DEEP-DIVE-001 | → `docs/TRUTH_ORDER.md` |
 | WP-HINDSIGHT-DEBT-ANALYSIS-001 | → `docs/DEBT_REGISTER_V1.md` |
+| WP-HISTORY-ORPHAN-REVIEW-042 | Report-only orphan inventory |
+| WP-TOOLING-AWARENESS-PROPOSAL-001 | → WP-TOOLING-AWARENESS-001 (Block C) |
 
 ---
 
