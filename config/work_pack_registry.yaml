@@ -7,7 +7,7 @@
 anchor:
   repo: mwd474747/CivForge
   branch: main
-  head: a7bb165
+  head: 879e700
   pytest_total: 147
   kernel_port: 8080
   updated_at: "2026-06-16"

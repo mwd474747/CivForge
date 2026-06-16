@@ -115,6 +115,7 @@ CLOSED_WPS = (
     "WP-GROK-POLICY-BRANCH-001",
     "WP-GROK-COMPETITION-DEPTH-001",
     "WP-GROK-PLAYER-AGENT-001",
+    "WP-GROK-JWT-IDENTITY-001",
 )
 for wp in CLOSED_WPS:
     if f"{wp}:" not in text:
