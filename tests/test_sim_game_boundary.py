@@ -41,4 +41,6 @@ def test_registry_is_only_mechanics_entry_for_lanes():
 def test_default_registry_module_count():
     reg = build_default_registry()
     names = reg.module_names()
-    assert len(names) >= 3
+    assert len(names) >= 5
+    assert "diplomacy_layer" in names
+    assert "competition" in names

@@ -110,6 +110,9 @@ def _tick_cultural(game_state: Dict[str, Any]) -> List[str]:
 
 def build_default_registry() -> MechanicsRegistry:
     reg = MechanicsRegistry()
+    from backend.mechanics_layer_modules import register_layer_mechanics
+
+    register_layer_mechanics(reg)
     reg.register("military", _tick_military)
     reg.register("economic", _tick_economic)
     reg.register("cultural", _tick_cultural)

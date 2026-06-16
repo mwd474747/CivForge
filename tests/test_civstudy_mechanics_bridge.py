@@ -67,6 +67,8 @@ def test_build_default_registry_includes_civstudy_modules():
     assert "civstudy_discovery" in reg._modules
     assert "civstudy_cultural" in reg._modules
     assert "civstudy_policy_tree" in reg._modules
+    assert "diplomacy_layer" in reg._modules
+    assert "competition" in reg._modules
 
 
 def test_policy_tree_unlocks_diplomacy_tier_one():

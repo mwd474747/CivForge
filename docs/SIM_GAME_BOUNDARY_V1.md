@@ -10,16 +10,18 @@
 
 | Layer | Responsibility | Key modules |
 |-------|----------------|-------------|
-| **Simulation (orchestration)** | Turn loop, map/alliances/negotiations, competition scoring, milestones, FunForge gate, receipts, `:8082` telemetry | `core/orchestrator.py`, `backend/simulation_boundary.py`, `backend/multi_agent_state.py`, `backend/competition_modes.py`, `backend/turn_simulation.py` (sim phase) |
-| **Game mechanics (pluggable rules)** | Districts, policies, CivStudy ticks, military/economic/cultural lanes | `core/mechanics_registry.py`, `backend/civstudy_mechanics_bridge.py`, `backend/game_actions.py` |
+| **Simulation (orchestration)** | Milestone sync after mechanics, FunForge gate, receipts, `:8082` telemetry | `core/orchestrator.py`, `backend/simulation_boundary.py`, `backend/turn_simulation.py` |
+| **Game mechanics (pluggable rules)** | Diplomacy/competition, districts, policies, CivStudy ticks, military/economic/cultural lanes | `core/mechanics_registry.py`, `backend/mechanics_layer_modules.py`, `backend/civstudy_mechanics_bridge.py`, `backend/game_actions.py` |
 
-**Turn order (enforced):**
+**Turn order (enforced — WP-GROK-REFRACTOR-SIM-001 landed):**
 
 ```
 orchestrator.advance_cycle()
   → run_turn_simulation()
-       → run_simulation_layer()      # simulation only
-       → registry.pass_through_tick() # mechanics only
+       → game_state["_turn_decisions"] = decisions
+       → registry.pass_through_tick()  # diplomacy_layer, competition, lanes, civstudy
+       → run_simulation_layer()        # milestones only
+       → pop _turn_decisions
 ```
 
 Audit keys on `/state.simulation_boundary`: `_simulation_boundary`, `_mechanics_tick_audit`.
@@ -30,7 +32,7 @@ Audit keys on `/state.simulation_boundary`: `_simulation_boundary`, `_mechanics_
 
 | Location | Overlap | Status |
 |----------|---------|--------|
-| `tick_multi_agent_state` mutates `victory_progress`, map, alliances | Simulation layer, not registry | **Documented** — kept in `run_simulation_layer` |
+| `tick_multi_agent_state` / `tick_competition` | Registered as `diplomacy_layer` + `competition` mechanics modules | **Landed** — `backend/mechanics_layer_modules.py` |
 | `mechanics_lanes` defaults in `telemetry_extra_from_state` | Read-only fallback init | Low risk; no tick logic |
 | CivStudy bridge registered in registry | Correct — metadata-driven mechanics | **Clean** |
 | FunForge scoring in orchestrator | Simulation/governance, not civ rules | **By design** |
@@ -43,7 +45,7 @@ Audit keys on `/state.simulation_boundary`: `_simulation_boundary`, `_mechanics_
 
 **Can simulation be replaced entirely by MechanicsRegistry?**
 
-| Verdict | **Partial — not yet full replacement** |
+| Verdict | **Partial — diplomacy/competition now in registry; milestones remain orchestration** |
 |---------|----------------------------------------|
 | Effort | Medium–high (multi_agent needs `decisions` context; competition modes need orchestrator hooks) |
 | Gain | Simpler mental model, one tick entry point |
@@ -57,17 +59,15 @@ Audit keys on `/state.simulation_boundary`: `_simulation_boundary`, `_mechanics_
 
 ---
 
-## 4. Proposed refactor WP draft — WP-GROK-REFRACTOR-SIM-001
+## 4. WP-GROK-REFRACTOR-SIM-001 — **landed** (`89c2dbe`+)
 
-| Step | Action |
-|------|--------|
-| 1 | Register `diplomacy_layer` tick wrapper calling `tick_multi_agent_state` |
-| 2 | Move competition tick to registry module `"competition"` |
-| 3 | Reduce `run_simulation_layer` to milestone sync only |
-| 4 | Add pytest asserting zero direct `mechanics_lanes` writes outside registry |
-| 5 | Preserve receipt-first + CivStudy extensibility |
-
-**Not in scope for this slice** — documented for Grok planning lane.
+| Step | Action | Status |
+|------|--------|--------|
+| 1 | Register `diplomacy_layer` tick wrapper (`_turn_decisions` passthrough) | **Done** |
+| 2 | Register `competition` mechanics module | **Done** |
+| 3 | `run_simulation_layer` → milestones only | **Done** |
+| 4 | Tick order: `pass_through_tick()` then `run_simulation_layer()` | **Done** |
+| 5 | pytest boundary + order tests | **Done** — `tests/test_wp_grok_refactor_sim_001.py` |
 
 ---
 

@@ -76,10 +76,12 @@ def test_simulation_mechanics_boundary_on_turn():
     summary = boundary_summary(state)
     assert summary["simulation_layer"]["phases"]
     assert summary["mechanics_layer"]["modules"]
+    assert "diplomacy_layer" in summary["mechanics_layer"]["modules"]
     assert "military" in summary["mechanics_layer"]["modules"]
+    assert summary["simulation_layer"]["phases"] == ["milestones"]
 
 
 def test_simulation_layer_runs_without_registry():
     state = build_initial_game_state()
-    run_simulation_layer(state, {})
+    run_simulation_layer(state)
     assert state.get("_simulation_boundary", {}).get("layer") == "simulation"

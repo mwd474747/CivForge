@@ -16,10 +16,14 @@ def run_turn_simulation(
     registry: MechanicsRegistry,
     decisions: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
-    """Run simulation layer then mechanics registry (explicit boundary)."""
+    """Mechanics first, then milestone sync (WP-GROK-REFRACTOR-SIM-001)."""
     events: List[str] = []
-    events.extend(run_simulation_layer(game_state, decisions or {}))
-    events.extend(registry.pass_through_tick(game_state))
+    game_state["_turn_decisions"] = dict(decisions or {})
+    try:
+        events.extend(registry.pass_through_tick(game_state))
+        events.extend(run_simulation_layer(game_state))
+    finally:
+        game_state.pop("_turn_decisions", None)
     return events
 
 
