@@ -103,6 +103,10 @@ assert len(names) == 17, f"expected 17 MCP tools, got {len(names)}"
 
 # Block A route smoke (deterministic on fresh reset session)
 post("/game/policy/branch", {"branch_id": "tradition"})
+inf = get("/state")["player"]["resources"].get("influence", 0)
+while inf < 10:
+    post("/advance_turn")
+    inf = get("/state")["player"]["resources"].get("influence", 0)
 post("/game/wonder/commission", {"wonder_id": "wonder-oracle"})
 s2 = get("/state")
 assert len(s2["civstudy_sim"]["commissioned_wonders"]) >= 1
