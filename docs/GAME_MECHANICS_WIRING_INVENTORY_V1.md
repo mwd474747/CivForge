@@ -84,9 +84,9 @@ Map drift, betrayal risk + **break events**, AI negotiations, player negotiate/r
 
 ---
 
-## MCP tools (12)
+## MCP tools (16)
 
-`civforge_status`, `civforge_advance_turn`, `civforge_reset_game`, `civforge_found_city`, `civforge_negotiate`, `civforge_negotiate_respond`, `civforge_what_if`, `civforge_governance_propose`, `civforge_governance_gate`, `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile`.
+`civforge_status`, `civforge_advance_turn`, `civforge_reset_game`, `civforge_found_city`, `civforge_negotiate`, `civforge_negotiate_respond`, `civforge_what_if`, `civforge_governance_propose`, `civforge_governance_gate`, `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile`, `civforge_propose_mechanics`, `civforge_gate_mechanics`, `civforge_apply_mechanics`, `civforge_list_mechanics_proposals`.
 
 ---
 
@@ -105,3 +105,20 @@ bash tools/turnkey-governance-posture.sh
 - `docs/GAME_ENGINE_IMPLEMENTATION_GAP_INVENTORY_V1.md`
 - `docs/GAME_PLAY_GUIDE_V1.md`
 - `docs/MECHANICS_TICK_CONTRACT_V1.md`
+
+---
+
+## Mechanics proposal lane (Grok swarm — not simulation-only)
+
+| Surface | Status |
+|---------|--------|
+| `POST /game/mechanics/propose` | **Wired** |
+| `POST /game/mechanics/gate` | **Wired** (FunForge ≥78) |
+| `POST /game/mechanics/apply` | **Wired** (runtime kinds) |
+| `GET /game/mechanics/proposals` | **Wired** |
+| MCP: propose/gate/apply/list | **Wired** (16 tools total) |
+| Runtime overrides in district pulse / cadence / sci bonus | **Wired** |
+| `MechanicsRegistry.register` from proposals | **Planning → Cursor** |
+
+Doc: `docs/GAME_MECHANICS_SWARM_PROPOSAL_LANE_V1.md`
+

@@ -1,9 +1,5 @@
 {
   "bridge": {
-    "bridge_files": [
-      "bridge/civforge_http_bridge.py",
-      "bridge/headless_observer.py"
-    ],
     "bridge_posts_integrate": true,
     "integrate_methods": [
       "GET",
@@ -13,24 +9,40 @@
   },
   "documented_mcp_tools": [
     "civforge_advance_turn",
+    "civforge_apply_mechanics",
+    "civforge_claim_tile",
     "civforge_found_city",
+    "civforge_gate_mechanics",
     "civforge_governance_gate",
     "civforge_governance_propose",
+    "civforge_list_mechanics_proposals",
     "civforge_negotiate",
     "civforge_negotiate_respond",
+    "civforge_propose_mechanics",
+    "civforge_reset_game",
+    "civforge_select_district",
     "civforge_status",
+    "civforge_unlock_policy",
     "civforge_what_if"
   ],
   "findings": [],
-  "generated_at": "2026-06-15T19:13:07Z",
+  "generated_at": "2026-06-16T00:53:32Z",
   "mcp_tools": [
     "civforge_advance_turn",
+    "civforge_apply_mechanics",
+    "civforge_claim_tile",
     "civforge_found_city",
+    "civforge_gate_mechanics",
     "civforge_governance_gate",
     "civforge_governance_propose",
+    "civforge_list_mechanics_proposals",
     "civforge_negotiate",
     "civforge_negotiate_respond",
+    "civforge_propose_mechanics",
+    "civforge_reset_game",
+    "civforge_select_district",
     "civforge_status",
+    "civforge_unlock_policy",
     "civforge_what_if"
   ],
   "nexus_allowed_actions": [
@@ -46,13 +58,40 @@
     "/found_city": [
       "POST"
     ],
+    "/game/actions": [
+      "GET"
+    ],
+    "/game/district/select": [
+      "POST"
+    ],
     "/game/founding-session": [
       "GET"
+    ],
+    "/game/map/claim": [
+      "POST"
+    ],
+    "/game/mechanics/apply": [
+      "POST"
+    ],
+    "/game/mechanics/gate": [
+      "POST"
+    ],
+    "/game/mechanics/proposals": [
+      "GET"
+    ],
+    "/game/mechanics/propose": [
+      "POST"
     ],
     "/game/negotiate": [
       "POST"
     ],
     "/game/negotiate/respond": [
+      "POST"
+    ],
+    "/game/policy/unlock": [
+      "POST"
+    ],
+    "/game/reset": [
       "POST"
     ],
     "/governance/advance_and_log": [
@@ -84,11 +123,35 @@
   "schema": "civforge.contract_parity.v1",
   "status": "pass",
   "summary": {
-    "documented_mcp_tool_count": 8,
+    "documented_mcp_tool_count": 16,
     "fail_count": 0,
     "finding_count": 0,
-    "mcp_tool_count": 8,
-    "route_count": 15,
+    "mcp_tool_count": 16,
+    "route_count": 24,
     "warn_count": 0
+  },
+  "swarm_alignment": {
+    "agents_md_refs_swarm_class": true,
+    "dawsos_role_map_present": true,
+    "execution_lanes": [
+      "cursor",
+      "grok_swarm",
+      "openclaw"
+    ],
+    "forge_coordinator_kernel_id": "forge-coordinator",
+    "lane_doc_refs_swarm_class": true,
+    "naming_notes_present": true,
+    "required_lane_keys": [
+      "grok_swarm",
+      "cursor",
+      "openclaw"
+    ],
+    "role_forge_coordinator": true,
+    "role_grok_swarm": true,
+    "role_openclaw_chief_of_staff": true,
+    "sim_api_registers_kernel_id": true,
+    "swarm_class_doc_present": true,
+    "work_pack_template_present": true,
+    "wp_template_has_side_effect_class": true
   }
 }

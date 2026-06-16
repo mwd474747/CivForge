@@ -12,13 +12,14 @@ from backend.civstudy_metadata import (
     default_policy_tree,
 )
 from backend.game_session import (
-    RECEIPT_QUORUM_PROGRESS_BONUS,
-    RECEIPT_QUORUM_VERIFY_MIN,
-    TRADE_ROUTE_SCI_BONUS,
     cultural_tick_cadence,
     receipt_quorum_active,
+    receipt_quorum_progress_bonus,
+    receipt_quorum_verify_min,
     trade_route_sci_active,
+    trade_route_sci_bonus,
 )
+from backend.mechanics_proposals import district_yield_bonus
 
 
 def default_civstudy_sim_state() -> Dict[str, Any]:
@@ -91,7 +92,11 @@ def tick_civstudy_district_pulse(game_state: Dict[str, Any]) -> List[str]:
     if not district:
         return []
 
-    bonuses = district.get("yield_bonus", {})
+    bonuses = district_yield_bonus(
+        game_state,
+        sim["active_district_id"],
+        district.get("yield_bonus", {}),
+    )
     resources = game_state["player"]["resources"]
     applied: List[str] = []
     for key, delta in bonuses.items():
@@ -99,17 +104,20 @@ def tick_civstudy_district_pulse(game_state: Dict[str, Any]) -> List[str]:
             resources[key] += delta
             applied.append(f"{key}+{delta}")
 
+    sci_bonus = trade_route_sci_bonus(game_state)
     if trade_route_sci_active(game_state) and "sci" in resources:
-        resources["sci"] += TRADE_ROUTE_SCI_BONUS
-        applied.append(f"sci+{TRADE_ROUTE_SCI_BONUS} (trade route)")
+        resources["sci"] += sci_bonus
+        applied.append(f"sci+{sci_bonus} (trade route)")
 
-    if receipt_quorum_active(game_state) and resources.get("verify_budget", 0) >= RECEIPT_QUORUM_VERIFY_MIN:
+    quorum_min = receipt_quorum_verify_min(game_state)
+    quorum_bonus = receipt_quorum_progress_bonus(game_state)
+    if receipt_quorum_active(game_state) and resources.get("verify_budget", 0) >= quorum_min:
         vp = game_state.setdefault("victory_progress", {})
         vp["joint_progress"] = min(
             vp.get("target", 100),
-            vp.get("joint_progress", 0) + RECEIPT_QUORUM_PROGRESS_BONUS,
+            vp.get("joint_progress", 0) + quorum_bonus,
         )
-        applied.append(f"victory+{RECEIPT_QUORUM_PROGRESS_BONUS} (receipt quorum)")
+        applied.append(f"victory+{quorum_bonus} (receipt quorum)")
 
     if not applied:
         return []

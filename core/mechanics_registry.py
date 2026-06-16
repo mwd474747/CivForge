@@ -5,7 +5,7 @@ from __future__ import annotations
 import random
 from typing import Any, Callable, Dict, List
 
-from backend.game_session import TRADE_ROUTE_SCI_BONUS, trade_route_sci_active
+from backend.game_session import trade_route_sci_active, trade_route_sci_bonus
 from core.mechanics_tick_contract import TickFn, wrap_tick
 
 
@@ -74,8 +74,9 @@ def _tick_economic(game_state: Dict[str, Any]) -> List[str]:
         events.append(msg)
     if trade_route_sci_active(game_state) and turn % 4 == 0:
         resources = game_state.setdefault("player", {}).setdefault("resources", {})
-        resources["sci"] = resources.get("sci", 0) + TRADE_ROUTE_SCI_BONUS
-        msg = f"Turn {turn}: Trade route sci yield +{TRADE_ROUTE_SCI_BONUS}."
+        bonus = trade_route_sci_bonus(game_state)
+        resources["sci"] = resources.get("sci", 0) + bonus
+        msg = f"Turn {turn}: Trade route sci yield +{bonus}."
         lane.setdefault("recent", []).insert(0, msg)
         events.append(msg)
     return events

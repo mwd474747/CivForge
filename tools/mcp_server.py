@@ -77,6 +77,35 @@ TOOLS = [
         "properties": {"x": {"type": "integer"}, "y": {"type": "integer"}},
         "required": ["x", "y"],
     }},
+    {"name": "civforge_propose_mechanics", "description": "Propose a game mechanic update (Grok swarm proposal lane)", "inputSchema": {
+        "type": "object",
+        "properties": {
+            "kind": {"type": "string", "description": "lane_param|district_yield_override|tick_cadence_override|param_override|policy_definition|fork_definition|tick_module|code_change"},
+            "title": {"type": "string"},
+            "payload": {"type": "object"},
+            "author": {"type": "string", "default": "grok_swarm"},
+            "work_pack_id": {"type": "string"},
+            "rationale": {"type": "string"},
+        },
+        "required": ["kind", "title"],
+    }},
+    {"name": "civforge_gate_mechanics", "description": "FunForge gate on a mechanics proposal", "inputSchema": {
+        "type": "object",
+        "properties": {
+            "proposal_id": {"type": "string"},
+            "fun_score_override": {"type": "number"},
+        },
+        "required": ["proposal_id"],
+    }},
+    {"name": "civforge_apply_mechanics", "description": "Apply gated-approved runtime mechanics proposal", "inputSchema": {
+        "type": "object",
+        "properties": {"proposal_id": {"type": "string"}},
+        "required": ["proposal_id"],
+    }},
+    {"name": "civforge_list_mechanics_proposals", "description": "List mechanics proposals and summary", "inputSchema": {
+        "type": "object",
+        "properties": {"status": {"type": "string"}},
+    }},
 ]
 
 
@@ -134,6 +163,26 @@ def _call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         result = _http("POST", "/game/policy/unlock", {"policy_id": arguments["policy_id"]})
     elif name == "civforge_claim_tile":
         result = _http("POST", "/game/map/claim", {"x": int(arguments["x"]), "y": int(arguments["y"])})
+    elif name == "civforge_propose_mechanics":
+        result = _http("POST", "/game/mechanics/propose", {
+            "kind": arguments["kind"],
+            "title": arguments["title"],
+            "payload": arguments.get("payload") or {},
+            "author": arguments.get("author", "grok_swarm"),
+            "work_pack_id": arguments.get("work_pack_id", ""),
+            "rationale": arguments.get("rationale", ""),
+        })
+    elif name == "civforge_gate_mechanics":
+        body: Dict[str, Any] = {"proposal_id": arguments["proposal_id"]}
+        if "fun_score_override" in arguments:
+            body["fun_score_override"] = float(arguments["fun_score_override"])
+        result = _http("POST", "/game/mechanics/gate", body)
+    elif name == "civforge_apply_mechanics":
+        result = _http("POST", "/game/mechanics/apply", {"proposal_id": arguments["proposal_id"]})
+    elif name == "civforge_list_mechanics_proposals":
+        status = arguments.get("status")
+        path = "/game/mechanics/proposals" + (f"?status={status}" if status else "")
+        result = _http("GET", path)
     else:
         result = {"error": f"unknown tool: {name}"}
     text = json.dumps(result, indent=2)

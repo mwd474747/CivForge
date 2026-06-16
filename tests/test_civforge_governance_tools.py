@@ -19,7 +19,7 @@ def test_contract_parity_has_no_fail_findings():
     assert swarm.get("role_openclaw_chief_of_staff") is True
     assert swarm.get("role_forge_coordinator") is True
     assert swarm.get("dawsos_role_map_present") is True
-    assert report["summary"]["mcp_tool_count"] == 12
+    assert report["summary"]["mcp_tool_count"] == 16
     assert report["bridge"]["post_integrate_supported"] is True
     assert report["nexus_allowed_actions"] == ["sync_config"]
     assert report["summary"]["fail_count"] == 0
@@ -31,7 +31,7 @@ def test_governance_posture_static_features_present():
     assert report["features"]["proposal_receipt_persistence_present"] is True
     assert report["features"]["public_mode_guard_present"] is True
     assert report["features"]["post_integrate_route_present"] is True
-    assert report["summary"]["mcp_tool_count"] == 12
+    assert report["summary"]["mcp_tool_count"] == 16
     assert report["summary"]["fail_count"] == 0
 
 

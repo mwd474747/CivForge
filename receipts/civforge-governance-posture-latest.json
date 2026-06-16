@@ -1,10 +1,6 @@
 {
   "contract_parity": {
     "bridge": {
-      "bridge_files": [
-        "bridge/civforge_http_bridge.py",
-        "bridge/headless_observer.py"
-      ],
       "bridge_posts_integrate": true,
       "integrate_methods": [
         "GET",
@@ -14,24 +10,40 @@
     },
     "documented_mcp_tools": [
       "civforge_advance_turn",
+      "civforge_apply_mechanics",
+      "civforge_claim_tile",
       "civforge_found_city",
+      "civforge_gate_mechanics",
       "civforge_governance_gate",
       "civforge_governance_propose",
+      "civforge_list_mechanics_proposals",
       "civforge_negotiate",
       "civforge_negotiate_respond",
+      "civforge_propose_mechanics",
+      "civforge_reset_game",
+      "civforge_select_district",
       "civforge_status",
+      "civforge_unlock_policy",
       "civforge_what_if"
     ],
     "findings": [],
-    "generated_at": "2026-06-15T19:13:07Z",
+    "generated_at": "2026-06-16T00:53:32Z",
     "mcp_tools": [
       "civforge_advance_turn",
+      "civforge_apply_mechanics",
+      "civforge_claim_tile",
       "civforge_found_city",
+      "civforge_gate_mechanics",
       "civforge_governance_gate",
       "civforge_governance_propose",
+      "civforge_list_mechanics_proposals",
       "civforge_negotiate",
       "civforge_negotiate_respond",
+      "civforge_propose_mechanics",
+      "civforge_reset_game",
+      "civforge_select_district",
       "civforge_status",
+      "civforge_unlock_policy",
       "civforge_what_if"
     ],
     "nexus_allowed_actions": [
@@ -47,13 +59,40 @@
       "/found_city": [
         "POST"
       ],
+      "/game/actions": [
+        "GET"
+      ],
+      "/game/district/select": [
+        "POST"
+      ],
       "/game/founding-session": [
         "GET"
+      ],
+      "/game/map/claim": [
+        "POST"
+      ],
+      "/game/mechanics/apply": [
+        "POST"
+      ],
+      "/game/mechanics/gate": [
+        "POST"
+      ],
+      "/game/mechanics/proposals": [
+        "GET"
+      ],
+      "/game/mechanics/propose": [
+        "POST"
       ],
       "/game/negotiate": [
         "POST"
       ],
       "/game/negotiate/respond": [
+        "POST"
+      ],
+      "/game/policy/unlock": [
+        "POST"
+      ],
+      "/game/reset": [
         "POST"
       ],
       "/governance/advance_and_log": [
@@ -85,12 +124,36 @@
     "schema": "civforge.contract_parity.v1",
     "status": "pass",
     "summary": {
-      "documented_mcp_tool_count": 8,
+      "documented_mcp_tool_count": 16,
       "fail_count": 0,
       "finding_count": 0,
-      "mcp_tool_count": 8,
-      "route_count": 15,
+      "mcp_tool_count": 16,
+      "route_count": 24,
       "warn_count": 0
+    },
+    "swarm_alignment": {
+      "agents_md_refs_swarm_class": true,
+      "dawsos_role_map_present": true,
+      "execution_lanes": [
+        "cursor",
+        "grok_swarm",
+        "openclaw"
+      ],
+      "forge_coordinator_kernel_id": "forge-coordinator",
+      "lane_doc_refs_swarm_class": true,
+      "naming_notes_present": true,
+      "required_lane_keys": [
+        "grok_swarm",
+        "cursor",
+        "openclaw"
+      ],
+      "role_forge_coordinator": true,
+      "role_grok_swarm": true,
+      "role_openclaw_chief_of_staff": true,
+      "sim_api_registers_kernel_id": true,
+      "swarm_class_doc_present": true,
+      "work_pack_template_present": true,
+      "wp_template_has_side_effect_class": true
     }
   },
   "features": {
@@ -100,36 +163,40 @@
     "public_mode_guard_present": true
   },
   "findings": [],
-  "generated_at": "2026-06-15T19:13:07Z",
+  "generated_at": "2026-06-16T00:53:32Z",
   "git": {
-    "line_count": 120,
+    "line_count": 134,
     "source_dirty": [
-      " M AGENTS.md",
+      " M IMPLEMENTATION_STATUS.md",
+      " M backend/civstudy_mechanics_bridge.py",
+      " M backend/game_reset.py",
+      " M backend/game_session.py",
       " M backend/sim_api.py",
-      " M core/governance.py",
-      " M docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md",
-      " M docs/EXECUTION_LANE_V2.md",
+      " M core/mechanics_registry.py",
+      " M docs/GAME_MECHANICS_WIRING_INVENTORY_V1.md",
       " M docs/GAME_PLAY_GUIDE_V1.md",
-      " M docs/GIT_LANES_POLICY.md",
       " M docs/GROK_SWARM_PACKET_V1.md",
-      " D docs/nexus_ctrl_reference.md",
-      " D planning/references/nexus_ctrl_dawsos_integration.md",
       " M prompts/grok_swarm_handoff_seed.md",
-      " M tools/civforge_cli.py",
+      " M receipts/civforge-contract-parity-latest.json",
+      " M receipts/civforge-contract-parity-latest.md",
+      " M receipts/civforge-contract-parity-receipt-latest.json",
+      " M receipts/civforge-governance-posture-latest.json",
+      " M receipts/civforge-governance-posture-latest.md",
+      " M receipts/civforge-governance-posture-receipt-latest.json",
+      " M receipts/civforge-poller-posture-latest.json",
+      " M receipts/civforge-poller-posture-latest.md",
+      " M receipts/civforge-poller-posture-receipt-latest.json",
+      " M receipts/civforge-receipt-index-latest.json",
+      " M receipts/civforge-receipt-index-latest.md",
+      " M receipts/civforge-receipt-index-receipt-latest.json",
+      " M receipts/cursor-execution-mechanics-integration-20260615.md",
+      " M tests/test_civforge_governance_tools.py",
       " M tools/mcp_server.py",
-      " M tools/nexus_command_poller.py",
-      " M tools/start-kernel-8080.sh",
-      " M tools/start-poller-daemon.sh",
-      " M tools/validate-game.sh",
-      "?? docs/CIVFORGE_SWARM_CLASS_V1.md",
-      "?? docs/dawsos_nexus_reference.md",
-      "?? planning/references/dawsos_nexus_integration.md",
-      "?? tests/test_civforge_governance_tools.py",
-      "?? tools/civforge_governance_posture.py",
-      "?? tools/civforge_poller_posture.py",
-      "?? tools/civforge_receipt_index.py"
+      "?? backend/mechanics_proposals.py",
+      "?? docs/GAME_MECHANICS_SWARM_PROPOSAL_LANE_V1.md",
+      "?? tests/test_mechanics_proposals.py"
     ],
-    "source_dirty_count": 24
+    "source_dirty_count": 28
   },
   "kernel": {
     "json": {
@@ -190,7 +257,7 @@
       ],
       "alliances": [
         {
-          "betrayal_risk": 65,
+          "betrayal_risk": 66,
           "formed_turn": 1,
           "id": "alliance-player-harper",
           "note": "Systems integration pact",
@@ -212,7 +279,7 @@
           "status": "provisional"
         },
         {
-          "betrayal_risk": 41,
+          "betrayal_risk": 40,
           "formed_turn": 44,
           "id": "alliance-player-harper-44",
           "note": "Formed from negotiation: Review test negotiation",
@@ -223,7 +290,7 @@
           "status": "active"
         },
         {
-          "betrayal_risk": 49,
+          "betrayal_risk": 51,
           "formed_turn": 48,
           "id": "alliance-player-harper-48",
           "note": "Formed from negotiation: First offer same turn",
@@ -474,7 +541,7 @@
           "sci-trade-route"
         ]
       },
-      "current_turn": 76,
+      "current_turn": 77,
       "faction_colors": {
         "aris": "#ec4899",
         "contested": "#ef4444",
@@ -690,7 +757,7 @@
       "mechanics_lanes": {
         "cultural": {
           "event_chains": 8,
-          "influence_spread": 55,
+          "influence_spread": 57,
           "recent": [
             "Turn 72: Cultural event chain started (#8).",
             "Turn 66: Cultural event chain started (#6).",
@@ -734,7 +801,7 @@
             "Border patrol reinforced",
             "Legacy doctrine review"
           ],
-          "strength": 72
+          "strength": 73
         }
       },
       "negotiations": [
@@ -1100,6 +1167,182 @@
         },
         {
           "from": "player",
+          "id": "neg-player-harper-76-3",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 76
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-76-4",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 76
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-76-5",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 76
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-76-6",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 76
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-76-7",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 76
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-76-8",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 76
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-76-9",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 76
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-76-10",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 76
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-1",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-2",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-3",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-4",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-5",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-6",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-7",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-8",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-9",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-10",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-11",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-12",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-13",
+          "offer": "validate A",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
+          "id": "neg-player-harper-77-14",
+          "offer": "validate B",
+          "status": "pending",
+          "to": "harper",
+          "turn": 77
+        },
+        {
+          "from": "player",
           "id": "neg-player-harper-48-1",
           "offer": "First offer same turn",
           "status": "accepted",
@@ -1113,42 +1356,15 @@
         "fun_score": 86.6,
         "name": "Governance Lead (Grok)",
         "resources": {
-          "food": 303,
-          "influence": 297,
-          "prod": 293,
-          "sci": 296,
-          "verify_budget": 298
+          "food": 304,
+          "influence": 298,
+          "prod": 294,
+          "sci": 297,
+          "verify_budget": 299
         },
         "territories": 7
       },
       "receipts": [
-        {
-          "action": "governance_gate",
-          "approved": true,
-          "comment": "Quality sufficient.",
-          "fun_score": 92.0,
-          "id": "3591c2c9-gate-20260615184343",
-          "proposal": {
-            "action": "civforge_governance_hardening_validation",
-            "details": {
-              "details": {
-                "scope": "proposal_gate_persistence_after_screen_restart",
-                "via": "openclaw-validation"
-              },
-              "investment": 1,
-              "target": "gravity-mosaic"
-            },
-            "fun_score": 92.0,
-            "id": "3591c2c9",
-            "status": "GATED_APPROVED",
-            "timestamp": "2026-06-15T18:43:43.789261",
-            "turn": 72
-          },
-          "proposal_id": "3591c2c9",
-          "receipt_type": "governance_gate",
-          "status": "GATED_APPROVED",
-          "turn": 72
-        },
         {
           "comment": "Acceptable. Consider extra verification pass.",
           "decisions": {
@@ -1300,17 +1516,60 @@
           },
           "status": "PASS",
           "turn": 76
+        },
+        {
+          "comment": "Acceptable. Consider extra verification pass.",
+          "conflict_resolution_mode": null,
+          "decisions": {
+            "forge-coordinator": "Decided: deploy (based on prod=13, sci=9, 0 receipts)",
+            "harper": "Decided: deploy (based on prod=13, sci=9, 0 receipts)",
+            "sebastian": "Decided: deploy (based on prod=13, sci=9, 0 receipts)"
+          },
+          "delegate_conflict": false,
+          "fanout_max": 3,
+          "fun_score": 86.6,
+          "gate": {
+            "approved": true,
+            "comment": "Decided: deploy (based on prod=13, sci=9, 0 receipts)",
+            "receipt": {
+              "action": "govern_gravity_work",
+              "details": {
+                "decisions": {
+                  "forge-coordinator": "Decided: deploy (based on prod=13, sci=9, 0 receipts)",
+                  "harper": "Decided: deploy (based on prod=13, sci=9, 0 receipts)",
+                  "sebastian": "Decided: deploy (based on prod=13, sci=9, 0 receipts)"
+                },
+                "delegate_conflict": false,
+                "player_actions": 1
+              },
+              "fun_score": 86.6,
+              "id": "d83831a9",
+              "status": "GATED_APPROVED",
+              "timestamp": "2026-06-15T22:53:18.030449",
+              "turn": 77
+            }
+          },
+          "join_strategy": "evidence_then_review",
+          "proposal_id": "d83831a9",
+          "resources": {
+            "deploy_budget": 5,
+            "prod": 13,
+            "sci": 9,
+            "verify": 7
+          },
+          "status": "PASS",
+          "turn": 77
         }
       ],
       "recent_events": [
-        "Turn 76: Alliance alliance-player-harper-44 betrayal risk elevated to 41%.",
-        "Turn 76: Alliance alliance-player-harper-48 betrayal risk elevated to 49%.",
-        "Turn 76: Lysander (Research) opened negotiation.",
-        "Turn 76: Harper (Systems) \u2014 Decided: deploy (based on prod=16, sci=12, 3 receipts)",
-        "Turn 76: Sebastian (Governance) \u2014 Decided: deploy (based on prod=16, sci=12, 3 receipts)",
-        "Turn 76: Economic institution founded (#11).",
-        "Turn 76: Governance Lead (Grok) proposed to Harper (Systems): validate A",
-        "Turn 76: Governance Lead (Grok) proposed to Harper (Systems): validate B"
+        "Turn 77: Governance Lead (Grok) proposed to Harper (Systems): validate A",
+        "Turn 77: Governance Lead (Grok) proposed to Harper (Systems): validate B",
+        "Turn 77: Governance Lead (Grok) proposed to Harper (Systems): validate A",
+        "Turn 77: Governance Lead (Grok) proposed to Harper (Systems): validate B",
+        "Turn 77: Governance Lead (Grok) proposed to Harper (Systems): validate A",
+        "Turn 77: Governance Lead (Grok) proposed to Harper (Systems): validate B",
+        "Turn 77: Governance Lead (Grok) proposed to Harper (Systems): validate A",
+        "Turn 77: Governance Lead (Grok) proposed to Harper (Systems): validate B"
       ],
       "status": "active",
       "victory_progress": {
@@ -1386,7 +1645,7 @@
   },
   "poller_posture": {
     "findings": [],
-    "generated_at": "2026-06-15T19:13:07Z",
+    "generated_at": "2026-06-16T00:53:32Z",
     "key_file": {
       "exists": true,
       "has_civforge_kernel": true,
@@ -1422,67 +1681,117 @@
     }
   },
   "receipt_index": {
-    "generated_at": "2026-06-15T19:13:07Z",
+    "classified_samples": [
+      {
+        "path": "receipts/civforge-receipt-index-latest.md",
+        "receipt_class": "posture"
+      },
+      {
+        "path": "receipts/civforge-poller-posture-latest.md",
+        "receipt_class": "posture"
+      },
+      {
+        "path": "receipts/civforge-contract-parity-latest.md",
+        "receipt_class": "posture"
+      },
+      {
+        "path": "receipts/game-reset-20260616-005325.md",
+        "receipt_class": "other"
+      },
+      {
+        "path": "receipts/game-reset-20260616-005253.md",
+        "receipt_class": "other"
+      },
+      {
+        "path": "receipts/game-reset-20260616-005212.md",
+        "receipt_class": "other"
+      },
+      {
+        "path": "receipts/work-pack-grok-mechanics-propose-001.md",
+        "receipt_class": "planning"
+      },
+      {
+        "path": "receipts/openclaw-governance-turnkey-20260616-004644.md",
+        "receipt_class": "openclaw_ops"
+      },
+      {
+        "path": "receipts/civforge-governance-posture-latest.md",
+        "receipt_class": "posture"
+      },
+      {
+        "path": "receipts/game-reset-20260616-004643.md",
+        "receipt_class": "other"
+      },
+      {
+        "path": "receipts/openclaw-governance-turnkey-20260616-004334.md",
+        "receipt_class": "openclaw_ops"
+      },
+      {
+        "path": "receipts/game-reset-20260616-004333.md",
+        "receipt_class": "other"
+      }
+    ],
+    "generated_at": "2026-06-16T00:53:32Z",
     "latest_files": [
       {
-        "mtime": "2026-06-15T19:12:49Z",
-        "path": "receipts/cursor-execution-governance-swarm-class-20260615.md",
-        "size": 1265
-      },
-      {
-        "mtime": "2026-06-15T18:54:46Z",
-        "path": "receipts/governance-cycle-20260615-185446.md",
-        "size": 1072
-      },
-      {
-        "mtime": "2026-06-15T18:54:46Z",
-        "path": "receipts/civforge-governance-posture-latest.md",
-        "size": 189
-      },
-      {
-        "mtime": "2026-06-15T18:54:46Z",
+        "mtime": "2026-06-16T00:53:32Z",
         "path": "receipts/civforge-receipt-index-latest.md",
-        "size": 1149
+        "size": 1126
       },
       {
-        "mtime": "2026-06-15T18:54:46Z",
+        "mtime": "2026-06-16T00:53:32Z",
+        "path": "receipts/civforge-poller-posture-latest.md",
+        "size": 157
+      },
+      {
+        "mtime": "2026-06-16T00:53:32Z",
         "path": "receipts/civforge-contract-parity-latest.md",
-        "size": 152
+        "size": 153
       },
       {
-        "mtime": "2026-06-15T18:54:41Z",
-        "path": "receipts/synthesis-lane-v2-nexus-governance-20260615.md",
-        "size": 4507
+        "mtime": "2026-06-16T00:53:25Z",
+        "path": "receipts/game-reset-20260616-005325.md",
+        "size": 588
       },
       {
-        "mtime": "2026-06-15T18:50:16Z",
-        "path": "receipts/openclaw-civforge-governance-hardening-20260615-1450.md",
-        "size": 2658
+        "mtime": "2026-06-16T00:52:53Z",
+        "path": "receipts/game-reset-20260616-005253.md",
+        "size": 588
       },
       {
-        "mtime": "2026-06-15T18:48:44Z",
-        "path": "receipts/work-pack-grok-mechanics-sim-001.md",
-        "size": 2209
+        "mtime": "2026-06-16T00:52:12Z",
+        "path": "receipts/game-reset-20260616-005212.md",
+        "size": 588
       },
       {
-        "mtime": "2026-06-15T18:48:44Z",
-        "path": "receipts/HANDOFF-GROK-SWARM-20260615.md",
-        "size": 5850
+        "mtime": "2026-06-16T00:51:42Z",
+        "path": "receipts/work-pack-grok-mechanics-propose-001.md",
+        "size": 3082
       },
       {
-        "mtime": "2026-06-15T18:47:43Z",
-        "path": "receipts/gravity-rec-20260615-184743.md",
-        "size": 589
+        "mtime": "2026-06-16T00:46:44Z",
+        "path": "receipts/openclaw-governance-turnkey-20260616-004644.md",
+        "size": 557
       },
       {
-        "mtime": "2026-06-15T18:47:05Z",
-        "path": "receipts/lane-v2-migration-20260615.md",
-        "size": 1328
+        "mtime": "2026-06-16T00:46:43Z",
+        "path": "receipts/civforge-governance-posture-latest.md",
+        "size": 190
       },
       {
-        "mtime": "2026-06-15T18:45:51Z",
-        "path": "receipts/governance-cycle-20260615-184551.md",
-        "size": 1071
+        "mtime": "2026-06-16T00:46:43Z",
+        "path": "receipts/game-reset-20260616-004643.md",
+        "size": 588
+      },
+      {
+        "mtime": "2026-06-16T00:43:34Z",
+        "path": "receipts/openclaw-governance-turnkey-20260616-004334.md",
+        "size": 557
+      },
+      {
+        "mtime": "2026-06-16T00:43:33Z",
+        "path": "receipts/game-reset-20260616-004333.md",
+        "size": 588
       }
     ],
     "schema": "civforge.receipt_index.v1",
@@ -1490,48 +1799,56 @@
       "exists": true,
       "latest": [
         {
-          "action": "PASS",
-          "created_at": "2026-06-15T18:54:46.631892",
-          "id": "r-76-20260615-185446",
-          "status": "PASS",
-          "turn": 76
+          "action": "game_reset",
+          "created_at": "2026-06-16T00:53:25.134334",
+          "id": "r-1-20260616-005325",
+          "status": "SUCCESS",
+          "turn": 1
         },
         {
-          "action": "PASS",
-          "created_at": "2026-06-15T18:54:46.513272",
-          "id": "r-75-20260615-185446",
-          "status": "PASS",
-          "turn": 75
+          "action": "game_reset",
+          "created_at": "2026-06-16T00:52:53.864569",
+          "id": "r-1-20260616-005253",
+          "status": "SUCCESS",
+          "turn": 1
         },
         {
-          "action": "gravity_recommendation",
-          "created_at": "2026-06-15T18:47:43.048264",
-          "id": "r-0-20260615-184743",
-          "status": null,
-          "turn": 0
+          "action": "game_reset",
+          "created_at": "2026-06-16T00:52:12.599543",
+          "id": "r-1-20260616-005212",
+          "status": "SUCCESS",
+          "turn": 1
         },
         {
-          "action": "PASS",
-          "created_at": "2026-06-15T18:45:51.747419",
-          "id": "r-74-20260615-184551",
-          "status": "PASS",
-          "turn": 74
+          "action": "game_reset",
+          "created_at": "2026-06-16T00:46:43.053412",
+          "id": "r-1-20260616-004643",
+          "status": "SUCCESS",
+          "turn": 1
         },
         {
-          "action": "PASS",
-          "created_at": "2026-06-15T18:45:51.624067",
-          "id": "r-73-20260615-184551",
-          "status": "PASS",
-          "turn": 73
+          "action": "game_reset",
+          "created_at": "2026-06-16T00:43:33.637055",
+          "id": "r-1-20260616-004333",
+          "status": "SUCCESS",
+          "turn": 1
         }
       ],
-      "receipts": 322,
+      "receipts": 336,
       "state_snapshots": 1
     },
     "status": "pass",
     "summary": {
       "latest_file_count": 12,
-      "sqlite_receipts": 322,
+      "receipt_classes": {
+        "execution": 5,
+        "governance_cycle": 3,
+        "openclaw_ops": 11,
+        "other": 13,
+        "planning": 4,
+        "posture": 4
+      },
+      "sqlite_receipts": 336,
       "sqlite_state_snapshots": 1
     }
   },
@@ -1541,9 +1858,9 @@
     "fail_count": 0,
     "finding_count": 0,
     "fun_score": 86.6,
-    "mcp_tool_count": 8,
-    "pending_negotiations": 45,
-    "turn": 76,
+    "mcp_tool_count": 16,
+    "pending_negotiations": 67,
+    "turn": 77,
     "warn_count": 0
   }
 }

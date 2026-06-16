@@ -20,7 +20,8 @@ Grok swarm runs on **grok.com**. No Mac Studio terminal, no `.grok/config.toml`,
 
 | Priority | Work pack topic | Cursor implements |
 |----------|-----------------|-------------------|
-| 1 | Policy-tree tier effects | `backend/civstudy_mechanics_bridge.py` |
+| 1 | **Mechanics proposal lane** (runtime + planning kinds) | `backend/mechanics_proposals.py` + MCP |
+| 2 | Policy-tree tier effects | `backend/civstudy_mechanics_bridge.py` |
 | 2 | Negotiation backlog sweep | `tools/negotiation-sweep.sh` |
 | 3 | `:8081` JWT identity | `tools/dawsos_auth_client.py` + sim_api |
 | 4 | Git worktrees | `docs/GIT_LANES_POLICY.md` |
@@ -43,7 +44,9 @@ Never: `civforge_cli.py status | grep vercel`
 
 ## 4. MCP tools (agent-play — Cursor maintains)
 
-8 tools in `tools/mcp_server.py` — see `docs/GAME_PLAY_GUIDE_V1.md`
+16 tools in `tools/mcp_server.py` — see `docs/GAME_PLAY_GUIDE_V1.md`
+
+**Mechanics proposal lane (not simulation):** `civforge_propose_mechanics`, `civforge_gate_mechanics`, `civforge_apply_mechanics`, `civforge_list_mechanics_proposals` — see `docs/GAME_MECHANICS_SWARM_PROPOSAL_LANE_V1.md`
 
 ---
 
@@ -64,7 +67,7 @@ Unchanged: global `~/.grok/config.toml` + grok.com project MCP settings.
 | Tool class | grok.com | Cursor Mac |
 |------------|----------|------------|
 | dawsOS MCPs (gitnexus, memory, trivium) | keep connected | via Cursor MCP |
-| CivForge `tools/mcp_server.py` (8 tools) | optional remote bridge | local stdio |
+| CivForge `tools/mcp_server.py` (16 tools) | optional remote bridge | local stdio |
 | Terminal / git on CivForge | planning only | executes |
 
 See `prompts/grok_swarm_handoff_seed.md` § dawsOS MCP tools.

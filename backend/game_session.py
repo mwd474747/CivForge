@@ -84,7 +84,7 @@ def governance_quorum_met(game_state: Dict[str, Any]) -> bool:
         return True
     if receipt_quorum_active(game_state):
         resources = game_state.get("player", {}).get("resources", {})
-        if resources.get("verify_budget", 0) >= RECEIPT_QUORUM_VERIFY_MIN:
+        if resources.get("verify_budget", 0) >= receipt_quorum_verify_min(game_state):
             return True
     factions = {party for alliance in player_alliances for party in alliance.get("parties", [])}
     return len(factions) >= 3
@@ -108,9 +108,31 @@ def milestone_truth(game_state: Dict[str, Any], vp: Dict[str, Any]) -> Dict[int,
 
 
 def cultural_tick_cadence(game_state: Dict[str, Any]) -> int:
+    overrides = game_state.get("mechanics_overrides", {})
+    cadence = overrides.get("cultural_cadence")
+    if isinstance(cadence, int) and cadence >= 2:
+        return cadence
     if policy_flags(game_state).get("symposium_chain"):
         return 4
     return 6
+
+
+def trade_route_sci_bonus(game_state: Dict[str, Any]) -> int:
+    from backend.mechanics_proposals import session_param
+
+    return int(session_param(game_state, "trade_route_sci_bonus", TRADE_ROUTE_SCI_BONUS))
+
+
+def receipt_quorum_progress_bonus(game_state: Dict[str, Any]) -> int:
+    from backend.mechanics_proposals import session_param
+
+    return int(session_param(game_state, "receipt_quorum_progress_bonus", RECEIPT_QUORUM_PROGRESS_BONUS))
+
+
+def receipt_quorum_verify_min(game_state: Dict[str, Any]) -> int:
+    from backend.mechanics_proposals import session_param
+
+    return int(session_param(game_state, "receipt_quorum_verify_min", RECEIPT_QUORUM_VERIFY_MIN))
 
 
 def check_defeat_conditions(game_state: Dict[str, Any]) -> Optional[str]:

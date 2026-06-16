@@ -20,6 +20,13 @@ from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civst
 from backend.game_reset import apply_game_reset
 from backend.game_session import policy_flags, session_phase
 from backend.game_actions import action_catalog, claim_map_tile, player_cycle_decision, select_district, unlock_policy
+from backend.mechanics_proposals import (
+    apply_mechanics,
+    gate_mechanics,
+    list_mechanics_proposals,
+    propose_mechanics,
+    proposals_summary,
+)
 from backend.turn_simulation import (
     enrich_cycle_receipt,
     maybe_emit_defeat_receipt,
@@ -173,6 +180,8 @@ game_state: Dict[str, Any] = {
     "negotiations": default_negotiations(),
     "victory_progress": default_victory_progress(),
     "mechanics_lanes": default_mechanics_lanes(),
+    "mechanics_proposals": [],
+    "mechanics_overrides": {},
 }
 
 # Try to restore last known state snapshot if available (now safe)
@@ -282,6 +291,8 @@ async def get_state() -> Dict[str, Any]:
         "session_phase": session_phase(game_state),
         "action_catalog": action_catalog(game_state),
         "session_history": game_state.get("session_history", [])[-5:],
+        "mechanics_proposals": proposals_summary(game_state),
+        "mechanics_overrides": game_state.get("mechanics_overrides", {}),
         "note": "CivForge governance workspace with multi-agent map, alliances, negotiations, mechanics lanes, and joint victory.",
     }
 
@@ -443,6 +454,21 @@ class MapClaimRequest(BaseModel):
     x: int
     y: int
 
+class MechanicsProposeRequest(BaseModel):
+    kind: str
+    title: str
+    payload: Dict[str, Any] = {}
+    author: str = "grok_swarm"
+    work_pack_id: str = ""
+    rationale: str = ""
+
+class MechanicsGateRequest(BaseModel):
+    proposal_id: str
+    fun_score_override: Optional[float] = None
+
+class MechanicsApplyRequest(BaseModel):
+    proposal_id: str
+
 @app.get("/game/actions")
 async def game_actions_catalog() -> Dict[str, Any]:
     """Player action costs and unlockable policies for dashboard/MCP."""
@@ -471,6 +497,52 @@ async def game_map_claim(req: MapClaimRequest, _claims: Dict[str, Any] = Depends
     if result.get("error"):
         return result
     receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.get("/game/mechanics/proposals")
+async def game_mechanics_proposals_list(status: Optional[str] = None) -> Dict[str, Any]:
+    """List mechanics proposals (Grok swarm proposal lane — not simulation-only)."""
+    return list_mechanics_proposals(game_state, status=status)
+
+@app.post("/game/mechanics/propose")
+async def game_mechanics_propose(
+    req: MechanicsProposeRequest,
+    _claims: Dict[str, Any] = Depends(require_public_mode_token),
+) -> Dict[str, Any]:
+    """Propose a game mechanic update (runtime patch or Cursor planning kind)."""
+    result = propose_mechanics(
+        game_state,
+        kind=req.kind,
+        title=req.title,
+        payload=req.payload,
+        author=req.author,
+        work_pack_id=req.work_pack_id,
+        rationale=req.rationale,
+    )
+    if not result.get("error"):
+        receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.post("/game/mechanics/gate")
+async def game_mechanics_gate(
+    req: MechanicsGateRequest,
+    _claims: Dict[str, Any] = Depends(require_public_mode_token),
+) -> Dict[str, Any]:
+    """FunForge gate on a mechanics proposal."""
+    result = gate_mechanics(game_state, req.proposal_id, req.fun_score_override)
+    if not result.get("error"):
+        receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.post("/game/mechanics/apply")
+async def game_mechanics_apply(
+    req: MechanicsApplyRequest,
+    _claims: Dict[str, Any] = Depends(require_public_mode_token),
+) -> Dict[str, Any]:
+    """Apply a gated-approved runtime mechanics proposal."""
+    result = apply_mechanics(game_state, req.proposal_id)
+    if result.get("applied"):
+        receipt_store.save_state("game_state", game_state)
     return result
 
 @app.post("/game/reset")

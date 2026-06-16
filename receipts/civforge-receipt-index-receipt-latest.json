@@ -1,7 +1,7 @@
 {
   "action": "civforge_receipt_index",
   "artifact": "receipts/civforge-receipt-index-latest.json",
-  "generated_at": "2026-06-15T20:33:57Z",
+  "generated_at": "2026-06-16T00:53:32Z",
   "schema": "civforge.receipt.v1",
   "status": "pass"
 }

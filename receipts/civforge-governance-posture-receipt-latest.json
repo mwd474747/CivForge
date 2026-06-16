@@ -1,7 +1,7 @@
 {
   "action": "civforge_governance_posture",
   "artifact": "receipts/civforge-governance-posture-latest.json",
-  "generated_at": "2026-06-15T19:13:07Z",
+  "generated_at": "2026-06-16T00:53:32Z",
   "schema": "civforge.receipt.v1",
   "status": "pass"
 }

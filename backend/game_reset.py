@@ -66,7 +66,8 @@ def build_initial_game_state() -> Dict[str, Any]:
         "alliances": default_alliances(),
         "negotiations": default_negotiations(),
         "mechanics_lanes": default_mechanics_lanes(),
-        "civstudy_sim": default_civstudy_sim_state(),
+        "mechanics_proposals": [],
+        "mechanics_overrides": {},
     }
     ensure_multi_agent_state(state)
     state["victory_progress"] = fresh_victory_progress(state)

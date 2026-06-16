@@ -47,6 +47,10 @@ python3 tools/civforge_cli.py mcp-serve   # stdio MCP for agent players
 | `civforge_select_district` | `POST /game/district/select` |
 | `civforge_unlock_policy` | `POST /game/policy/unlock` |
 | `civforge_claim_tile` | `POST /game/map/claim` |
+| `civforge_propose_mechanics` | `POST /game/mechanics/propose` |
+| `civforge_gate_mechanics` | `POST /game/mechanics/gate` |
+| `civforge_apply_mechanics` | `POST /game/mechanics/apply` |
+| `civforge_list_mechanics_proposals` | `GET /game/mechanics/proposals` |
 
 ## Player actions
 
