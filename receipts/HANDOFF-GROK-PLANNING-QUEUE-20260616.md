@@ -1,7 +1,9 @@
 # Grok Planning Handoff — Post REFACTOR-SIM-001
 
+> **Consolidated review (Block A + Agent-vs-Agent):** see **`receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md`** — use that for Grok’s next PRIME resubmit.
+
 **Generated:** 2026-06-16  
-**Cursor HEAD (CivForge `main`):** `df4cdca` (this handoff commit; execution baseline `0f1aad8`)  
+**Cursor HEAD (CivForge `main`):** pull `main` → `git rev-parse --short HEAD` (execution baseline **`0f1aad8`**)  
 **Tag:** `report-only` (planning lane input; not promotion truth)
 
 ---
@@ -137,7 +139,7 @@ This lets Mike focus on **implementation approval** (one-line ignitions) instead
 ## 6. Copy-paste ignition for Grok (next session)
 
 ```
-Planning lane only. Anchor: CivForge main @ df4cdca, SIM_GAME_BOUNDARY_V1.md §4 landed.
+Planning lane only. Anchor: CivForge main (latest pull), SIM_GAME_BOUNDARY_V1.md §4 landed, this handoff receipt.
 
 Author Block A (cultural victory, policy branching, wonder placement) as three PRIME receipts
 using the envelope template in receipts/HANDOFF-GROK-PLANNING-QUEUE-20260616.md.
@@ -164,7 +166,7 @@ Before authoring Block A PRIME receipts, Grok **must** reconcile planning state 
 
 | Field | Correct value | Retire / do not cite |
 |-------|---------------|----------------------|
-| CivForge `main` HEAD | `df4cdca` (handoff); execution baseline `0f1aad8` | `3d4bbd5`, `a56b8ca`, pre-refactor HEADs |
+| CivForge `main` HEAD | `git rev-parse --short HEAD` after pull | `3d4bbd5`, `a56b8ca`, pre-refactor HEADs |
 | pytest count | **101 passed** | 29, 81, 96 as "current" |
 | MCP tools | **17** (see `tools/civforge_cli.py`) | "9 MCP tools" in gap inventory |
 | Tick order | `mechanics_first_then_milestones` | milestones-before-diplomacy diagrams |
