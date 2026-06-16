@@ -7,8 +7,9 @@ from typing import Any, Dict
 from backend.game_session import cultural_tick_cadence, session_phase
 from backend.trust_erosion import TRUST_BETRAYAL_THRESHOLD, trust_summary
 
-
 def victory_hud_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
+    from backend.cultural_victory import sync_cultural_victory_path
+
     vp = game_state.get("victory_progress", {})
     cultural = game_state.get("mechanics_lanes", {}).get("cultural", {})
     sim = game_state.get("civstudy_sim", {})
@@ -17,6 +18,7 @@ def victory_hud_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
     progress = vp.get("joint_progress", 0)
     target = vp.get("target", 100)
     max_risk = trust.get("max_betrayal_risk", 0)
+    cultural_path = sync_cultural_victory_path(game_state)
 
     warnings = []
     if fun < 45:
@@ -41,6 +43,10 @@ def victory_hud_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
             "tick_cadence": cultural_tick_cadence(game_state),
             "active_chain_count": len(sim.get("active_chains") or {}),
             "unlocked_policies": len(sim.get("policy_tree", {}).get("unlocked", [])),
+            "commissioned_wonders": len(sim.get("commissioned_wonders") or []),
+            "milestones": cultural_path.get("milestones", []),
+            "progress_pct": cultural_path.get("progress_pct", 0),
+            "alternate_victory_eligible": cultural_path.get("alternate_victory_eligible", False),
         },
         "defeat_warning": bool(warnings) and session_phase(game_state) == "active",
         "defeat_warnings": warnings,

@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from backend.civstudy_mechanics_bridge import apply_policy_effect, ensure_civstudy_sim_state
 from backend.civstudy_metadata import default_districts, default_policy_tree
+from backend.corpus_card_registry import get_corpus_card_registry
 from backend.game_session import (
     DISTRICT_SELECT_INFLUENCE_COST,
     MAP_CLAIM_INFLUENCE_COST,
@@ -17,6 +18,13 @@ from backend.multi_agent_state import AGENT_LABELS, ensure_multi_agent_state, sy
 SEND_ENVOY_INFLUENCE_COST = 6
 SEND_ENVOY_RISK_REDUCTION = 15
 SEND_ENVOY_SHIELD_TURNS = 3
+
+WONDER_COMMISSION_COSTS = {
+    "wonder-pyramids": 14,
+    "wonder-great-wall": 12,
+    "wonder-oracle": 10,
+}
+COMMISSIONABLE_WONDER_IDS = tuple(WONDER_COMMISSION_COSTS.keys())
 
 _POLICY_TIER_TURN = {1: 6, 2: 12, 3: 18}
 
@@ -37,12 +45,30 @@ def player_resources(game_state: Dict[str, Any]) -> Dict[str, Any]:
     return game_state.setdefault("player", {}).setdefault("resources", {})
 
 
+def _wonder_catalog() -> Dict[str, Dict[str, Any]]:
+    registry = get_corpus_card_registry()
+    return {
+        wid: registry.get(wid)
+        for wid in COMMISSIONABLE_WONDER_IDS
+        if registry.get(wid)
+    }
+
+
+def _commissioned_wonder_ids(game_state: Dict[str, Any]) -> set:
+    sim = ensure_civstudy_sim_state(game_state)
+    return {entry.get("wonder_id") for entry in sim.get("commissioned_wonders", [])}
+
+
 def action_catalog(game_state: Dict[str, Any]) -> Dict[str, Any]:
     """Costs and availability for dashboard / MCP."""
+    from backend.policy_branching import policy_tree_checklist
+
     ensure_multi_agent_state(game_state)
     ensure_civstudy_sim_state(game_state)
     sim = game_state["civstudy_sim"]
     unlocked = set(sim.get("policy_tree", {}).get("unlocked", []))
+    influence = player_resources(game_state).get("influence", 0)
+    commissioned = _commissioned_wonder_ids(game_state)
     policies = []
     for pid, meta in _policy_catalog().items():
         tier = int(meta.get("tier", 1))
@@ -54,6 +80,17 @@ def action_catalog(game_state: Dict[str, Any]) -> Dict[str, Any]:
             "unlocked": pid in unlocked,
             "unlockable": _policy_unlockable(game_state, pid)[0],
             "influence_cost": int(meta.get("influence_cost") or POLICY_UNLOCK_INFLUENCE_COST.get(tier, 8)),
+        })
+    wonders = []
+    for wid, card in _wonder_catalog().items():
+        cost = WONDER_COMMISSION_COSTS[wid]
+        wonders.append({
+            "id": wid,
+            "name": card.get("name", wid),
+            "effect": card.get("effect", ""),
+            "influence_cost": cost,
+            "commissioned": wid in commissioned,
+            "commissionable": wid not in commissioned and influence >= cost,
         })
     return {
         "district_select": {"influence_cost": DISTRICT_SELECT_INFLUENCE_COST, "districts": list(_district_catalog().keys())},
@@ -75,6 +112,8 @@ def action_catalog(game_state: Dict[str, Any]) -> Dict[str, Any]:
             ],
         },
         "policies": policies,
+        "policy_tree_checklist": policy_tree_checklist(game_state),
+        "wonders": wonders,
         "active_district_id": sim.get("active_district_id"),
     }
 
@@ -85,7 +124,8 @@ def _policy_unlockable(game_state: Dict[str, Any], policy_id: str) -> Tuple[bool
         return False, "unknown policy"
     meta = catalog[policy_id]
     sim = ensure_civstudy_sim_state(game_state)
-    unlocked = set(sim.get("policy_tree", {}).get("unlocked", []))
+    pt = sim.get("policy_tree", {})
+    unlocked = set(pt.get("unlocked", []))
     if policy_id in unlocked:
         return False, "already unlocked"
     tier = int(meta.get("tier", 1))
@@ -98,6 +138,17 @@ def _policy_unlockable(game_state: Dict[str, Any], policy_id: str) -> Tuple[bool
             if prev["branch_id"] == branch_id and int(prev.get("tier", 0)) == tier - 1:
                 if prev["id"] not in unlocked:
                     return False, f"requires prior policy {prev['id']}"
+    branch_focus = pt.get("branch_focus")
+    if branch_focus:
+        from backend.policy_branching import POLICY_BRANCH_EXTENSIONS
+
+        allowed = None
+        for branch in POLICY_BRANCH_EXTENSIONS:
+            if branch["id"] == branch_focus:
+                allowed = set(branch["policies"])
+                break
+        if allowed is not None and policy_id not in allowed:
+            return False, f"requires branch focus {branch_focus}"
     cost = int(meta.get("influence_cost") or POLICY_UNLOCK_INFLUENCE_COST.get(tier, 8))
     if player_resources(game_state).get("influence", 0) < cost:
         return False, f"requires {cost} influence"
@@ -231,6 +282,79 @@ def _find_player_alliance(game_state: Dict[str, Any], alliance_id: str) -> Optio
             continue
         return alliance
     return None
+
+
+def _apply_wonder_effect(game_state: Dict[str, Any], wonder_id: str) -> None:
+    lanes = game_state.setdefault("mechanics_lanes", {})
+    sim = ensure_civstudy_sim_state(game_state)
+    if wonder_id == "wonder-pyramids":
+        eco = lanes.setdefault("economic", {})
+        eco["yield_bonus_pct"] = eco.get("yield_bonus_pct", 10) + 5
+        game_state["player"]["resources"]["prod"] = game_state["player"]["resources"].get("prod", 0) + 2
+    elif wonder_id == "wonder-great-wall":
+        for alliance in game_state.get("alliances", []):
+            if "player" in alliance.get("parties", []):
+                alliance["betrayal_risk"] = max(0, int(alliance.get("betrayal_risk", 0)) - 10)
+    elif wonder_id == "wonder-oracle":
+        cul = lanes.setdefault("cultural", {})
+        cul["influence_spread"] = cul.get("influence_spread", 0) + 3
+        sim.setdefault("wonder_effects", {})["oracle"] = True
+
+
+def commission_wonder(
+    game_state: Dict[str, Any],
+    wonder_id: str,
+    district_id: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Commission a world wonder from corpus cards (WP-GROK-WONDER-PLACE-001)."""
+    from backend.cultural_victory import sync_cultural_victory_path
+
+    ensure_multi_agent_state(game_state)
+    ensure_civstudy_sim_state(game_state)
+    if wonder_id not in COMMISSIONABLE_WONDER_IDS:
+        return {"error": "unknown wonder", "wonder_id": wonder_id, "valid": list(COMMISSIONABLE_WONDER_IDS)}
+
+    sim = game_state["civstudy_sim"]
+    if wonder_id in _commissioned_wonder_ids(game_state):
+        return {"error": "wonder already commissioned", "wonder_id": wonder_id}
+
+    districts = _district_catalog()
+    active_district = district_id or sim.get("active_district_id")
+    if active_district not in districts:
+        return {"error": "unknown district", "district_id": active_district, "valid": list(districts.keys())}
+
+    cost = WONDER_COMMISSION_COSTS[wonder_id]
+    resources = player_resources(game_state)
+    if resources.get("influence", 0) < cost:
+        return {"error": "not enough influence", "required": cost, "available": resources.get("influence", 0)}
+
+    card = _wonder_catalog().get(wonder_id, {})
+    resources["influence"] -= cost
+    entry = {
+        "wonder_id": wonder_id,
+        "name": card.get("name", wonder_id),
+        "district_id": active_district,
+        "turn": game_state["turn"],
+        "effect": card.get("effect", ""),
+    }
+    sim.setdefault("commissioned_wonders", []).append(entry)
+    _apply_wonder_effect(game_state, wonder_id)
+    sync_cultural_victory_path(game_state)
+
+    msg = (
+        f"Turn {game_state['turn']}: Commissioned wonder '{entry['name']}' "
+        f"in {districts[active_district]['name']} ({cost} influence)."
+    )
+    sim.setdefault("recent", []).insert(0, msg)
+    sim["recent"] = sim["recent"][:8]
+    game_state.setdefault("events", []).append(msg)
+    return {
+        "wonder_id": wonder_id,
+        "wonder": entry,
+        "influence_spent": cost,
+        "commissioned_wonders": sim["commissioned_wonders"],
+        "cultural_path": game_state.get("victory_progress", {}).get("cultural_path"),
+    }
 
 
 def send_envoy(game_state: Dict[str, Any], alliance_id: str) -> Dict[str, Any]:

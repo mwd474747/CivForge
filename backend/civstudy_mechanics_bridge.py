@@ -28,7 +28,8 @@ def default_civstudy_sim_state() -> Dict[str, Any]:
         "unlocked_forks": [],
         "active_chains": {},
         "district_pulse_turn": 0,
-        "policy_tree": {"unlocked": [], "policy_flags": {}},
+        "commissioned_wonders": [],
+        "policy_tree": {"unlocked": [], "policy_flags": {}, "branch_focus": None},
         "recent": [],
     }
 
@@ -319,18 +320,27 @@ def tick_civstudy_cultural_chains(game_state: Dict[str, Any]) -> List[str]:
             msg += " (complete)"
         events.append(msg)
 
+    from backend.cultural_victory import sync_cultural_victory_path
+
+    sync_cultural_victory_path(game_state)
     return events
 
 
 def civstudy_sim_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
     """Compact summary for /state and Empire Council advisory telemetry."""
+    from backend.policy_branching import policy_tree_checklist
+
     sim = ensure_civstudy_sim_state(game_state)
     district = _district_by_id(sim["active_district_id"])
+    pt = dict(sim.get("policy_tree", {}))
+    pt["checklist"] = policy_tree_checklist(game_state)
     return {
         "active_district": district["name"] if district else sim["active_district_id"],
         "unlocked_forks": list(sim.get("unlocked_forks", [])),
         "unlocked_policies": list(sim.get("policy_tree", {}).get("unlocked", [])),
         "policy_flags": dict(sim.get("policy_tree", {}).get("policy_flags", {})),
+        "policy_tree": pt,
+        "commissioned_wonders": list(sim.get("commissioned_wonders", [])),
         "active_chains": {
             k: v for k, v in sim.get("active_chains", {}).items() if not v.get("complete")
         },

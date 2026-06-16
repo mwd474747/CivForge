@@ -26,7 +26,16 @@ from backend.civstudy_metadata import civstudy_reference_panel
 from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
 from backend.game_reset import apply_defeat_cascade_seed, apply_game_reset
 from backend.game_session import apply_defeat, check_defeat_conditions, policy_flags, session_phase
-from backend.game_actions import action_catalog, claim_map_tile, player_cycle_decision, select_district, send_envoy, unlock_policy
+from backend.game_actions import (
+    action_catalog,
+    claim_map_tile,
+    commission_wonder,
+    player_cycle_decision,
+    select_district,
+    send_envoy,
+    unlock_policy,
+)
+from backend.policy_branching import select_policy_branch
 from backend.trust_erosion import trust_summary
 from backend.victory_hud import victory_hud_summary
 from backend.mechanics_proposals import (
@@ -466,6 +475,13 @@ class DistrictSelectRequest(BaseModel):
 class PolicyUnlockRequest(BaseModel):
     policy_id: str
 
+class PolicyBranchSelectRequest(BaseModel):
+    branch_id: str
+
+class WonderCommissionRequest(BaseModel):
+    wonder_id: str
+    district_id: Optional[str] = None
+
 class MapClaimRequest(BaseModel):
     x: int
     y: int
@@ -523,6 +539,22 @@ async def game_district_select(req: DistrictSelectRequest, _claims: Dict[str, An
 @app.post("/game/policy/unlock")
 async def game_policy_unlock(req: PolicyUnlockRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
     result = unlock_policy(game_state, req.policy_id)
+    if result.get("error"):
+        return result
+    receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.post("/game/policy/branch")
+async def game_policy_branch(req: PolicyBranchSelectRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    result = select_policy_branch(game_state, req.branch_id)
+    if result.get("error"):
+        return result
+    receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.post("/game/wonder/commission")
+async def game_wonder_commission(req: WonderCommissionRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    result = commission_wonder(game_state, req.wonder_id, req.district_id)
     if result.get("error"):
         return result
     receipt_store.save_state("game_state", game_state)
