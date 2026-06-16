@@ -34,7 +34,9 @@ live_head = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], tex
 
 errors = []
 if registry_head != live_head:
-    print(f"NOTE: update config/work_pack_registry.yaml anchor.head to {live_head} after this commit")
+    text = text.replace(f"  head: {registry_head}", f"  head: {live_head}", 1)
+    registry_path.write_text(text)
+    print(f"Updated registry anchor.head → {live_head}")
 
 pytest_run = subprocess.run(
     ["python3", "-m", "pytest", "tests/", "-q"],
