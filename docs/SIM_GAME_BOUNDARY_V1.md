@@ -55,7 +55,7 @@ Audit keys on `/state.simulation_boundary`: `_simulation_boundary`, `_mechanics_
 
 1. Keep `run_simulation_layer` explicit (current).
 2. Register *new* rules as mechanics modules (`reg.register(...)`).
-3. Optional future WP: wrap `tick_multi_agent_state` as registry module `"diplomacy_layer"` with decision injection.
+3. Milestone sync remains orchestration-only (`run_simulation_layer`); diplomacy/competition are registry modules (WP-GROK-REFRACTOR-SIM-001 landed).
 
 ---
 

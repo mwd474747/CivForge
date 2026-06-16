@@ -3,7 +3,7 @@
 **Tag:** `prototype-only`  
 **Work packs:** WP-SIM-GAME-CLARITY-001, WP-SIM-GAME-CLARITY-002, WP-DEEP-DIVE-ANALYSIS-003, WP-SIM-GAME-OVERLAP-ANALYSIS-004  
 **Base HEAD:** `d22e99c`  
-**Land HEAD:** _(set after commit)_  
+**Land HEAD:** `0386b7a` on `origin/main`  
 **Generated:** 2026-06-16T15:00:00Z  
 
 ## Commands run
