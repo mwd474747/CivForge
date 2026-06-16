@@ -5,21 +5,9 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from backend.civstudy_mechanics_bridge import ensure_civstudy_sim_state
+from backend.civstudy_metadata import policy_branch_extensions
 
-POLICY_BRANCH_EXTENSIONS: List[Dict[str, Any]] = [
-    {
-        "id": "tradition",
-        "label": "Tradition",
-        "maps_to": "culture",
-        "policies": ["symposium_chain", "influence_spread", "festival_receipts"],
-    },
-    {
-        "id": "liberty",
-        "label": "Liberty",
-        "maps_to": "diplomacy",
-        "policies": ["open_negotiation", "shared_intel"],
-    },
-]
+POLICY_BRANCH_EXTENSIONS = policy_branch_extensions()
 
 
 def policy_tree_checklist(game_state: Dict[str, Any]) -> Dict[str, Any]:

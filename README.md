@@ -26,6 +26,8 @@ bash tools/turnkey-gaps-all.sh           # tests + cursor + openclaw escalation 
 
 **Execution lanes:** `docs/EXECUTION_LANE_V2.md` — Grok swarm (grok.com) plans; Cursor executes locally; OpenClaw on escalation only.
 
+**Truth plane (anti-drift):** `docs/TRUTH_ORDER.md` · `config/work_pack_registry.yaml` · `bash tools/verify-truth-anchor.sh`
+
 **Turnkey lane packets:**
 
 | Lane | Doc | Script |

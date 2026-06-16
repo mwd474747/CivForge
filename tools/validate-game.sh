@@ -31,7 +31,7 @@ else
 fi
 
 echo "2. Unit tests..."
-python3 -m pytest tests/test_multi_agent_state.py tests/test_civstudy_metadata.py tests/test_civstudy_mechanics_bridge.py -q
+python3 -m pytest tests/ -q
 
 echo "3. API contract probes..."
 python3 <<'PY'
@@ -66,6 +66,13 @@ for key in ("districts", "policy_tree", "discovery_forks", "cultural_event_chain
     assert key in cs, f"missing civstudy_reference.{key}"
 sim = s.get("civstudy_sim", {})
 assert "active_district" in sim, "missing civstudy_sim.active_district"
+assert "policy_tree" in sim and "checklist" in sim["policy_tree"], "missing policy_tree.checklist (Block A)"
+assert "commissioned_wonders" in sim, "missing civstudy_sim.commissioned_wonders (Block A)"
+assert "cultural_path" in s.get("victory_progress", {}), "missing victory_progress.cultural_path (Block A)"
+assert "work_pack_registry" in s, "missing work_pack_registry on /state"
+assert s["work_pack_registry"].get("closed_block_a") is True, "Block A should be closed in registry"
+cat = s.get("action_catalog", {})
+assert len(cat.get("wonders", [])) == 3, "expected 3 commissionable wonders in action_catalog"
 vp = s.get("victory_progress", {})
 if vp.get("joint_progress", 0) >= vp.get("target", 100):
     assert vp["milestones"][3]["done"] is True, "Joint victory milestone should sync at 100%"
@@ -93,7 +100,13 @@ for mech in (
     assert mech in names, f"missing MCP tool {mech}"
 assert "civforge_send_envoy" in names
 assert len(names) == 17, f"expected 17 MCP tools, got {len(names)}"
-print("  API + MCP probes OK")
+
+# Block A route smoke (deterministic on fresh reset session)
+post("/game/policy/branch", {"branch_id": "tradition"})
+post("/game/wonder/commission", {"wonder_id": "wonder-oracle"})
+s2 = get("/state")
+assert len(s2["civstudy_sim"]["commissioned_wonders"]) >= 1
+print("  API + MCP + Block A probes OK")
 PY
 
 if $READ_ONLY; then

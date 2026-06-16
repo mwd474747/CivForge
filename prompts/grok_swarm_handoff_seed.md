@@ -7,7 +7,7 @@ There is **no local Grok terminal** on the Mac Studio. Cursor executes; you plan
 
 ## Lane model (locked)
 
-Read `docs/EXECUTION_LANE_V2.md` and `receipts/HANDOFF-GROK-SWARM-20260615.md`.
+Read `docs/TRUTH_ORDER.md`, `config/work_pack_registry.yaml`, `docs/AGENT_CLAIMS_POLICY.md`.
 
 | Lane | You? |
 |------|------|
@@ -18,7 +18,7 @@ Read `docs/EXECUTION_LANE_V2.md` and `receipts/HANDOFF-GROK-SWARM-20260615.md`.
 ## CivForge state (verify via Cursor receipt, not your terminal)
 
 - Repo: `~/CivForge` / https://github.com/mwd474747/CivForge
-- HEAD: ask Cursor for latest `git rev-parse --short HEAD`
+- HEAD + WP lifecycle: read `config/work_pack_registry.yaml` (do not guess)
 - Play: http://127.0.0.1:8080/dashboard or https://civforge.vercel.app?api_base=
 - Verify command (Cursor runs): `bash tools/turnkey-cursor-local.sh`
 
@@ -69,3 +69,11 @@ Before closing any PRIME receipt, require a linked **Cursor execution receipt** 
 ---
 
 _End of swarm handoff seed._
+
+## Block A
+
+**Closed** @ `1037950`. Do not re-plan. Cite `receipts/BLOCK-A-CLOSURE-20260616.md` for closure PRIMEs.
+
+## Block B (open)
+
+`WP-GROK-COMPETITION-DEPTH-001`, `WP-GROK-PLAYER-AGENT-001` — §5 envelopes verbatim only.

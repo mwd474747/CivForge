@@ -1,7 +1,9 @@
 # Grok Consolidated Handoff — Block A Review + Block B Redirect
 
 **Generated:** 2026-06-16  
-**Authority:** `report-only` (planning lane; not promotion truth)  
+**Authority:** `report-only` (planning lane; Block A execution closed — see BLOCK-A-CLOSURE)  
+> **UPDATE 2026-06-16:** Block A **closed** @ `1037950` — see `receipts/BLOCK-A-CLOSURE-20260616.md` and `config/work_pack_registry.yaml`. §5 remains scope authority for Block B. Do **not** re-issue Block A RESUBMIT PRIMEs.
+
 **Anchor:** CivForge `main` — pull then `git rev-parse --short HEAD`  
 **Execution baseline:** `0f1aad8` (101 pytest); prior handoff `receipts/HANDOFF-GROK-PLANNING-QUEUE-20260616.md`  
 **Cursor review author:** Cursor partner lane (validation only)
@@ -12,7 +14,7 @@
 
 | Item | Verdict |
 |------|---------|
-| **Block A PRIMEs** (CULTURAL-VICTORY, POLICY-BRANCH, WONDER-PLACE) | **Direction OK — envelopes too thin.** Resubmit §5 refined envelopes before Mike ignites Cursor. |
+| **Block A** (CULTURAL-VICTORY, POLICY-BRANCH, WONDER-PLACE) | **Closed** @ `1037950` — Cursor receipt + 113 pytest. Grok: closure PRIMEs only. |
 | **WP-GROK-AGENT-VS-AGENT-003** | **Reject for execution.** Split into Block B (`COMPETITION-DEPTH-001` + `PLAYER-AGENT-001`); extend existing modules. |
 | **Grok role** | Planning PRIMEs with full envelopes only — no execution claims, no parallel subsystems. |
 | **Cursor role** | One WP per ignition; pytest + execution receipt. |
@@ -134,10 +136,9 @@ orchestrator.advance_cycle()
 
 ### 4.3 Execution order (Mike)
 
-1. Grok resubmits Block A refined PRIMEs (§5).
-2. Mike: `Execute WP-GROK-CULTURAL-VICTORY-001` → Cursor → receipt → pytest.
-3. Repeat for POLICY-BRANCH-001, then WONDER-PLACE-001 (one WP per ignition).
-4. After Block A, Grok authors Block B refined PRIMEs; Mike ignites one at a time.
+1. ~~Block A~~ **Done** — `receipts/cursor-execution-wp-grok-block-a-20260616.md`
+2. Grok authors Block B PRIMEs from §5 (COMPETITION-DEPTH, PLAYER-AGENT) — planning only.
+3. Mike ignites one Block B WP at a time → Cursor → receipt → registry update.
 
 ---
 

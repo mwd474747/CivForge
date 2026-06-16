@@ -62,6 +62,7 @@ def default_corpus_cards() -> List[Dict[str, Any]]:
             "name": "Pyramids",
             "flavor": "A monument to eternity — production legacy for generations.",
             "effect": "Permanent +15% build speed empire-wide; legacy points +2 on completion.",
+            "influence_cost": 14,
         },
         {
             "id": "wonder-great-wall",
@@ -69,6 +70,7 @@ def default_corpus_cards() -> List[Dict[str, Any]]:
             "name": "Great Wall",
             "flavor": "Stone sentinels guard the border against raiders.",
             "effect": "Border tiles gain +4 defense; betrayal risk on frontier alliances −10%.",
+            "influence_cost": 12,
         },
         {
             "id": "wonder-oracle",
@@ -76,6 +78,7 @@ def default_corpus_cards() -> List[Dict[str, Any]]:
             "name": "Oracle",
             "flavor": "Priests divine the will of the gods and inspire the masses.",
             "effect": "Cultural event chains start one turn earlier; influence spread +3.",
+            "influence_cost": 10,
         },
         {
             "id": "policy-classical-governments",

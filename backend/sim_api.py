@@ -38,6 +38,7 @@ from backend.game_actions import (
 from backend.policy_branching import select_policy_branch
 from backend.trust_erosion import trust_summary
 from backend.victory_hud import victory_hud_summary
+from backend.work_pack_status import work_pack_status_summary
 from backend.mechanics_proposals import (
     apply_mechanics,
     gate_mechanics,
@@ -319,6 +320,7 @@ async def get_state() -> Dict[str, Any]:
         "competition_mode": competition_summary(game_state),
         "simulation_boundary": boundary_summary(game_state),
         "dashboard_components": get_dashboard_registry().all_components(),
+        "work_pack_registry": work_pack_status_summary(),
     }
 
 @app.get("/game/founding-session")

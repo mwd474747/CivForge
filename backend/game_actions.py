@@ -54,6 +54,13 @@ def _wonder_catalog() -> Dict[str, Dict[str, Any]]:
     }
 
 
+def _wonder_influence_cost(wonder_id: str) -> int:
+    card = _wonder_catalog().get(wonder_id) or {}
+    if card.get("influence_cost") is not None:
+        return int(card["influence_cost"])
+    return WONDER_COMMISSION_COSTS.get(wonder_id, 10)
+
+
 def _commissioned_wonder_ids(game_state: Dict[str, Any]) -> set:
     sim = ensure_civstudy_sim_state(game_state)
     return {entry.get("wonder_id") for entry in sim.get("commissioned_wonders", [])}
@@ -83,7 +90,7 @@ def action_catalog(game_state: Dict[str, Any]) -> Dict[str, Any]:
         })
     wonders = []
     for wid, card in _wonder_catalog().items():
-        cost = WONDER_COMMISSION_COSTS[wid]
+        cost = _wonder_influence_cost(wid)
         wonders.append({
             "id": wid,
             "name": card.get("name", wid),

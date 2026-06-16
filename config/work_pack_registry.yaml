@@ -1,0 +1,103 @@
+# CivForge work-pack registry — single machine-readable closure index.
+# Authority: docs/TRUTH_ORDER.md (this file is tier-2; Cursor execution receipts are tier-1 for landed WPs).
+#
+# lifecycle: planning | ignited | executing | closed | retired | superseded
+# Updated by Cursor after execution; Grok must not mutate without Mike ignition.
+
+anchor:
+  repo: mwd474747/CivForge
+  branch: main
+  head: b3f3eb3
+  pytest_total: 117
+  kernel_port: 8080
+  updated_at: "2026-06-16"
+
+truth_docs:
+  order: docs/TRUTH_ORDER.md
+  lifecycle: docs/WORK_PACK_LIFECYCLE.md
+  lanes: docs/EXECUTION_LANE_V2.md
+  scope_authority: receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md
+
+blocks:
+  block_a:
+    title: Wonder → Cultural → Policy
+    status: closed
+    closure_receipt: receipts/BLOCK-A-CLOSURE-20260616.md
+    execution_receipt: receipts/cursor-execution-wp-grok-block-a-20260616.md
+    landed_commit: 1037950
+  block_b:
+    title: Competition depth + player agent
+    status: planning
+    scope_authority: receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md#wp-grok-competition-depth-001
+
+work_packs:
+  WP-GROK-WONDER-PLACE-001:
+    lifecycle: closed
+    block: block_a
+    landed_commit: 1037950
+    execution_receipt: receipts/cursor-execution-wp-grok-block-a-20260616.md
+    tests:
+      - tests/test_wp_grok_wonder_place_001.py
+    routes:
+      - POST /game/wonder/commission
+    superseded_primes:
+      - WP-GROK-BLOCK-A-RESUBMIT-FINAL-ALIGNED-003
+
+  WP-GROK-CULTURAL-VICTORY-001:
+    lifecycle: closed
+    block: block_a
+    landed_commit: 1037950
+    execution_receipt: receipts/cursor-execution-wp-grok-block-a-20260616.md
+    tests:
+      - tests/test_wp_grok_cultural_victory_001.py
+    state_paths:
+      - victory_progress.cultural_path
+      - victory_hud.cultural_path.milestones
+    superseded_primes:
+      - WP-GROK-BLOCK-A-RESUBMIT-FINAL-ALIGNED-001
+
+  WP-GROK-POLICY-BRANCH-001:
+    lifecycle: closed
+    block: block_a
+    landed_commit: 1037950
+    execution_receipt: receipts/cursor-execution-wp-grok-block-a-20260616.md
+    tests:
+      - tests/test_wp_grok_policy_branch_001.py
+    routes:
+      - POST /game/policy/branch
+    superseded_primes:
+      - WP-GROK-BLOCK-A-RESUBMIT-FINAL-ALIGNED-002
+
+  WP-GROK-AGENT-VS-AGENT-003:
+    lifecycle: retired
+    reason: Replaced by COMPETITION-DEPTH-001 + PLAYER-AGENT-001 per consolidated handoff §3
+    do_not_execute: true
+
+  WP-GROK-COMPETITION-DEPTH-001:
+    lifecycle: planning
+    block: block_b
+    execution_authority: cursor
+    scope_authority: receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md
+
+  WP-GROK-PLAYER-AGENT-001:
+    lifecycle: planning
+    block: block_b
+    execution_authority: cursor
+    scope_authority: receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md
+
+  WP-BIAS-ROOT-CAUSE-ANALYSIS-041:
+    lifecycle: superseded
+    reason: Process rules captured in docs/AGENT_CLAIMS_POLICY.md — not a Cursor WP
+
+  WP-ROOT-CAUSE-DEEP-DIVE-001:
+    lifecycle: superseded
+    reason: Analysis complete in docs/TRUTH_ORDER.md + BLOCK-A-CLOSURE — not a Cursor WP
+
+  WP-HINDSIGHT-DEBT-ANALYSIS-001:
+    lifecycle: superseded
+    reason: Debt catalog in docs/DEBT_REGISTER_V1.md — not a Cursor WP
+
+retired_prime_patterns:
+  - WP-GROK-BLOCK-A-RESUBMIT-*
+  - WP-GROK-BLOCK-A-*-CORRECTED
+  - WP-GROK-BLOCK-A-*-FINAL*

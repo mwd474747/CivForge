@@ -69,7 +69,11 @@
 
 ---
 
-## 5. Receipt chain
+## 5. Truth plane (anti-drift)
+
+Read **`docs/TRUTH_ORDER.md`** before any status claim. Machine index: **`config/work_pack_registry.yaml`**. Live summary: `GET /state` → `work_pack_registry`.
+
+## 6. Receipt chain
 
 ```
 Grok WP (criteria) → Cursor executes → Cursor execution receipt (HEAD + tests)
@@ -86,7 +90,7 @@ Grok WP (criteria) → Cursor executes → Cursor execution receipt (HEAD + test
 
 ---
 
-## 6. Approvals
+## 7. Approvals
 
 | Action | Approver | Executor |
 |--------|----------|----------|
@@ -97,7 +101,7 @@ Grok WP (criteria) → Cursor executes → Cursor execution receipt (HEAD + test
 
 ---
 
-## 7. Local control surfaces (Cursor)
+## 8. Local control surfaces (Cursor)
 
 | Tool | Purpose |
 |------|---------|
@@ -108,7 +112,7 @@ Grok WP (criteria) → Cursor executes → Cursor execution receipt (HEAD + test
 
 ---
 
-## 8. Swarm class (CivForge ≠ dawsOS registry swarms)
+## 9. Swarm class (CivForge ≠ dawsOS registry swarms)
 
 CivForge is **dawsOS-shaped** (proposal-first, receipt-first, bounded bridges) but **not** a `swarm-registry.v0.json` workflow swarm.
 
@@ -122,6 +126,6 @@ Full comparison: `docs/CIVFORGE_SWARM_CLASS_V1.md`
 
 ---
 
-## 9. Migration note
+## 10. Migration note
 
 Historical receipts referencing local Grok terminal, `.grok/config.toml`, or `nexus_ctrl` naming are **archived context**. Active execution uses this document. Nexus canon: `docs/dawsos_nexus_reference.md`.

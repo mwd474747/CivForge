@@ -1,6 +1,6 @@
 # Grok Planning Handoff — Post REFACTOR-SIM-001
 
-> **Consolidated review (Block A + Agent-vs-Agent):** see **`receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md`** — use that for Grok’s next PRIME resubmit.
+> **Block A closed** @ `1037950` — `receipts/BLOCK-A-CLOSURE-20260616.md`. **Truth order:** `docs/TRUTH_ORDER.md`. Consolidated handoff §5 = Block B scope only.
 
 **Generated:** 2026-06-16  
 **Cursor HEAD (CivForge `main`):** pull `main` → `git rev-parse --short HEAD` (execution baseline **`0f1aad8`**)  

@@ -1,98 +1,103 @@
 # AGENTS.md - CivForge Agentic Architecture
 
-**This folder (CivForge) is home for governed agentic work on separate projects.**
-
-## Execution lanes (canonical — `docs/EXECUTION_LANE_V2.md`)
-
-| Lane | Runtime | Role |
-|------|---------|------|
-| **Grok swarm** | grok.com | Planning, work packs, PRIME criteria — **no Mac Studio terminal** |
-| **Cursor** | Cursor IDE | **All local execution** — code, kernel, tests, CivForge git, vercel |
-| **OpenClaw** | wt / escalation | dawsOS promotion, boundary apply, C2 — **only when triggered** |
-
-**Removed (2026-06-15):** Local Grok terminal (`.grok/config.toml`, `grok_macstudio_bridge.py`, ForgeMaster local executor).
+**Bootstrap anchor:** `docs/TRUTH_ORDER.md` → `config/work_pack_registry.yaml` → latest `receipts/cursor-execution-*.md`
 
 ---
 
-## Bootstrap (every session)
+## Execution lanes (canonical)
 
-1. Read `SEPARATION.md`, `docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md`, and `docs/CIVFORGE_SWARM_CLASS_V1.md`
-2. Read `docs/EXECUTION_LANE_V2.md` — know your lane (CivForge ≠ dawsOS `swarm-registry` class)
-3. Read `receipts/HANDOFF-GROK-SWARM-20260615.md` for current state
-4. Grok swarm: `prompts/grok_swarm_handoff_seed.md`
-5. Cursor: run `bash tools/turnkey-cursor-local.sh` after implementation
-6. Swarm alignment receipts 020/021/024/025 — truth plane lock
-7. Confirm `:8080` kernel, `:8082` Nexus (telemetry), `:8081` auth (optional)
+| Lane | Runtime | Role |
+|------|---------|------|
+| **Grok swarm** | grok.com | Planning PRIMEs only — **no Mac Studio terminal** |
+| **Cursor** | Cursor IDE | **All local execution** — code, tests, git, kernel |
+| **OpenClaw** | wt / escalation | dawsOS promotion — **only when triggered** |
 
-**Write it down:** receipts/ and execution receipts. No mental notes.
+Full lane map: `docs/EXECUTION_LANE_V2.md`  
+Claims policy: `docs/AGENT_CLAIMS_POLICY.md`  
+WP lifecycle: `docs/WORK_PACK_LIFECYCLE.md`
+
+---
+
+## Every session (all agents)
+
+1. `cd ~/CivForge && git rev-parse --short HEAD`
+2. Read `config/work_pack_registry.yaml` — check WP `lifecycle` before planning or claiming closure
+3. Read `docs/TRUTH_ORDER.md` — do not conflate CivForge receipts with dawsOS `reports/ops/*`
+4. If discussing landed work: open matching `receipts/cursor-execution-*.md` — **not** stale Grok PRIMEs
+
+**Block A (closed @ `1037950`):** `receipts/BLOCK-A-CLOSURE-20260616.md` — do not re-ignite.  
+**Block B (open):** `WP-GROK-COMPETITION-DEPTH-001`, `WP-GROK-PLAYER-AGENT-001` — planning only until Mike ignites.
 
 ---
 
 ## Grok swarm (grok.com — planning only)
 
-- Authors `WP-*` work packs and roadmap priority
-- PRIME receipts = **planning class**; must link Cursor execution receipt + real `git HEAD`
-- Does **not** run terminal, commit, or claim local execution
-- In-game personas (Harper, Sebastian, etc.) are simulation roles in `:8080` — not local agents
+**Mandatory prefix:**
 
-Handoff: `prompts/grok_swarm_handoff_seed.md`, `docs/GROK_SWARM_PACKET_V1.md`
+```
+HEAD: <from registry or "unknown — ask Cursor">
+WP lifecycle: <from config/work_pack_registry.yaml>
+Status: planning • no execution claimed
+```
+
+**Does:**
+- Author `WP-*` with §5 envelopes **verbatim** from `receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md`
+- Close landed WPs with `closure_class: planning_validated_against_cursor_execution` + Cursor receipt link
+- Retire `WP-GROK-AGENT-VS-AGENT-003` and all `WP-GROK-BLOCK-A-RESUBMIT-*` PRIMEs
+
+**Does not:**
+- Claim `completed`, `live`, `deployed`, `verified` without Cursor tier-1 receipt
+- Re-plan closed Block A
+- Assign Cursor meta-analysis WPs (bias/root-cause/hindsight) unless Mike explicitly ignites
+
+Handoff seed: `prompts/grok_swarm_handoff_seed.md`
 
 ---
 
 ## Cursor (local executor)
 
-- Implements all CivForge source, tests, docs (lane-aligned)
-- Runs kernel (`tools/start-kernel-8080.sh`), poller, vercel (when Mike approves)
-- CivForge `git commit` / `push` to `main`
-- Writes `receipts/cursor-execution-*.md` with probe literals
-- Uses `bridge/civforge_http_bridge.py`, `tools/civforge_cli.py`, GitNexus impact before edits
-- Does **not** wt commit/C2/storage apply/LaunchAgents (escalate via `docs/OPENCLAW_ESCALATION_PACKET_V1.md`)
+**Does:**
+- Implement ignited WPs one family at a time
+- Write `receipts/cursor-execution-*.md` with `git rev-parse --short HEAD` + pytest count
+- Update `config/work_pack_registry.yaml` (`anchor.head`, `pytest_total`, WP lifecycle)
+- Run `bash tools/verify-truth-anchor.sh` and `bash tools/validate-game.sh`
+
+**Does not:**
+- wt commit / C2 / storage apply / LaunchAgents (escalate via `docs/OPENCLAW_ESCALATION_PACKET_V1.md`)
 
 ---
 
 ## OpenClaw (escalation only)
 
-- wt `reports/ops/*` = promotion truth (not CivForge receipts)
-- Trigger: boundary menu, C2, projection blockers, scheduled cron
-- CivForge bridge closed at WP-001 — no routine CivForge ops
+- wt `reports/ops/*` = promotion truth — not CivForge game state
+- See `docs/OPENCLAW_ESCALATION_PACKET_V1.md`
 
 ---
 
-## Swarm class (important)
+## Kernel truth
 
-CivForge borrows dawsOS **governance patterns** but is **not** a wt-registered workflow swarm. Grok on grok.com plans; AgentBrains simulate in `:8080`; OpenClaw owns wt truth on escalation only. See `docs/CIVFORGE_SWARM_CLASS_V1.md`.
-
----
-
-## In-game agent registry (`agents/role_registry.json`)
-
-Simulation personas in `core/` governance cycles (Layer 2 — not grok.com swarm, not wt delegates):
-
-- **harper** — memory, research, verify
-- **sebastian** — FunForge gate, separation, literal verify
-- **game-mechanic-designer**, **player-agent**, **mechanics-simulator**, **ui-coordinator**, **infra-governor** — lane specialists (Grok plans → Cursor implements)
+- **Module:** `backend/sim_api.py` + `core/` on `:8080`
+- **Routing gate:** `GET /state` includes `work_pack_registry` (registry summary)
+- **Restart after code change:** `bash tools/start-kernel-8080.sh`
+- **Verify:** `bash tools/verify-truth-anchor.sh` then `bash tools/validate-game.sh --read-only`
 
 ---
 
-## Orchestration patterns
+## In-game personas (simulation only)
 
-1. Receipt-first loop — propose, gate, advance → `receipts/*.md` + SQLite
-2. FunForge ≥80 gate for gravity/meta work
-3. `POST /advance_turn` — AgentBrains → FunForge → gate
-4. Gravity **only** via `tools/deploy-gravity-mosaic/deploy.sh`
-5. Separation + literal hygiene before every edit
-
-**Kernel truth:** `backend/sim_api.py` + `core/` on `:8080`. Drivers: `civforge_cli.py`, `civforge_http_bridge.py`, MCP server.
+`harper`, `sebastian`, `forge-coordinator` in AgentBrains — **not** grok.com swarm agents.  
+Registry: `agents/role_registry.json`
 
 ---
 
-## Current reality (2026-06-15)
+## Current reality (2026-06-16)
 
-- Dashboard **landed** — `GET /dashboard`, https://civforge.vercel.app — extend, do not rebuild
-- CivStudy metadata + mechanics sim bridge live (`civstudy_sim` in `/state`)
-- MCP: 8 tools including governance propose/gate
-- Verify: `bash tools/validate-game.sh` — never `civforge_cli.py status | grep vercel`
-- Git lanes: `docs/GIT_LANES_POLICY.md`
-- OpenClaw WP-001 **Done** — Nexus bridge, wt probes pass
+| Item | Status |
+|------|--------|
+| Block A (wonder / cultural / policy) | **Closed** @ `1037950` — 113+ pytest |
+| Dashboard | `GET /dashboard` on `:8080` — extend, do not rebuild |
+| CorpusCardRegistry | `backend/corpus_card_registry.py` — **exists** |
+| MCP tools | 17 — see `tools/mcp_server.py` |
+| Debt backlog | `docs/DEBT_REGISTER_V1.md` |
 
-Update this file via governed work pack + Cursor execution receipt.
+Update this file via governed work pack + Cursor execution receipt only.

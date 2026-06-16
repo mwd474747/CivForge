@@ -145,6 +145,24 @@ def default_cultural_event_chains() -> List[Dict[str, Any]]:
     ]
 
 
+def policy_branch_extensions() -> List[Dict[str, Any]]:
+    """Tradition/Liberty player branch focus mapped to canonical policy tree branches (§5)."""
+    return [
+        {
+            "id": "tradition",
+            "label": "Tradition",
+            "maps_to": "culture",
+            "policies": ["symposium_chain", "influence_spread", "festival_receipts"],
+        },
+        {
+            "id": "liberty",
+            "label": "Liberty",
+            "maps_to": "diplomacy",
+            "policies": ["open_negotiation", "shared_intel"],
+        },
+    ]
+
+
 def civstudy_reference_panel() -> Dict[str, Any]:
     """Read-only civstudy pattern hints for dashboard and agent-play."""
     corpus = get_corpus_card_registry()
@@ -168,6 +186,7 @@ def civstudy_reference_panel() -> Dict[str, Any]:
         "adjacency_bonuses": corpus.all_adjacency(),
         "districts": default_districts(),
         "policy_tree": default_policy_tree(),
+        "policy_branch_extensions": policy_branch_extensions(),
         "discovery_forks": default_discovery_forks(),
         "cultural_event_chains": default_cultural_event_chains(),
     }
