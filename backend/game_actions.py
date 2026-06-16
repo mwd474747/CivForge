@@ -49,7 +49,7 @@ def action_catalog(game_state: Dict[str, Any]) -> Dict[str, Any]:
             "effect": meta.get("effect", ""),
             "unlocked": pid in unlocked,
             "unlockable": _policy_unlockable(game_state, pid)[0],
-            "influence_cost": POLICY_UNLOCK_INFLUENCE_COST.get(tier, 8),
+            "influence_cost": int(meta.get("influence_cost") or POLICY_UNLOCK_INFLUENCE_COST.get(tier, 8)),
         })
     return {
         "district_select": {"influence_cost": DISTRICT_SELECT_INFLUENCE_COST, "districts": list(_district_catalog().keys())},
@@ -78,7 +78,7 @@ def _policy_unlockable(game_state: Dict[str, Any], policy_id: str) -> Tuple[bool
             if prev["branch_id"] == branch_id and int(prev.get("tier", 0)) == tier - 1:
                 if prev["id"] not in unlocked:
                     return False, f"requires prior policy {prev['id']}"
-    cost = POLICY_UNLOCK_INFLUENCE_COST.get(tier, 8)
+    cost = int(meta.get("influence_cost") or POLICY_UNLOCK_INFLUENCE_COST.get(tier, 8))
     if player_resources(game_state).get("influence", 0) < cost:
         return False, f"requires {cost} influence"
     return True, "ok"
@@ -122,7 +122,7 @@ def unlock_policy(game_state: Dict[str, Any], policy_id: str) -> Dict[str, Any]:
 
     meta = _policy_catalog()[policy_id]
     tier = int(meta.get("tier", 1))
-    cost = POLICY_UNLOCK_INFLUENCE_COST[tier]
+    cost = int(meta.get("influence_cost") or POLICY_UNLOCK_INFLUENCE_COST[tier])
     resources = player_resources(game_state)
     resources["influence"] -= cost
 

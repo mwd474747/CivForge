@@ -270,17 +270,21 @@ def tick_multi_agent_state(game_state: Dict[str, Any], decisions: Optional[Dict[
 
     # Drift betrayal risk on alliances; betrayal_watch can break alliances
     watch = policy_flags(game_state).get("betrayal_watch")
+    envoy = policy_flags(game_state).get("envoy_network")
     for alliance in game_state["alliances"]:
         if alliance.get("status") == "broken":
             continue
         drift = random.randint(-2, 4)
+        if envoy and drift > 2:
+            drift = 2
         alliance["betrayal_risk"] = max(0, min(100, alliance.get("betrayal_risk", 10) + drift))
         if alliance["betrayal_risk"] > 40 and alliance["status"] == "active":
             events.append(
                 f"Turn {turn}: Alliance {alliance['id']} betrayal risk elevated to {alliance['betrayal_risk']}%."
             )
         should_break = alliance["betrayal_risk"] >= BETRAYAL_COLLAPSE_THRESHOLD
-        if watch and alliance["betrayal_risk"] >= BETRAYAL_WATCH_THRESHOLD and random.randint(1, 100) <= 12:
+        break_odds = 7 if envoy else 12
+        if watch and alliance["betrayal_risk"] >= BETRAYAL_WATCH_THRESHOLD and random.randint(1, 100) <= break_odds:
             should_break = True
         if should_break and alliance["status"] in ("active", "provisional"):
             alliance["status"] = "broken"

@@ -47,6 +47,12 @@ def default_policy_tree() -> Dict[str, Any]:
                 "policies": [
                     {"id": "open_negotiation", "tier": 1, "effect": "Extra negotiation slot per 4 turns"},
                     {"id": "alliance_cap_3", "tier": 2, "effect": "Raise active alliance soft cap"},
+                    {
+                        "id": "envoy_network",
+                        "tier": 2,
+                        "effect": "Diplomatic outpost network: softer betrayal drift, lower break risk",
+                        "influence_cost": 12,
+                    },
                     {"id": "betrayal_watch", "tier": 3, "effect": "Surface betrayal risk in HUD"},
                 ],
             },

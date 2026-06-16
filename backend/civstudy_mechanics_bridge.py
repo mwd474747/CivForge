@@ -228,6 +228,8 @@ def apply_policy_effect(game_state: Dict[str, Any], policy: Dict[str, Any], sim:
         flags[pid] = True
     elif pid == "alliance_cap_3":
         flags["alliance_cap_3"] = True
+    elif pid == "envoy_network":
+        flags["envoy_network"] = True
     elif pid == "trade_route_map":
         eco = lanes.setdefault("economic", {})
         eco["trade_routes"] = eco.get("trade_routes", 0) + 1

@@ -26,8 +26,14 @@
       "civforge_unlock_policy",
       "civforge_what_if"
     ],
-    "findings": [],
-    "generated_at": "2026-06-16T02:52:35Z",
+    "findings": [
+      {
+        "detail": "active docs/tooling should point to sibling dawsos-auth-prototype, not removed tools/auth-prototype bridge scripts",
+        "id": "stale_auth_bridge_ref:tools/civforge_cli.py",
+        "severity": "warn"
+      }
+    ],
+    "generated_at": "2026-06-16T03:32:49Z",
     "mcp_tools": [
       "civforge_advance_turn",
       "civforge_apply_mechanics",
@@ -122,14 +128,14 @@
       ]
     },
     "schema": "civforge.contract_parity.v1",
-    "status": "pass",
+    "status": "warn",
     "summary": {
       "documented_mcp_tool_count": 16,
       "fail_count": 0,
-      "finding_count": 0,
+      "finding_count": 1,
       "mcp_tool_count": 16,
       "route_count": 24,
-      "warn_count": 0
+      "warn_count": 1
     },
     "swarm_alignment": {
       "agents_md_refs_swarm_class": true,
@@ -162,15 +168,27 @@
     "proposal_restore_present": true,
     "public_mode_guard_present": true
   },
-  "findings": [],
-  "generated_at": "2026-06-16T02:52:36Z",
+  "findings": [
+    {
+      "detail": "contract parity has warning findings",
+      "id": "contract_parity_warn",
+      "severity": "warn"
+    }
+  ],
+  "generated_at": "2026-06-16T03:32:49Z",
   "git": {
-    "line_count": 119,
+    "line_count": 129,
     "source_dirty": [
-      " M receipts/HANDOFF-GROK-SWARM-20260616.md",
+      " M backend/civstudy_mechanics_bridge.py",
+      " M backend/civstudy_metadata.py",
+      " M backend/game_actions.py",
+      " M backend/multi_agent_state.py",
       " M receipts/civforge-contract-parity-latest.json",
       " M receipts/civforge-contract-parity-latest.md",
       " M receipts/civforge-contract-parity-receipt-latest.json",
+      " M receipts/civforge-governance-posture-latest.json",
+      " M receipts/civforge-governance-posture-latest.md",
+      " M receipts/civforge-governance-posture-receipt-latest.json",
       " M receipts/civforge-poller-posture-latest.json",
       " M receipts/civforge-poller-posture-latest.md",
       " M receipts/civforge-poller-posture-receipt-latest.json",
@@ -178,9 +196,9 @@
       " M receipts/civforge-receipt-index-latest.md",
       " M receipts/civforge-receipt-index-receipt-latest.json",
       " M receipts/cursor-execution-mechanics-integration-20260615.md",
-      " M receipts/cursor-execution-mechanics-proposal-lane-20260616.md"
+      "?? tests/test_envoy_network_policy.py"
     ],
-    "source_dirty_count": 12
+    "source_dirty_count": 18
   },
   "kernel": {
     "json": {
@@ -213,6 +231,15 @@
             "effect": "Raise active alliance soft cap",
             "id": "alliance_cap_3",
             "influence_cost": 8,
+            "tier": 2,
+            "unlockable": false,
+            "unlocked": false
+          },
+          {
+            "branch": "Diplomacy",
+            "effect": "Diplomatic outpost network: softer betrayal drift, lower break risk",
+            "id": "envoy_network",
+            "influence_cost": 12,
             "tier": 2,
             "unlockable": false,
             "unlocked": false
@@ -515,6 +542,12 @@
                 {
                   "effect": "Raise active alliance soft cap",
                   "id": "alliance_cap_3",
+                  "tier": 2
+                },
+                {
+                  "effect": "Diplomatic outpost network: softer betrayal drift, lower break risk",
+                  "id": "envoy_network",
+                  "influence_cost": 12,
                   "tier": 2
                 },
                 {
@@ -823,42 +856,15 @@
       },
       "mechanics_overrides": {
         "cultural_cadence": null,
-        "district_yields": {
-          "research-campus": {
-            "sci": 3
-          }
-        },
+        "district_yields": {},
         "lane_params": {},
         "session_params": {}
       },
       "mechanics_proposals": {
-        "by_status": {
-          "APPLIED": 1
-        },
+        "by_status": {},
         "pending_runtime": 0,
-        "recent": [
-          {
-            "applied_at": "2026-06-16T02:52:18.418675",
-            "author": "grok_swarm",
-            "created_at": "2026-06-16T02:52:18.414561",
-            "fun_score": 85.0,
-            "id": "6edc05db",
-            "implementation_lane": "kernel_runtime",
-            "kind": "district_yield_override",
-            "payload": {
-              "district_id": "research-campus",
-              "yield_bonus": {
-                "sci": 3
-              }
-            },
-            "rationale": "Tune district pulse sci without new tick module (Cursor execution proof)",
-            "status": "APPLIED",
-            "title": "Research campus sci pulse +1",
-            "turn": 1,
-            "work_pack_id": "WP-GROK-MECH-DISTRICT-001"
-          }
-        ],
-        "total": 1
+        "recent": [],
+        "total": 0
       },
       "negotiations": [
         {
@@ -902,25 +908,23 @@
             "cities": 2,
             "defeat_reason": null,
             "fun_score": 87.0,
-            "joint_progress": 100,
-            "milestones_done": 4,
-            "negotiations_pending": 2,
-            "outcome": "victory",
+            "joint_progress": 0,
+            "milestones_done": 1,
+            "negotiations_pending": 5,
+            "outcome": null,
             "target": 100,
             "territories": 5,
             "turn": 1,
             "unlocked_forks": [],
             "unlocked_policies": []
           },
-          "sessions_logged": 1,
+          "sessions_logged": 2,
           "status": "SUCCESS",
           "turn": 1
         }
       ],
       "recent_events": [
-        "Turn 1: New game \u2014 prior run turn 1 (outcome=victory), progress 100/100.",
-        "Turn 1: Mechanics proposal 'Research campus sci pulse +1' (district_yield_override) from grok_swarm.",
-        "Turn 1: Applied mechanics proposal 'Research campus sci pulse +1' \u2014 district research-campus yield \u2190 {'sci': 3}."
+        "Turn 1: New game \u2014 prior run turn 1, progress 0/100."
       ],
       "session_history": [
         {
@@ -933,6 +937,22 @@
           "milestones_done": 4,
           "negotiations_pending": 2,
           "outcome": "victory",
+          "target": 100,
+          "territories": 5,
+          "turn": 1,
+          "unlocked_forks": [],
+          "unlocked_policies": []
+        },
+        {
+          "active_district_id": "governance-quarter",
+          "alliances_count": 2,
+          "cities": 2,
+          "defeat_reason": null,
+          "fun_score": 87.0,
+          "joint_progress": 0,
+          "milestones_done": 1,
+          "negotiations_pending": 5,
+          "outcome": null,
           "target": 100,
           "territories": 5,
           "turn": 1,
@@ -982,7 +1002,7 @@
   },
   "poller_posture": {
     "findings": [],
-    "generated_at": "2026-06-16T02:52:35Z",
+    "generated_at": "2026-06-16T03:32:49Z",
     "key_file": {
       "exists": true,
       "has_civforge_kernel": true,
@@ -1032,7 +1052,31 @@
         "receipt_class": "posture"
       },
       {
-        "path": "receipts/game-reset-20260616-025235.md",
+        "path": "receipts/game-reset-20260616-033244.md",
+        "receipt_class": "other"
+      },
+      {
+        "path": "receipts/work-pack-grok-policy-002.md",
+        "receipt_class": "planning"
+      },
+      {
+        "path": "receipts/civforge-governance-posture-latest.md",
+        "receipt_class": "posture"
+      },
+      {
+        "path": "receipts/game-reset-20260616-033156.md",
+        "receipt_class": "other"
+      },
+      {
+        "path": "receipts/HANDOFF-GROK-SWARM-20260616.md",
+        "receipt_class": "planning"
+      },
+      {
+        "path": "receipts/cursor-execution-wp-grok-mech-district-001-20260616.md",
+        "receipt_class": "execution"
+      },
+      {
+        "path": "receipts/game-reset-20260616-025354.md",
         "receipt_class": "other"
       },
       {
@@ -1040,101 +1084,98 @@
         "receipt_class": "execution"
       },
       {
-        "path": "receipts/HANDOFF-GROK-SWARM-20260616.md",
-        "receipt_class": "planning"
-      },
-      {
-        "path": "receipts/game-reset-20260616-014757.md",
-        "receipt_class": "other"
-      },
-      {
-        "path": "receipts/openclaw-governance-turnkey-20260616-005332.md",
-        "receipt_class": "openclaw_ops"
-      },
-      {
-        "path": "receipts/civforge-governance-posture-latest.md",
-        "receipt_class": "posture"
-      },
-      {
-        "path": "receipts/game-reset-20260616-005325.md",
-        "receipt_class": "other"
-      },
-      {
-        "path": "receipts/game-reset-20260616-005253.md",
-        "receipt_class": "other"
-      },
-      {
-        "path": "receipts/game-reset-20260616-005212.md",
-        "receipt_class": "other"
+        "path": "receipts/swarm-alignment-correction-mechanics-lane-20260616.md",
+        "receipt_class": "execution"
       }
     ],
-    "generated_at": "2026-06-16T02:52:36Z",
+    "generated_at": "2026-06-16T03:32:49Z",
     "latest_files": [
       {
-        "mtime": "2026-06-16T02:52:35Z",
+        "mtime": "2026-06-16T03:32:49Z",
         "path": "receipts/civforge-receipt-index-latest.md",
-        "size": 1124
+        "size": 1157
       },
       {
-        "mtime": "2026-06-16T02:52:35Z",
+        "mtime": "2026-06-16T03:32:49Z",
         "path": "receipts/civforge-poller-posture-latest.md",
         "size": 157
       },
       {
-        "mtime": "2026-06-16T02:52:35Z",
+        "mtime": "2026-06-16T03:32:49Z",
         "path": "receipts/civforge-contract-parity-latest.md",
-        "size": 153
+        "size": 317
       },
       {
-        "mtime": "2026-06-16T02:52:35Z",
-        "path": "receipts/game-reset-20260616-025235.md",
-        "size": 588
+        "mtime": "2026-06-16T03:32:44Z",
+        "path": "receipts/game-reset-20260616-033244.md",
+        "size": 581
       },
       {
-        "mtime": "2026-06-16T01:52:37Z",
-        "path": "receipts/cursor-execution-mechanics-proposal-lane-20260616.md",
-        "size": 1551
+        "mtime": "2026-06-16T03:32:14Z",
+        "path": "receipts/work-pack-grok-policy-002.md",
+        "size": 899
       },
       {
-        "mtime": "2026-06-16T01:52:37Z",
-        "path": "receipts/HANDOFF-GROK-SWARM-20260616.md",
-        "size": 4565
-      },
-      {
-        "mtime": "2026-06-16T01:47:57Z",
-        "path": "receipts/game-reset-20260616-014757.md",
-        "size": 588
-      },
-      {
-        "mtime": "2026-06-16T00:53:32Z",
-        "path": "receipts/openclaw-governance-turnkey-20260616-005332.md",
-        "size": 557
-      },
-      {
-        "mtime": "2026-06-16T00:53:32Z",
+        "mtime": "2026-06-16T03:32:10Z",
         "path": "receipts/civforge-governance-posture-latest.md",
-        "size": 190
+        "size": 252
       },
       {
-        "mtime": "2026-06-16T00:53:25Z",
-        "path": "receipts/game-reset-20260616-005325.md",
+        "mtime": "2026-06-16T03:31:56Z",
+        "path": "receipts/game-reset-20260616-033156.md",
         "size": 588
       },
       {
-        "mtime": "2026-06-16T00:52:53Z",
-        "path": "receipts/game-reset-20260616-005253.md",
+        "mtime": "2026-06-16T02:54:48Z",
+        "path": "receipts/HANDOFF-GROK-SWARM-20260616.md",
+        "size": 4675
+      },
+      {
+        "mtime": "2026-06-16T02:54:48Z",
+        "path": "receipts/cursor-execution-wp-grok-mech-district-001-20260616.md",
+        "size": 2183
+      },
+      {
+        "mtime": "2026-06-16T02:53:54Z",
+        "path": "receipts/game-reset-20260616-025354.md",
         "size": 588
       },
       {
-        "mtime": "2026-06-16T00:52:12Z",
-        "path": "receipts/game-reset-20260616-005212.md",
-        "size": 588
+        "mtime": "2026-06-16T02:53:26Z",
+        "path": "receipts/cursor-execution-mechanics-proposal-lane-20260616.md",
+        "size": 1800
+      },
+      {
+        "mtime": "2026-06-16T02:53:26Z",
+        "path": "receipts/swarm-alignment-correction-mechanics-lane-20260616.md",
+        "size": 1853
       }
     ],
     "schema": "civforge.receipt_index.v1",
     "sqlite": {
       "exists": true,
       "latest": [
+        {
+          "action": "game_reset",
+          "created_at": "2026-06-16T03:32:44.943226",
+          "id": "r-1-20260616-033244",
+          "status": "SUCCESS",
+          "turn": 1
+        },
+        {
+          "action": "game_reset",
+          "created_at": "2026-06-16T03:31:56.828738",
+          "id": "r-1-20260616-033156",
+          "status": "SUCCESS",
+          "turn": 1
+        },
+        {
+          "action": "game_reset",
+          "created_at": "2026-06-16T02:53:54.113557",
+          "id": "r-1-20260616-025354",
+          "status": "SUCCESS",
+          "turn": 1
+        },
         {
           "action": "game_reset",
           "created_at": "2026-06-16T02:52:35.305432",
@@ -1148,56 +1189,35 @@
           "id": "r-1-20260616-014757",
           "status": "SUCCESS",
           "turn": 1
-        },
-        {
-          "action": "game_reset",
-          "created_at": "2026-06-16T00:53:25.134334",
-          "id": "r-1-20260616-005325",
-          "status": "SUCCESS",
-          "turn": 1
-        },
-        {
-          "action": "game_reset",
-          "created_at": "2026-06-16T00:52:53.864569",
-          "id": "r-1-20260616-005253",
-          "status": "SUCCESS",
-          "turn": 1
-        },
-        {
-          "action": "game_reset",
-          "created_at": "2026-06-16T00:52:12.599543",
-          "id": "r-1-20260616-005212",
-          "status": "SUCCESS",
-          "turn": 1
         }
       ],
-      "receipts": 338,
+      "receipts": 341,
       "state_snapshots": 1
     },
     "status": "pass",
     "summary": {
       "latest_file_count": 12,
       "receipt_classes": {
-        "execution": 5,
+        "execution": 4,
         "governance_cycle": 2,
-        "openclaw_ops": 11,
-        "other": 14,
-        "planning": 4,
+        "openclaw_ops": 10,
+        "other": 17,
+        "planning": 3,
         "posture": 4
       },
-      "sqlite_receipts": 338,
+      "sqlite_receipts": 341,
       "sqlite_state_snapshots": 1
     }
   },
   "schema": "civforge.governance_posture.v1",
-  "status": "pass",
+  "status": "warn",
   "summary": {
     "fail_count": 0,
-    "finding_count": 0,
+    "finding_count": 1,
     "fun_score": 87.0,
     "mcp_tool_count": 16,
     "pending_negotiations": 2,
     "turn": 1,
-    "warn_count": 0
+    "warn_count": 1
   }
 }
