@@ -2,7 +2,7 @@
 
 **Generated:** 2026-06-16  
 **Lane:** Cursor execution (CivForge `main`)  
-**Tag:** `prototype-only` until operator push
+**Tag:** `current` @ `a78e185` — pushed, kernel restarted, validate-game PASS
 
 ---
 

@@ -1,7 +1,7 @@
 # Block C closure — Alternate victory + soak + diplomacy + tooling
 
 **Date:** 2026-06-16  
-**Tag:** `prototype-only` until anchor sync + push  
+**Tag:** `current` @ `a78e185` — pushed, `:8080` live, validate-game PASS  
 **Authority:** Cursor execution lane
 
 ---
