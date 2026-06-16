@@ -2,7 +2,7 @@
 
 **Updated:** 2026-06-16  
 **Scope:** CivForge game engine mechanics — all metadata effects wired.  
-**Label:** `prototype-only` (passes 46+ pytest; live kernel smoke recommended)
+**Label:** `prototype-only` (passes 57 pytest; live kernel smoke recommended)
 
 ---
 
@@ -23,9 +23,9 @@ Remaining **non-engine** gaps (out of scope for this slice): `:8081` JWT identit
 | Claim map tile | `POST /game/map/claim` | 4 influence | **Wired** |
 | Action catalog | `GET /game/actions` | — | **Wired** |
 
-Dashboard: district/policy panel + clickable claimable map tiles.
+| Dashboard | district/policy panel + clickable map + **mechanics proposals tab** |
 
-MCP: `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile` (12 tools total).
+MCP: `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile` (16 tools total — see below).
 
 ---
 
@@ -42,6 +42,7 @@ MCP: `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile`
 | `symposium_chain` | Earlier cultural chains | Cadence 6→4 |
 | `influence_spread` | +2 spread | Lane on unlock |
 | `festival_receipts` | +2 victory on chain complete | Cultural tick bonus |
+| `envoy_network` | Softer betrayal drift + lower watch break odds | `multi_agent_state` when tier-2 unlocked (12 influence) |
 
 Policies unlock via **auto tick** OR **player spend** (`POST /game/policy/unlock`).
 
@@ -86,7 +87,22 @@ Map drift, betrayal risk + **break events**, AI negotiations, player negotiate/r
 
 ## MCP tools (16)
 
-`civforge_status`, `civforge_advance_turn`, `civforge_reset_game`, `civforge_found_city`, `civforge_negotiate`, `civforge_negotiate_respond`, `civforge_what_if`, `civforge_governance_propose`, `civforge_governance_gate`, `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile`, `civforge_propose_mechanics`, `civforge_gate_mechanics`, `civforge_apply_mechanics`, `civforge_list_mechanics_proposals`.
+Play/governance: `civforge_status`, `civforge_advance_turn`, `civforge_reset_game`, `civforge_found_city`, `civforge_negotiate`, `civforge_negotiate_respond`, `civforge_what_if`, `civforge_governance_propose`, `civforge_governance_gate`, `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile`.
+
+Mechanics proposal lane: `civforge_propose_mechanics`, `civforge_gate_mechanics`, `civforge_apply_mechanics`, `civforge_list_mechanics_proposals`.
+
+See `docs/GAME_MECHANICS_SWARM_PROPOSAL_LANE_V1.md` for propose → gate → apply flow.
+
+---
+
+## Mechanics proposal lane — wired
+
+| Kind class | Examples | Apply on kernel |
+|------------|----------|-----------------|
+| Runtime | `lane_param`, `district_yield_override`, `tick_cadence_override`, `param_override` | Yes (after FunForge gate ≥78) |
+| Planning | `policy_definition`, `fork_definition`, `tick_module`, `code_change` | No — Cursor code land (e.g. `envoy_network` via WP-GROK-POLICY-002) |
+
+Routes: `POST /game/mechanics/propose|gate|apply`, `GET /game/mechanics/proposals`. `/state` exposes `mechanics_proposals` + `mechanics_overrides`.
 
 ---
 
@@ -94,8 +110,11 @@ Map drift, betrayal risk + **break events**, AI negotiations, player negotiate/r
 
 ```bash
 cd ~/CivForge
+bash tools/start-kernel-8080.sh
 python3 -m pytest tests/ -q
+bash tools/validate-game.sh --read-only
 bash tools/turnkey-governance-posture.sh
+python3 tools/civforge_contract_parity.py
 ```
 
 ---
@@ -105,20 +124,3 @@ bash tools/turnkey-governance-posture.sh
 - `docs/GAME_ENGINE_IMPLEMENTATION_GAP_INVENTORY_V1.md`
 - `docs/GAME_PLAY_GUIDE_V1.md`
 - `docs/MECHANICS_TICK_CONTRACT_V1.md`
-
----
-
-## Mechanics proposal lane (Grok swarm — not simulation-only)
-
-| Surface | Status |
-|---------|--------|
-| `POST /game/mechanics/propose` | **Wired** |
-| `POST /game/mechanics/gate` | **Wired** (FunForge ≥78) |
-| `POST /game/mechanics/apply` | **Wired** (runtime kinds) |
-| `GET /game/mechanics/proposals` | **Wired** |
-| MCP: propose/gate/apply/list | **Wired** (16 tools total) |
-| Runtime overrides in district pulse / cadence / sci bonus | **Wired** |
-| `MechanicsRegistry.register` from proposals | **Planning → Cursor** |
-
-Doc: `docs/GAME_MECHANICS_SWARM_PROPOSAL_LANE_V1.md`
-

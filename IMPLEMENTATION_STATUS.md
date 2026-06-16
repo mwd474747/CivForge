@@ -17,10 +17,10 @@ CivForge = **local Python FastAPI governance backend** running on `0.0.0.0:8080`
 - receipts/ — growing set of real governance-cycle and work-pack markdown artifacts (including auth-prototype-push, git-tools, LOCKED-CIV-GAME-PLAN, mechanics-extension-sim receipts)
 - Gravity deploy tool untouched and canonical for the separate project
 - dawsos-auth-prototype (separate repo https://github.com/mwd474747/dawsos-auth-prototype) — pushed after literal verification; only thin client integration in CivForge/tools/dawsos_auth_client.py + optional protected_advance demo
-- **Civ Game Layer**: **Prototype live** on the kernel — multi-agent map, alliances, negotiations, joint victory, `MechanicsRegistry` + CivStudy policy-tree ticks, turn simulation runner, victory-outcome receipts, `POST /game/reset`, dashboard at `/dashboard`, 16 MCP tools (12 play/governance + 4 mechanics proposal = 16). Gap inventory: `docs/GAME_ENGINE_IMPLEMENTATION_GAP_INVENTORY_V1.md`. Planning canon: `docs/GAME_PLAY_GUIDE_V1.md`, `docs/MECHANICS_TICK_CONTRACT_V1.md`, `receipts/LOCKED-CIV-GAME-PLAN-*.md`.
+- **Civ Game Layer**: **Prototype live** on the kernel — multi-agent map, alliances, negotiations, joint victory, `MechanicsRegistry` + CivStudy policy-tree ticks, turn simulation runner, victory-outcome receipts, `POST /game/reset`, dashboard at `/dashboard`, **16 MCP tools**, mechanics proposal lane (propose/gate/apply). Gap inventory: `docs/GAME_ENGINE_IMPLEMENTATION_GAP_INVENTORY_V1.md`. Planning canon: `docs/GAME_PLAY_GUIDE_V1.md`, `docs/MECHANICS_TICK_CONTRACT_V1.md`, `docs/GAME_MECHANICS_SWARM_PROPOSAL_LANE_V1.md`, `receipts/LOCKED-CIV-GAME-PLAN-*.md`.
 
 **Persistence**: Enabled (ReceiptStore now supports db_path). State snapshots + receipts load on startup.
-**MCP readiness**: `tools/mcp_server.py` — 12 tools (status, advance, reset, found city, negotiate, district, policy, map claim, what-if, governance propose/gate).
+**MCP readiness**: `tools/mcp_server.py` — **16 tools** (status, advance, reset, found city, negotiate/respond, what-if, governance propose/gate, district/policy/map claim, mechanics propose/gate/apply/list).
 **Execution lanes (v2):** Grok swarm (grok.com) plans; Cursor executes; OpenClaw escalates for wt. See `docs/EXECUTION_LANE_V2.md`.
 **Bridge**: `bridge/civforge_http_bridge.py` — Cursor/scripts call get_state(), advance_cycle(), etc.
 

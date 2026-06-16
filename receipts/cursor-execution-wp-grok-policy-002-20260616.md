@@ -75,4 +75,4 @@ bash tools/turnkey-governance-posture.sh                          # PASSED (afte
 
 Grok may close **WP-GROK-POLICY-002** planning PRIME by linking this file only. Tag Grok receipt: **planning**. Tag this file: **current**.
 
-**HEAD:** `8d10225`
+**HEAD:** `c9b2db3`

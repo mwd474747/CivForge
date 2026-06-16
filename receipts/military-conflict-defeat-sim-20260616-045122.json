@@ -1,0 +1,195 @@
+{
+  "work_pack_id": "WP-MILITARY-CONFLICT-DEFEAT-REVIEW-SIM-001",
+  "mode": "kernel",
+  "kernel_url": "http://127.0.0.1:8080",
+  "generated_at": "2026-06-16T04:51:22Z",
+  "rounds_requested": 50,
+  "rounds_completed": 35,
+  "stopped_early": true,
+  "stop_reason": "{\"detail\":\"Game is in victory epilogue \u2014 POST /game/reset to start a new session\"}",
+  "delegate_conflicts": 0,
+  "review_inventory": {
+    "military_legacy_chains": {
+      "wired": true,
+      "paths": [
+        "core/mechanics_registry.py::_tick_military (legacy_points every 5 turns)",
+        "backend/civstudy_mechanics_bridge.py::legacy-doctrine fork (+1 legacy)",
+        "backend/civstudy_metadata.py::military_legacy_accelerator unlock"
+      ],
+      "note": "CivStudy 'Warrior promotion' maps to military strength drift + legacy_points, not a separate Warrior unit."
+    },
+    "conflict_triggers": {
+      "wired": true,
+      "paths": [
+        "backend/multi_agent_state.py::contested tile capture (turn % 3)",
+        "core/swarm_join.py::detect_delegate_conflict (orchestrator deploy vs verify)",
+        "backend/multi_agent_state.py::betrayal break events"
+      ]
+    },
+    "defeat_cascades": {
+      "wired": true,
+      "reasons": [
+        "fun_floor",
+        "diplomatic_isolation",
+        "betrayal_collapse",
+        "stalled_progress"
+      ],
+      "paths": [
+        "backend/game_session.py::check_defeat_conditions",
+        "backend/turn_simulation.py::maybe_emit_defeat_receipt"
+      ],
+      "note": "No explicit bankruptcy cascade \u2014 fun_floor and stalled_progress cover resource/pacing collapse."
+    },
+    "diplomacy_betrayal": {
+      "wired": true,
+      "paths": [
+        "backend/multi_agent_state.py::betrayal risk drift + BETRAYAL break",
+        "backend/game_session.py::betrayal_watch policy (12% break/turn at risk \u226555)",
+        "backend/multi_agent_state.py::envoy_network softening (drift cap + 7% break odds)"
+      ]
+    },
+    "alliance_stability": {
+      "wired": true,
+      "paths": [
+        "backend/game_session.py::alliance_soft_cap (2 default, 3 with alliance_cap_3)",
+        "backend/multi_agent_state.py::respond_negotiation forms alliances",
+        "backend/multi_agent_state.py::player alliance progress penalty on betrayal"
+      ]
+    },
+    "agents": [
+      "player",
+      "harper",
+      "sebastian",
+      "lysander",
+      "aris"
+    ]
+  },
+  "event_counts": {
+    "betrayal": 0,
+    "map_conflict": 0,
+    "military_legacy": 0,
+    "defeat": 0,
+    "milestone": 0,
+    "negotiation": 0,
+    "delegate_conflict": 0
+  },
+  "sample_events": [
+    "Turn 36: Harper (Systems) \u2014 Decided: deploy (based on prod=47, sci=43, 8 receipts)",
+    "Turn 36: Sebastian (Governance) \u2014 Decided: deploy (based on prod=47, sci=43, 8 receipts)",
+    "Turn 36: Governance Lead (Grok) \u2014 Player agency (1): district=governance-quarter, policies=10, tiles=10",
+    "Turn 36: Economic institution founded (#12).",
+    "Turn 36: Trade route sci yield +1.",
+    "Turn 36: Cultural event chain started (#8).",
+    "Turn 36: CivStudy district 'Governance Quarter' pulse \u2192 verify_budget+1, influence+1, sci+1 (trade route), victory+2 (receipt quorum).",
+    "Turn 36: Joint victory outcome logged \u2014 victory-outcome-20260616-045122.md."
+  ],
+  "round_snapshots": [
+    {
+      "round": 1,
+      "metrics": {
+        "turn": 2,
+        "session_phase": "active",
+        "fun_score": 86.6,
+        "military_strength": 42,
+        "military_legacy_points": 3,
+        "military_garrisons": 2,
+        "alliances_active": 2,
+        "alliances_broken": 0,
+        "max_betrayal_risk": 23,
+        "contested_tiles": 5,
+        "joint_progress": 6,
+        "outcome": null,
+        "defeat_reason": null,
+        "milestones_done": 2,
+        "unlocked_policies": [],
+        "unlocked_forks": [
+          "cross-faction-symposium",
+          "receipt-quorum",
+          "sci-trade-route"
+        ]
+      }
+    },
+    {
+      "round": 10,
+      "metrics": {
+        "turn": 11,
+        "session_phase": "active",
+        "fun_score": 86.6,
+        "military_strength": 53,
+        "military_legacy_points": 6,
+        "military_garrisons": 2,
+        "alliances_active": 2,
+        "alliances_broken": 0,
+        "max_betrayal_risk": 31,
+        "contested_tiles": 3,
+        "joint_progress": 32,
+        "outcome": null,
+        "defeat_reason": null,
+        "milestones_done": 3,
+        "unlocked_policies": [],
+        "unlocked_forks": [
+          "cross-faction-symposium",
+          "legacy-doctrine",
+          "receipt-quorum",
+          "sci-trade-route"
+        ]
+      }
+    },
+    {
+      "round": 25,
+      "metrics": {
+        "turn": 26,
+        "session_phase": "active",
+        "fun_score": 86.6,
+        "military_strength": 64,
+        "military_legacy_points": 9,
+        "military_garrisons": 2,
+        "alliances_active": 2,
+        "alliances_broken": 0,
+        "max_betrayal_risk": 42,
+        "contested_tiles": 2,
+        "joint_progress": 73,
+        "outcome": null,
+        "defeat_reason": null,
+        "milestones_done": 3,
+        "unlocked_policies": [],
+        "unlocked_forks": [
+          "cross-faction-symposium",
+          "legacy-doctrine",
+          "receipt-quorum",
+          "sci-trade-route"
+        ]
+      }
+    }
+  ],
+  "final_metrics": {
+    "turn": 36,
+    "session_phase": "epilogue",
+    "fun_score": 86.6,
+    "military_strength": 75,
+    "military_legacy_points": 11,
+    "military_garrisons": 2,
+    "alliances_active": 2,
+    "alliances_broken": 0,
+    "max_betrayal_risk": 56,
+    "contested_tiles": 0,
+    "joint_progress": 100,
+    "outcome": "victory",
+    "defeat_reason": null,
+    "milestones_done": 4,
+    "unlocked_policies": [],
+    "unlocked_forks": [
+      "cross-faction-symposium",
+      "legacy-doctrine",
+      "receipt-quorum",
+      "sci-trade-route"
+    ]
+  },
+  "agents": [
+    "player",
+    "harper",
+    "sebastian",
+    "lysander",
+    "aris"
+  ]
+}

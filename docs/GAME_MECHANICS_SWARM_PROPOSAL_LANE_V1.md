@@ -52,7 +52,7 @@ GET  /game/mechanics/proposals → list + summary
 
 ---
 
-## MCP tools (15 total)
+## MCP tools (16 total)
 
 | Tool | Route |
 |------|-------|
@@ -61,7 +61,7 @@ GET  /game/mechanics/proposals → list + summary
 | `civforge_apply_mechanics` | `POST /game/mechanics/apply` |
 | `civforge_list_mechanics_proposals` | `GET /game/mechanics/proposals` |
 
-Plus existing 12 play/governance tools — see `docs/GAME_PLAY_GUIDE_V1.md`.
+Plus existing 12 play/governance tools — see `docs/GAME_PLAY_GUIDE_V1.md` (16 tools listed there).
 
 ---
 
@@ -79,8 +79,8 @@ Example work pack: `receipts/work-pack-grok-mechanics-propose-001.md`
 
 | Surface | Status |
 |---------|--------|
-| All 9 policies, 4 forks, 4 districts, player actions | **Wired** (ticks + actions) |
-| Mechanics proposal lane | **Wired** (propose/gate/apply + overrides) |
+| All 10 policies, 4 forks, 4 districts, player actions | **Wired** (ticks + actions) |
+| Mechanics proposal lane | **Wired** (propose/gate/apply + overrides + dashboard tab) |
 | `MechanicsRegistry.register` from proposals | **Planning only** — requires Cursor code |
 | Live CivStudy corpus | **Reference metadata only** |
 | `:8081` JWT | **Out of scope** |

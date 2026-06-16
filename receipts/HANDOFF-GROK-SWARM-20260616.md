@@ -6,7 +6,7 @@
 **Handoff seed:** `prompts/grok_swarm_handoff_seed.md`  
 **Cursor execution:** `receipts/cursor-execution-mechanics-proposal-lane-20260616.md`  
 **Work pack:** `receipts/work-pack-grok-mechanics-propose-001.md`  
-**CivForge HEAD:** `f55aad4` on `main` (verify: `git pull && git rev-parse --short HEAD`; feature `956d251`)
+**CivForge HEAD:** `c9b2db3` on `main` (verify: `git pull && git rev-parse --short HEAD`)
 
 **Cursor execution (live `:8080` proof):** `receipts/cursor-execution-wp-grok-mech-district-001-20260616.md`
 
@@ -71,9 +71,10 @@ Planning kinds **gate** but **do not auto-apply** — export to `WP-*` for Curso
 | Priority | Topic | Notes |
 |----------|-------|-------|
 | 1 | Runtime tuning via proposal lane | Use `WP-GROK-MECHANICS-PROPOSE-001` template |
-| 2 | New policy/fork definitions | `policy_definition` / `fork_definition` → Cursor WP |
-| 3 | Negotiation backlog sweep | `civforge_negotiate_respond` loop |
-| 4 | `:8081` JWT identity | infra lane — Cursor only |
+| 2 | **`send_envoy` action** | `WP-GROK-POLICY-003` → Cursor code land |
+| 3 | New policy/fork definitions | `policy_definition` / `fork_definition` → Cursor WP |
+| 4 | Negotiation backlog sweep | `civforge_negotiate_respond` loop |
+| 5 | `:8081` JWT identity | infra lane — Cursor only |
 
 **Forbidden:** UI rebuild, fake HEAD, wt promotion claims, local Mac terminal claims.
 

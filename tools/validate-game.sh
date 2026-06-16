@@ -52,8 +52,11 @@ def post(path, body=None):
     with urllib.request.urlopen(req, timeout=15) as r:
         return json.loads(r.read())
 
+# Deterministic probes: negotiate requires influence ≥2 on a fresh session.
+post("/game/reset", {})
 s = get("/state")
 assert s["status"] == "active"
+assert "mechanics_proposals" in s, "missing mechanics_proposals on /state"
 assert len(s.get("map_tiles", [])) == 25
 assert set((s.get("mechanics_lanes") or {}).keys()) == {"military", "economic", "cultural"}
 cs = s.get("civstudy_reference", {})
@@ -79,6 +82,14 @@ names = {t["name"] for t in tools}
 assert "civforge_negotiate_respond" in names
 assert "civforge_governance_propose" in names
 assert "civforge_governance_gate" in names
+for mech in (
+    "civforge_propose_mechanics",
+    "civforge_gate_mechanics",
+    "civforge_apply_mechanics",
+    "civforge_list_mechanics_proposals",
+):
+    assert mech in names, f"missing MCP tool {mech}"
+assert len(names) == 16, f"expected 16 MCP tools, got {len(names)}"
 print("  API + MCP probes OK")
 PY
 

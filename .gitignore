@@ -24,10 +24,13 @@ __pycache__/
 # dawsOS-borrowed hygiene
 # Godot legacy (already archived)
 # Local receipts that may be ephemeral during active work
-# Local runtime / generated
-# Local runtime state (CivForge backend only)
-# OS / editor
-# receipts/governance-cycle-*.md
+receipts/game-reset-*.md
+receipts/governance-cycle-*.md
+receipts/governance-gate-*.md
+receipts/governance-proposal-*.md
+receipts/gravity-rec-*.md
+receipts/openclaw-governance-turnkey-*.md
+receipts/openclaw-ops-run-*.md
 # receipts/work-pack-*.md
 build/
 develop-eggs/

@@ -42,6 +42,13 @@
     .risk-low { color: var(--ok); }
     .policy-watch { border-left: 3px solid var(--warn); padding-left: 0.5rem; }
     .policy-banner { background: #422006; color: #fde68a; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem; }
+    .mech-item { background: #0f172a; padding: 0.65rem; border-radius: 6px; margin-bottom: 0.5rem; font-size: 0.85rem; }
+    .mech-status { display: inline-block; padding: 0.1rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .mech-status-PROPOSED { background: #334155; }
+    .mech-status-GATED_APPROVED { background: #166534; color: #bbf7d0; }
+    .mech-status-GATED_REJECTED { background: #7f1d1d; color: #fecaca; }
+    .mech-status-APPLIED { background: #1e3a8a; color: #bfdbfe; }
+    .mech-overrides { font-size: 0.8rem; color: var(--muted); }
     .epilogue-banner { background: #14532d; color: #bbf7d0; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem; }
     .defeat-banner { background: #450a0a; color: #fecaca; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem; }
     .tile.claimable { cursor: pointer; outline: 2px dashed #fbbf24; }
@@ -102,6 +109,7 @@
       <button class="tab-btn" data-view="cultural">Cultural</button>
       <button class="tab-btn" data-view="founding">Found City</button>
       <button class="tab-btn" data-view="civstudy">CivStudy Ref</button>
+      <button class="tab-btn" data-view="mechanics">Mechanics Proposals</button>
     </div>
 
     <div id="view-overview">
@@ -185,6 +193,40 @@
       <h2>CivStudy Reference (read-only)</h2>
       <div id="civstudy-panel"></div>
     </div>
+    <div id="view-mechanics" class="panel hidden">
+      <h2>Mechanics Proposal Lane</h2>
+      <p class="sub">Grok swarm proposes → FunForge gate → kernel applies runtime patches. Planning kinds require Cursor code.</p>
+      <div id="mech-summary" class="mech-overrides" style="margin-bottom:0.75rem"></div>
+      <div class="grid-2">
+        <div>
+          <h3 style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--accent)">New proposal</h3>
+          <label>Kind</label>
+          <select id="mech-kind" style="width:100%;margin:0.35rem 0">
+            <option value="param_override">param_override (runtime)</option>
+            <option value="district_yield_override">district_yield_override (runtime)</option>
+            <option value="lane_param">lane_param (runtime)</option>
+            <option value="tick_cadence_override">tick_cadence_override (runtime)</option>
+            <option value="policy_definition">policy_definition (planning)</option>
+            <option value="fork_definition">fork_definition (planning)</option>
+          </select>
+          <label>Title</label>
+          <input id="mech-title" type="text" placeholder="Short title" style="width:100%;margin:0.35rem 0" />
+          <label>Payload (JSON)</label>
+          <textarea id="mech-payload" rows="5"></textarea>
+          <label>Work pack ID</label>
+          <input id="mech-wp" type="text" value="WP-GROK-MECHANICS-PROPOSE-001" style="width:100%;margin:0.35rem 0" />
+          <button class="primary" id="mech-propose-btn" type="button">Propose</button>
+        </div>
+        <div>
+          <h3 style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--accent)">Gate override</h3>
+          <label>Fun score override (≥78 to approve)</label>
+          <input id="mech-fun-override" type="number" value="85" min="0" max="100" step="0.1" style="width:6rem;margin:0.35rem 0" />
+          <p id="mech-result" class="sub" style="margin-top:0.5rem"></p>
+        </div>
+      </div>
+      <h3 style="margin:1rem 0 0.5rem;font-size:0.9rem;color:var(--accent)">Proposals</h3>
+      <div id="mech-list"></div>
+    </div>
   </div>
 
   <script>
@@ -222,7 +264,7 @@
         if (!btn) return;
         activeView = btn.dataset.view;
         document.querySelectorAll("#view-tabs .tab-btn").forEach(b => b.classList.toggle("active", b.dataset.view === activeView));
-        ["overview","military","economic","cultural","founding","civstudy"].forEach(v => {
+        ["overview","military","economic","cultural","founding","civstudy","mechanics"].forEach(v => {
           const el = document.getElementById("view-" + v);
           if (el) el.classList.toggle("hidden", v !== activeView);
         });
@@ -456,6 +498,98 @@
           .map(e => "<li>" + e + "</li>").join("") || "<li><em>No events yet.</em></li>";
       }
 
+      const MECH_PAYLOAD_PRESETS = {
+        param_override: { trade_route_sci_bonus: 2 },
+        district_yield_override: { district_id: "research-campus", yield_bonus: { sci: 3 } },
+        lane_param: { lane: "economic", params: { yield_bonus_pct: 10 } },
+        tick_cadence_override: { cultural_cadence: 5 },
+        policy_definition: { id: "example_policy", branch_id: "diplomacy", tier: 2, effect: "describe effect" },
+        fork_definition: { id: "example-fork", name: "Example Fork", prereq: "sci-trade-route" },
+      };
+
+      function mechStatusClass(status) {
+        return "mech-status mech-status-" + (status || "PROPOSED");
+      }
+
+      function renderMechanicsProposalsPanel(data) {
+        const summary = data.mechanics_proposals || {};
+        const overrides = data.mechanics_overrides || {};
+        document.getElementById("mech-summary").innerHTML =
+          "Total proposals: <strong>" + (summary.total || 0) + "</strong>" +
+          (summary.by_status ? " · " + Object.entries(summary.by_status).map(([k, v]) => k + ": " + v).join(", ") : "") +
+          "<br/>Active overrides: <code>" + JSON.stringify(overrides) + "</code>";
+      }
+
+      async function loadMechanicsList() {
+        const listEl = document.getElementById("mech-list");
+        if (!listEl || !apiBase) return;
+        try {
+          const r = await fetch(apiBase + "/game/mechanics/proposals");
+          const d = await r.json();
+          const items = (d.proposals || []).slice().reverse();
+          if (!items.length) {
+            listEl.innerHTML = "<em>No proposals yet — create one above or via MCP.</em>";
+            return;
+          }
+          listEl.innerHTML = items.map(p => {
+            const canGate = p.status === "PROPOSED" || p.status === "GATED_REJECTED";
+            const canApply = p.status === "GATED_APPROVED" &&
+              ["lane_param", "district_yield_override", "tick_cadence_override", "param_override"].indexOf(p.kind) >= 0;
+            return "<div class='mech-item'>" +
+              "<span class='" + mechStatusClass(p.status) + "'>" + p.status + "</span> " +
+              "<strong>" + (p.title || p.kind) + "</strong> " +
+              "<small>(" + p.kind + " · " + p.id + ")</small><br/>" +
+              "<code style='font-size:0.75rem'>" + JSON.stringify(p.payload || {}) + "</code><br/>" +
+              (p.fun_score != null ? "Fun: " + p.fun_score + " · " : "") +
+              (canGate ? "<button type='button' data-mech-gate='" + p.id + "'>Gate</button> " : "") +
+              (canApply ? "<button type='button' data-mech-apply='" + p.id + "'>Apply</button>" : "") +
+              (p.status === "GATED_APPROVED" && !canApply ? " <em>Planning kind — Cursor code land</em>" : "") +
+              "</div>";
+          }).join("");
+          listEl.querySelectorAll("[data-mech-gate]").forEach(btn => {
+            btn.onclick = () => mechGate(btn.dataset.mechGate);
+          });
+          listEl.querySelectorAll("[data-mech-apply]").forEach(btn => {
+            btn.onclick = () => mechApply(btn.dataset.mechApply);
+          });
+        } catch (e) {
+          listEl.innerHTML = "<em>Could not load proposals.</em>";
+        }
+      }
+
+      async function mechGate(proposalId) {
+        const fun = parseFloat(document.getElementById("mech-fun-override").value) || 85;
+        const r = await fetch(apiBase + "/game/mechanics/gate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ proposal_id: proposalId, fun_score_override: fun }),
+        });
+        const d = await r.json();
+        document.getElementById("mech-result").textContent = d.error ||
+          ("Gate: " + (d.approved ? "approved" : "rejected") + " (fun " + d.fun_score + ")");
+        await loadState();
+      }
+
+      async function mechApply(proposalId) {
+        const r = await fetch(apiBase + "/game/mechanics/apply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ proposal_id: proposalId }),
+        });
+        const d = await r.json();
+        document.getElementById("mech-result").textContent = d.error ||
+          (d.applied ? "Applied " + proposalId : JSON.stringify(d));
+        await loadState();
+      }
+
+      function syncMechPayloadPreset() {
+        const kind = document.getElementById("mech-kind").value;
+        const preset = MECH_PAYLOAD_PRESETS[kind];
+        if (preset) {
+          document.getElementById("mech-payload").value = JSON.stringify(preset, null, 2);
+        }
+      }
+
       function renderMechanics(data) {
         const ml = data.mechanics_lanes || {};
         const m = ml.military || {};
@@ -539,6 +673,8 @@
         renderVictory(data);
         renderEvents(data);
         renderMechanics(data);
+        renderMechanicsProposalsPanel(data);
+        loadMechanicsList();
         renderCivstudy(data);
         renderFounding();
       }
@@ -638,6 +774,33 @@
         document.getElementById("found-result").textContent = d.message || d.error || JSON.stringify(d);
         await loadState();
       };
+
+      document.getElementById("mech-kind").onchange = syncMechPayloadPreset;
+      document.getElementById("mech-propose-btn").onclick = async () => {
+        let payload;
+        try {
+          payload = JSON.parse(document.getElementById("mech-payload").value || "{}");
+        } catch (_) {
+          document.getElementById("mech-result").textContent = "Invalid JSON payload";
+          return;
+        }
+        const r = await fetch(apiBase + "/game/mechanics/propose", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            kind: document.getElementById("mech-kind").value,
+            title: document.getElementById("mech-title").value || "Dashboard proposal",
+            payload: payload,
+            work_pack_id: document.getElementById("mech-wp").value || "",
+            author: "dashboard",
+          }),
+        });
+        const d = await r.json();
+        document.getElementById("mech-result").textContent = d.error ||
+          ("Proposed " + (d.proposal && d.proposal.id) + " → " + (d.proposal && d.proposal.status));
+        await loadState();
+      };
+      syncMechPayloadPreset();
 
       if (apiBase) { showMain(); loadState(); } else { showSetup(); }
     })();
