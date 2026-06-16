@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
+from backend.civstudy_corpus_cards import default_adjacency_bonuses, default_corpus_cards
+
 
 def default_districts() -> List[Dict[str, Any]]:
     return [
@@ -158,9 +160,11 @@ def civstudy_reference_panel() -> Dict[str, Any]:
         "borrowed_patterns": [
             "Card-based admin HUD + budget bars",
             "Discrete task runners with loading feedback",
-            "Nexus JWKS auth patterns (future :8081 identity)",
+            "Empire Council session records (receipt chronicles)",
             "Governor entity management metaphors",
         ],
+        "corpus_cards": default_corpus_cards(),
+        "adjacency_bonuses": default_adjacency_bonuses(),
         "districts": default_districts(),
         "policy_tree": default_policy_tree(),
         "discovery_forks": default_discovery_forks(),

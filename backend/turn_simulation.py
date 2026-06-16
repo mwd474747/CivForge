@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
+from backend.civstudy_flavor import defeat_receipt_title, victory_receipt_title
 from backend.multi_agent_state import sync_victory_milestones, tick_multi_agent_state
 from core.mechanics_registry import MechanicsRegistry
 from core.receipts import ReceiptStore
@@ -58,10 +59,14 @@ def maybe_emit_defeat_receipt(
         "defeat_reason": reason,
         "fun_score": player.get("fun_score", 0),
         "victory_progress": deepcopy(vp),
+        "receipt_title": defeat_receipt_title({
+            "defeat_reason": reason,
+            "turn": game_state["turn"],
+        }),
     }
     path = receipt_store.append(receipt, filename_hint="defeat-outcome")
     game_state.setdefault("events", []).append(
-        f"Turn {game_state['turn']}: Defeat outcome logged — {path.name}."
+        f"Turn {game_state['turn']}: Empire Council records the fall of the realm — {path.name}."
     )
     return str(path)
 
@@ -93,9 +98,10 @@ def maybe_emit_victory_receipt(
         "policy_unlocked": list(
             game_state.get("civstudy_sim", {}).get("policy_tree", {}).get("unlocked", [])
         ),
+        "receipt_title": victory_receipt_title({}),
     }
     path = receipt_store.append(receipt, filename_hint="victory-outcome")
     game_state.setdefault("events", []).append(
-        f"Turn {game_state['turn']}: Joint victory outcome logged — {path.name}."
+        f"Turn {game_state['turn']}: Empire Council proclaims an age of glory — {path.name}."
     )
     return str(path)

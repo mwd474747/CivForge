@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Dict, List
 
+from backend.civstudy_flavor import DEFEAT_CASCADE_SEED_LINES
 from backend.civstudy_mechanics_bridge import default_civstudy_sim_state, ensure_civstudy_sim_state
 from backend.multi_agent_state import (
     default_alliances,
@@ -128,6 +129,8 @@ def apply_defeat_cascade_seed(game_state: Dict[str, Any]) -> None:
         if "player" in alliance.get("parties", []):
             alliance["status"] = "broken"
             broken += 1
+    for line in DEFEAT_CASCADE_SEED_LINES:
+        game_state.setdefault("events", []).append(f"Turn {game_state['turn']}: {line}")
     game_state.setdefault("events", []).append(
-        f"Turn {game_state['turn']}: Defeat-cascade seed applied ({broken} player alliances broken, fun=30)."
+        f"Turn {game_state['turn']}: Defeat-cascade seed — {broken} treaty(ies) broken, prosperity at {game_state['player']['fun_score']}."
     )

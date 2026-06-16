@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from core import AgentBrain, FunForge, GovernanceOrchestrator, ReceiptStore
 from core.swarm_join import FORGE_COORDINATOR_ID
 from core.mechanics_registry import build_default_registry, default_mechanics_lanes
+from backend.civstudy_flavor import game_state_note
 from backend.civstudy_metadata import civstudy_reference_panel
 from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
 from backend.game_reset import apply_defeat_cascade_seed, apply_game_reset
@@ -297,7 +298,7 @@ async def get_state() -> Dict[str, Any]:
         "session_history": game_state.get("session_history", [])[-5:],
         "mechanics_proposals": proposals_summary(game_state),
         "mechanics_overrides": game_state.get("mechanics_overrides", {}),
-        "note": "CivForge governance workspace with multi-agent map, alliances, negotiations, mechanics lanes, and joint victory.",
+        "note": game_state_note(),
     }
 
 @app.get("/game/founding-session")

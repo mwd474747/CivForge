@@ -60,15 +60,19 @@ class ReceiptStore:
         fname = f"{filename_hint}-{ts}.md"
         path = self.base_dir / fname
 
-        lines = [
-            f"# Receipt {receipt.get('id', receipt.get('turn', 'unknown'))}",
+        title_block = receipt.get("receipt_title")
+        if title_block:
+            lines = [title_block, ""]
+        else:
+            lines = [f"# Receipt {receipt.get('id', receipt.get('turn', 'unknown'))}"]
+        lines.extend([
             f"**Turn/Cycle**: {receipt.get('turn')}",
             f"**Action**: {receipt.get('action', receipt.get('status'))}",
             f"**Status**: {receipt.get('status')}",
-            f"**Fun/Quality Score**: {receipt.get('fun_score')}",
+            f"**Prosperity Score**: {receipt.get('fun_score')}",
             "",
             "## Details",
-        ]
+        ])
         for k, v in receipt.items():
             if k not in ("id", "turn", "action", "status", "fun_score"):
                 lines.append(f"- **{k}**: {v}")

@@ -90,7 +90,7 @@ Defeat reasons: `fun_floor`, `diplomatic_isolation`, `betrayal_collapse`, `stall
 | `victory_hud` | Progress %, cultural path, defeat warnings, milestones |
 | `trust_erosion` | Per-agent `negotiation_success_rates`, alliance risk tiers |
 | `mechanics_proposals` / `mechanics_overrides` | Proposal lane + applied `param_override` |
-| `civstudy_reference` | Read-only policy/fork/district catalog (includes `shared_intel`) |
+| `civstudy_reference` | Read-only policy/fork/district catalog (includes `shared_intel`, **12 corpus cards**, adjacency synergies) |
 
 ---
 

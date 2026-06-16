@@ -323,7 +323,7 @@ def tick_civstudy_cultural_chains(game_state: Dict[str, Any]) -> List[str]:
 
 
 def civstudy_sim_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
-    """Compact summary for /state and Nexus telemetry."""
+    """Compact summary for /state and Empire Council advisory telemetry."""
     sim = ensure_civstudy_sim_state(game_state)
     district = _district_by_id(sim["active_district_id"])
     return {

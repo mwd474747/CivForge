@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>CivForge Empire • Multi-Agent Live</title>
+  <title>CivForge Empire • Live Court</title>
   <style>
     :root {
       --bg: #0f172a; --panel: #1e293b; --text: #e2e8f0; --muted: #94a3b8;
@@ -65,13 +65,13 @@
   </style>
 </head>
 <body>
-  <h1>CivForge Multi-Agent Command</h1>
-  <p class="sub">Governance kernel + agent tabs, shared map, negotiations, alliances, joint victory</p>
+  <h1>CivForge Empire Command</h1>
+  <p class="sub" id="empire-flavor-line">The people demand expansion — rival city-states watch every decree from the court.</p>
 
   <div id="outcome-overlay" class="outcome-overlay hidden">
     <div class="outcome-card">
       <h2 id="outcome-title">Joint Victory</h2>
-      <p id="outcome-text">All milestones complete. Governance quorum achieved across factions.</p>
+      <p id="outcome-text">All milestones complete. The Empire Council proclaims joint victory across rival courts.</p>
       <button type="button" id="outcome-reset-btn">Start New Game</button>
       <button type="button" onclick="document.getElementById('outcome-overlay').classList.add('hidden')">Continue governing</button>
     </div>
@@ -85,10 +85,10 @@
   </div>
 
   <div id="main-dashboard" class="hidden">
-    <p class="banner">Kernel: <code id="api-base-label"></code> · <span id="conn-status">connected</span></p>
+    <p class="banner">Court seat: <code id="api-base-label"></code> · <span id="conn-status">connected</span></p>
     <div class="hud">
       <div class="stat"><span>Turn</span><strong id="hud-turn">—</strong></div>
-      <div class="stat"><span>Fun</span><strong id="hud-fun">—</strong></div>
+      <div class="stat"><span>Prosperity</span><strong id="hud-fun">—</strong></div>
       <div class="stat"><span>Cities</span><strong id="hud-cities">—</strong></div>
       <div class="stat"><span>Alliances</span><strong id="hud-alliances">—</strong></div>
       <div class="stat"><span>Victory</span><strong id="hud-victory">—</strong></div>
@@ -111,13 +111,13 @@
       <button class="tab-btn" data-view="cultural">Cultural</button>
       <button class="tab-btn" data-view="founding">Found City</button>
       <button class="tab-btn" data-view="civstudy">CivStudy Ref</button>
-      <button class="tab-btn" data-view="mechanics">Mechanics Proposals</button>
+      <button class="tab-btn" data-view="mechanics">Council Proposals</button>
     </div>
 
     <div id="view-overview">
     <div class="grid-2">
       <div class="panel">
-        <h2>Agent Governors</h2>
+        <h2>Rival Emissaries</h2>
         <div class="tabs" id="agent-tabs"></div>
         <div id="agent-details"></div>
       </div>
@@ -157,7 +157,7 @@
         <select id="neg-to"></select>
         <p id="neg-success-rate" class="sub" style="margin:0.35rem 0"></p>
         <label style="display:block;margin-top:0.5rem">Offer</label>
-        <textarea id="neg-offer" placeholder="Propose joint governance review…"></textarea>
+        <textarea id="neg-offer" placeholder="Propose a treaty before the Empire Council…"></textarea>
         <button class="primary" id="neg-send" style="margin-top:0.5rem">Send Offer</button>
         <div id="neg-log" style="margin-top:0.75rem"></div>
       </div>
@@ -204,20 +204,20 @@
       <div id="civstudy-panel"></div>
     </div>
     <div id="view-mechanics" class="panel hidden">
-      <h2>Mechanics Proposal Lane</h2>
-      <p class="sub">Grok swarm proposes → FunForge gate → kernel applies runtime patches. Planning kinds require Cursor code.</p>
+      <h2>Council Proposal Lane</h2>
+      <p class="sub">Court advisors propose edicts → prosperity gate → runtime imperial decrees. Planning kinds require Cursor code land.</p>
       <div id="mech-summary" class="mech-overrides" style="margin-bottom:0.75rem"></div>
       <div class="grid-2">
         <div>
           <h3 style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--accent)">New proposal</h3>
           <label>Kind</label>
           <select id="mech-kind" style="width:100%;margin:0.35rem 0">
-            <option value="param_override">param_override (runtime)</option>
-            <option value="district_yield_override">district_yield_override (runtime)</option>
-            <option value="lane_param">lane_param (runtime)</option>
-            <option value="tick_cadence_override">tick_cadence_override (runtime)</option>
-            <option value="policy_definition">policy_definition (planning)</option>
-            <option value="fork_definition">fork_definition (planning)</option>
+            <option value="param_override">Imperial edict — runtime tuning</option>
+            <option value="district_yield_override">District yield decree (runtime)</option>
+            <option value="lane_param">Lane parameter edict (runtime)</option>
+            <option value="tick_cadence_override">Tick cadence edict (runtime)</option>
+            <option value="policy_definition">Policy charter (planning)</option>
+            <option value="fork_definition">Discovery fork charter (planning)</option>
           </select>
           <label>Title</label>
           <input id="mech-title" type="text" placeholder="Short title" style="width:100%;margin:0.35rem 0" />
@@ -323,7 +323,7 @@
           pane.innerHTML = "<strong>" + a.name + "</strong><br/>" +
             "Territories: " + (a.data.territories || "—") + " · Cities: " + (a.data.cities || "—") + "<br/>" +
             "Food " + (r.food ?? "—") + " · Prod " + (r.prod ?? "—") + " · Sci " + (r.sci ?? "—") + " · Influence " + (r.influence ?? "—") +
-            (a.isPlayer ? "<br/>Fun score: <strong>" + (a.data.fun_score ?? data.fun_score) + "</strong>" : "");
+            (a.isPlayer ? "<br/>Prosperity: <strong>" + (a.data.fun_score ?? data.fun_score) + "</strong>" : "");
           details.appendChild(pane);
         });
       }
@@ -512,6 +512,9 @@
           title.style.color = "var(--danger)";
           document.querySelector(".outcome-card").style.borderColor = "var(--danger)";
           text.textContent = "Session ended: " + ((vp.defeat_reason || "defeat").replace(/_/g, " "));
+          if (hud.defeat_warnings && hud.defeat_warnings.length) {
+            text.textContent += " — " + hud.defeat_warnings.join(", ").replace(/_/g, " ");
+          }
           overlay.classList.remove("hidden");
         } else if (vp.outcome === "victory" || pct >= 100 || data.session_phase === "epilogue") {
           title.textContent = "Joint Victory";
@@ -524,8 +527,19 @@
         }
       }
 
+      const FLAVOR_LINES = [
+        "The people demand expansion.",
+        "A rival has denounced you.",
+        "Merchants petition the court for new trade routes.",
+        "Scholars at the Campus seek patronage for a wonder."
+      ];
+
       function renderHud(data) {
         document.getElementById("hud-turn").textContent = data.current_turn;
+        const flavorEl = document.getElementById("empire-flavor-line");
+        if (flavorEl && FLAVOR_LINES.length) {
+          flavorEl.textContent = FLAVOR_LINES[data.current_turn % FLAVOR_LINES.length];
+        }
         document.getElementById("hud-fun").textContent = data.fun_score;
         document.getElementById("hud-cities").textContent = data.player.cities;
         document.getElementById("hud-alliances").textContent = (data.alliances || []).length;
@@ -539,7 +553,7 @@
         defeatBanner.classList.toggle("hidden", !defeat);
         if (defeat) {
           const reason = (data.victory_progress && data.victory_progress.defeat_reason) || "defeat";
-          defeatBanner.textContent = "Defeat (" + reason.replace(/_/g, " ") + ") — reset to try again.";
+          defeatBanner.textContent = "Defeat (" + reason.replace(/_/g, " ") + ") — your empire falters. Reset to raise a new dynasty.";
         }
       }
 
@@ -578,7 +592,7 @@
           const d = await r.json();
           const items = (d.proposals || []).slice().reverse();
           if (!items.length) {
-            listEl.innerHTML = "<em>No proposals yet — create one above or via MCP.</em>";
+            listEl.innerHTML = "<em>No council proposals yet — create one above or via court dispatch.</em>";
             return;
           }
           listEl.innerHTML = items.map(p => {
@@ -688,6 +702,31 @@
         const chains = (cs.cultural_event_chains || []).map(c =>
           "<li><strong>" + c.name + "</strong>: " + (c.stages || []).join(" → ") + "</li>"
         ).join("");
+        const cards = (cs.corpus_cards || []).map(card => {
+          let body = "<p><em>" + (card.flavor || "") + "</em></p>";
+          if (card.policies) {
+            body += "<ul>" + card.policies.map(p => "<li><strong>" + p.id + "</strong>: " + p.effect + "</li>").join("") + "</ul>";
+          }
+          if (card.promotions) {
+            body += "<ul>" + card.promotions.map(p => "<li>" + p.from + " → " + p.to + " (" + p.requires + ")</li>").join("") + "</ul>";
+          }
+          if (card.victory_paths) {
+            body += "<ul>" + card.victory_paths.map(v => "<li><strong>" + v.name + "</strong>: " + v.goal + "</li>").join("") + "</ul>";
+          }
+          if (card.trade_route) {
+            body += "<p><strong>" + card.trade_route.name + "</strong>: " + card.trade_route.flavor + " <small>(" + card.trade_route.bonus + ")</small></p>";
+          }
+          if (card.cultural_chain) {
+            body += "<p><strong>" + card.cultural_chain.name + "</strong>: " + card.cultural_chain.flavor +
+              " <small>" + (card.cultural_chain.stages || []).join(" → ") + "</small></p>";
+          }
+          if (card.effect) body += "<p><small>" + card.effect + "</small></p>";
+          if (card.yields) body += "<p><small>Yields: " + JSON.stringify(card.yields) + "</small></p>";
+          return "<div class='mech-item'><span class='mech-status mech-status-APPLIED'>" + card.kind + "</span> <strong>" + card.name + "</strong><br/>" + body + "</div>";
+        }).join("");
+        const adjacency = (cs.adjacency_bonuses || []).map(a =>
+          "<li><strong>" + a.name + "</strong>: " + a.flavor + "</li>"
+        ).join("");
         document.getElementById("civstudy-panel").innerHTML =
           liveSection +
           "<hr style='border-color:#334155;margin:1rem 0'/>" +
@@ -696,6 +735,8 @@
           "<h3>Policy tree branches</h3><ul>" + (branches || "<li><em>—</em></li>") + "</ul>" +
           "<h3>Scientific discovery forks</h3><ul>" + (forks || "<li><em>—</em></li>") + "</ul>" +
           "<h3>Cultural event chains</h3><ul>" + (chains || "<li><em>—</em></li>") + "</ul>" +
+          "<h3>CivStudy corpus cards (12)</h3>" + (cards || "<p><em>—</em></p>") +
+          "<h3>Adjacency synergies</h3><ul>" + (adjacency || "<li><em>—</em></li>") + "</ul>" +
           "<h3>Reference agents</h3><ul>" + (cs.agents||[]).map(a => "<li><strong>" + a.role + "</strong>: " + a.focus + "</li>").join("") + "</ul>" +
           "<h3>Borrowed patterns</h3><ul>" + (cs.borrowed_patterns||[]).map(p => "<li>" + p + "</li>").join("") + "</ul>";
       }

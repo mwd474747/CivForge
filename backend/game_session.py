@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
+from backend.civstudy_flavor import DEFEAT_CASCADE_SEED_LINES, defeat_event_line
+
 BASE_NEGOTIATE_INFLUENCE_COST = 2
 ALLIANCE_SOFT_CAP_DEFAULT = 2
 ALLIANCE_SOFT_CAP_WITH_POLICY = 3
@@ -169,5 +171,4 @@ def apply_defeat(game_state: Dict[str, Any], reason: str, turn: Optional[int] = 
     vp = game_state.setdefault("victory_progress", {})
     vp["outcome"] = "defeat"
     vp["defeat_reason"] = reason
-    prefix = f"Turn {turn}: " if turn is not None else ""
-    game_state.setdefault("events", []).append(f"{prefix}Defeat — {reason.replace('_', ' ')}.")
+    game_state.setdefault("events", []).append(defeat_event_line(reason, turn))
