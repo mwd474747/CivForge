@@ -7,8 +7,8 @@
 anchor:
   repo: mwd474747/CivForge
   branch: main
-  head: 4e17371
-  pytest_total: 130
+  head: 0f7e24e
+  pytest_total: 138
   kernel_port: 8080
   updated_at: "2026-06-16"
 
@@ -17,6 +17,7 @@ truth_docs:
   lifecycle: docs/WORK_PACK_LIFECYCLE.md
   lanes: docs/EXECUTION_LANE_V2.md
   scope_authority: receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md
+  milestone_sync: docs/SIM_MILESTONE_SYNC_DECISION_V1.md
 
 blocks:
   block_a:
@@ -32,6 +33,11 @@ blocks:
     execution_receipts:
       - receipts/cursor-execution-wp-grok-competition-depth-001-20260616.md
       - receipts/cursor-execution-wp-grok-player-agent-001-20260616.md
+  block_c:
+    title: Alternate victory + soak + diplomacy + tooling
+    status: closed
+    closure_receipt: receipts/BLOCK-C-CLOSURE-20260616.md
+    execution_receipt: receipts/cursor-execution-wp-grok-block-c-20260616.md
 
 work_packs:
   WP-GROK-WONDER-PLACE-001:
@@ -112,6 +118,66 @@ work_packs:
   WP-HINDSIGHT-DEBT-ANALYSIS-001:
     lifecycle: superseded
     reason: Debt catalog in docs/DEBT_REGISTER_V1.md — not a Cursor WP
+
+  WP-HISTORY-ORPHAN-REVIEW-042:
+    lifecycle: superseded
+    reason: Orphan inventory report-only — do not resurrect Godot or agent-vs-agent monolith
+
+  WP-TOOLING-AWARENESS-PROPOSAL-001:
+    lifecycle: superseded
+    reason: Narrow slice landed as WP-TOOLING-AWARENESS-001 (mechanics status + cli snapshot)
+
+  WP-GROK-CULTURAL-EPILOGUE-001:
+    lifecycle: closed
+    block: block_c
+    debt: D-H1
+    execution_receipt: receipts/cursor-execution-wp-grok-block-c-20260616.md
+    tests:
+      - tests/test_wp_grok_block_c_001.py::test_cultural_alternate_triggers_epilogue_and_receipt
+
+  WP-GROK-SOAK-001:
+    lifecycle: closed
+    block: block_c
+    execution_receipt: receipts/cursor-execution-wp-grok-block-c-20260616.md
+    tests:
+      - tests/test_wp_grok_block_c_001.py::test_soak_no_boundary_regression
+
+  WP-GROK-AI-DIPLOMACY-001:
+    lifecycle: closed
+    block: block_c
+    execution_receipt: receipts/cursor-execution-wp-grok-block-c-20260616.md
+    tests:
+      - tests/test_wp_grok_block_c_001.py::test_ai_negotiation_proposal_to_player
+
+  WP-GROK-DOMINATION-PATH-001:
+    lifecycle: closed
+    block: block_c
+    execution_receipt: receipts/cursor-execution-wp-grok-block-c-20260616.md
+    tests:
+      - tests/test_wp_grok_block_c_001.py::test_domination_alternate_victory
+
+  WP-TOOLING-AWARENESS-001:
+    lifecycle: closed
+    block: block_c
+    execution_receipt: receipts/cursor-execution-wp-grok-block-c-20260616.md
+    routes:
+      - GET /game/mechanics/status
+    cli:
+      - python3 tools/civforge_cli.py snapshot
+
+  WP-GROK-DOC-SYNC-001:
+    lifecycle: closed
+    block: block_c
+    execution_receipt: receipts/cursor-execution-wp-grok-block-c-20260616.md
+    docs:
+      - docs/GAME_ENGINE_IMPLEMENTATION_GAP_INVENTORY_V1.md
+      - IMPLEMENTATION_STATUS.md
+
+  WP-GROK-REFRACTOR-SIM-002:
+    lifecycle: closed
+    block: block_c
+    execution_receipt: receipts/cursor-execution-wp-grok-block-c-20260616.md
+    decision_doc: docs/SIM_MILESTONE_SYNC_DECISION_V1.md
 
 retired_prime_patterns:
   - WP-GROK-BLOCK-A-RESUBMIT-*

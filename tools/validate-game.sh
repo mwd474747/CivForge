@@ -123,6 +123,17 @@ post("/game/player/strategy", {"strategy": "science"})
 s3 = get("/state")
 assert s3["player_agent"]["strategy"] == "science"
 print("  API + MCP + Block A + Block B probes OK")
+
+# Block C probes
+ms = get("/game/mechanics/status")
+assert "registry_modules" in ms
+assert "diplomacy_layer" in ms["registry_modules"]
+assert ms["tick_order"] == "mechanics_first_then_alternate_victory_then_milestones"
+s4 = get("/state")
+assert "domination_path" in s4.get("victory_progress", {}), "missing victory_progress.domination_path (Block C)"
+assert s4["work_pack_registry"].get("closed_block_c") is True, "Block C should be closed in registry"
+print("  Block C probes OK")
+
 PY
 
 if $READ_ONLY; then

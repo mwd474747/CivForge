@@ -14,8 +14,8 @@ fi
 
 echo "=== CivForge Turnkey Gaps All ==="
 
-echo "--- Unit tests (mechanics + civstudy) ---"
-python3 -m pytest tests/test_civstudy_metadata.py tests/test_civstudy_mechanics_bridge.py tests/test_multi_agent_state.py -q
+echo "--- Full unit test suite ---"
+python3 -m pytest tests/ -q
 
 echo "--- Governance posture (OpenClaw CF-GOV-*, read-only) ---"
 bash tools/turnkey-governance-posture.sh

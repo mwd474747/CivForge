@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
+from backend.ai_diplomacy import tick_ai_negotiation_proposals
 from backend.competition_modes import tick_competition
 from backend.multi_agent_state import tick_multi_agent_state
 from core.mechanics_registry import MechanicsRegistry
@@ -16,7 +17,9 @@ def turn_decisions(game_state: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def tick_diplomacy_layer(game_state: Dict[str, Any]) -> List[str]:
-    return tick_multi_agent_state(game_state, turn_decisions(game_state))
+    events = tick_multi_agent_state(game_state, turn_decisions(game_state))
+    events.extend(tick_ai_negotiation_proposals(game_state))
+    return events
 
 
 def tick_competition_layer(game_state: Dict[str, Any]) -> List[str]:

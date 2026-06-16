@@ -49,6 +49,7 @@ from backend.policy_branching import select_policy_branch
 from backend.player_agent import player_agent_summary, set_player_strategy
 from backend.trust_erosion import trust_summary
 from backend.victory_hud import victory_hud_summary
+from backend.mechanics_status import mechanics_status_summary
 from backend.work_pack_status import work_pack_status_summary
 from backend.mechanics_proposals import (
     apply_mechanics,
@@ -601,6 +602,12 @@ async def game_send_envoy(req: SendEnvoyRequest, _claims: Dict[str, Any] = Depen
         return result
     receipt_store.save_state("game_state", game_state)
     return result
+
+
+@app.get("/game/mechanics/status")
+async def game_mechanics_status() -> Dict[str, Any]:
+    """Registry module list + tick order (machine-readable tooling surface)."""
+    return mechanics_status_summary(game_state, mechanics_registry)
 
 @app.get("/game/mechanics/proposals")
 async def game_mechanics_proposals_list(status: Optional[str] = None) -> Dict[str, Any]:

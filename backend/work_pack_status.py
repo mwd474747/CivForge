@@ -79,4 +79,6 @@ def work_pack_status_summary() -> Dict[str, Any]:
             if isinstance(meta, dict) and meta.get("lifecycle") == "planning"
         ],
         "closed_block_a": blocks.get("block_a", {}).get("status") == "closed",
+        "closed_block_b": blocks.get("block_b", {}).get("status") == "closed",
+        "closed_block_c": blocks.get("block_c", {}).get("status") == "closed",
     }

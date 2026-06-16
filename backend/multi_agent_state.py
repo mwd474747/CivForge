@@ -240,8 +240,14 @@ def sync_victory_milestones(
 
     if progress >= target and vp.get("outcome") != "defeat":
         vp["outcome"] = "victory"
-    elif vp.get("outcome") == "victory" and progress < target:
+        vp["victory_type"] = "joint"
+        from backend.alternate_victory import EPILOGUE_MESSAGES
+
+        vp["epilogue_message"] = EPILOGUE_MESSAGES["joint"]
+    elif vp.get("outcome") == "victory" and vp.get("victory_type") == "joint" and progress < target:
         vp.pop("outcome", None)
+        vp.pop("victory_type", None)
+        vp.pop("epilogue_message", None)
     elif vp.get("outcome") == "defeat" and not vp.get("defeat_reason"):
         vp.pop("outcome", None)
     return events
@@ -298,6 +304,10 @@ def tick_multi_agent_state(game_state: Dict[str, Any], decisions: Optional[Dict[
         break_odds = 7 if envoy else 12
         if watch and alliance["betrayal_risk"] >= BETRAYAL_WATCH_THRESHOLD and random.randint(1, 100) <= break_odds:
             should_break = True
+            events.append(
+                f"Turn {turn}: BETRAYAL RESOLUTION — betrayal_watch policy forces collapse of "
+                f"alliance {alliance['id']} at risk {alliance['betrayal_risk']}%."
+            )
         if (
             alliance["betrayal_risk"] >= TRUST_CRITICAL_THRESHOLD
             and random.randint(1, 100) <= (18 if envoy else 25)

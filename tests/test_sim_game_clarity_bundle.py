@@ -78,7 +78,7 @@ def test_simulation_mechanics_boundary_on_turn():
     assert summary["mechanics_layer"]["modules"]
     assert "diplomacy_layer" in summary["mechanics_layer"]["modules"]
     assert "military" in summary["mechanics_layer"]["modules"]
-    assert summary["simulation_layer"]["phases"] == ["milestones"]
+    assert summary["simulation_layer"]["phases"] == ["alternate_victory", "milestones"]
 
 
 def test_simulation_layer_runs_without_registry():

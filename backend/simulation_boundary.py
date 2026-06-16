@@ -4,16 +4,21 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
+from backend.alternate_victory import sync_alternate_victory_outcomes
 from backend.multi_agent_state import sync_victory_milestones
 
-SIMULATION_PHASES = ("milestones",)
-TICK_ORDER = "mechanics_first_then_milestones"
+SIMULATION_PHASES = ("alternate_victory", "milestones")
+TICK_ORDER = "mechanics_first_then_alternate_victory_then_milestones"
+
+# WP-GROK-REFRACTOR-SIM-002: keep sync_victory_milestones in simulation layer (orchestrator-adjacent).
+# Alternate paths run before joint milestone victory so cultural/domination can close without joint_progress=100.
 
 
 def run_simulation_layer(game_state: Dict[str, Any]) -> List[str]:
     """Milestone coordination only — rule ticks run via MechanicsRegistry.pass_through_tick()."""
     events: List[str] = []
     vp = game_state.setdefault("victory_progress", {})
+    events.extend(sync_alternate_victory_outcomes(game_state, game_state["turn"]))
     events.extend(sync_victory_milestones(vp, game_state["turn"], game_state))
     game_state["_simulation_boundary"] = {
         "layer": "simulation",
@@ -33,7 +38,7 @@ def boundary_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
             "phases": sim.get("phases", list(SIMULATION_PHASES)),
             "last_turn": sim.get("turn"),
             "tick_order": sim.get("tick_order", TICK_ORDER),
-            "description": "Orchestrator-adjacent: victory milestone sync after mechanics ticks",
+            "description": "Orchestrator-adjacent: alternate victory + joint milestone sync after mechanics ticks",
         },
         "mechanics_layer": {
             "modules": mech.get("modules", []),

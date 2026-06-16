@@ -89,12 +89,15 @@ def maybe_emit_victory_receipt(
         return None
 
     player = game_state.get("player", {})
+    victory_type = vp.get("victory_type") or "joint"
     receipt = {
         "turn": game_state["turn"],
-        "action": "joint_victory",
+        "action": "joint_victory" if victory_type == "joint" else f"{victory_type}_victory",
         "status": "VICTORY",
         "fun_score": player.get("fun_score", 0),
         "outcome": "victory",
+        "victory_type": victory_type,
+        "epilogue_message": vp.get("epilogue_message"),
         "victory_progress": deepcopy(vp),
         "alliances_count": len(game_state.get("alliances", [])),
         "negotiations_pending": sum(
@@ -103,10 +106,12 @@ def maybe_emit_victory_receipt(
         "policy_unlocked": list(
             game_state.get("civstudy_sim", {}).get("policy_tree", {}).get("unlocked", [])
         ),
-        "receipt_title": victory_receipt_title({}),
+        "receipt_title": victory_receipt_title({"victory_type": victory_type, "epilogue_message": vp.get("epilogue_message")}),
     }
     path = receipt_store.append(receipt, filename_hint="victory-outcome")
+    from backend.alternate_victory import victory_type_label
+
     game_state.setdefault("events", []).append(
-        f"Turn {game_state['turn']}: Empire Council proclaims an age of glory — {path.name}."
+        f"Turn {game_state['turn']}: Empire Council proclaims {victory_type_label(game_state)} — {path.name}."
     )
     return str(path)

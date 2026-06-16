@@ -8,7 +8,9 @@ from backend.game_session import cultural_tick_cadence, session_phase
 from backend.trust_erosion import TRUST_BETRAYAL_THRESHOLD, trust_summary
 
 def victory_hud_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
+    from backend.alternate_victory import victory_type_label
     from backend.cultural_victory import sync_cultural_victory_path
+    from backend.domination_victory import sync_domination_victory_path
 
     vp = game_state.get("victory_progress", {})
     cultural = game_state.get("mechanics_lanes", {}).get("cultural", {})
@@ -19,6 +21,7 @@ def victory_hud_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
     target = vp.get("target", 100)
     max_risk = trust.get("max_betrayal_risk", 0)
     cultural_path = sync_cultural_victory_path(game_state)
+    domination_path = sync_domination_victory_path(game_state)
 
     warnings = []
     if fun < 45:
@@ -36,6 +39,9 @@ def victory_hud_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
         "milestones_done": sum(1 for m in vp.get("milestones", []) if m.get("done")),
         "milestones_total": len(vp.get("milestones", [])),
         "outcome": vp.get("outcome"),
+        "victory_type": vp.get("victory_type"),
+        "victory_type_label": victory_type_label(game_state),
+        "epilogue_message": vp.get("epilogue_message"),
         "defeat_reason": vp.get("defeat_reason"),
         "cultural_path": {
             "event_chains": cultural.get("event_chains", 0),
@@ -47,6 +53,11 @@ def victory_hud_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
             "milestones": cultural_path.get("milestones", []),
             "progress_pct": cultural_path.get("progress_pct", 0),
             "alternate_victory_eligible": cultural_path.get("alternate_victory_eligible", False),
+        },
+        "domination_path": {
+            "milestones": domination_path.get("milestones", []),
+            "progress_pct": domination_path.get("progress_pct", 0),
+            "alternate_victory_eligible": domination_path.get("alternate_victory_eligible", False),
         },
         "defeat_warning": bool(warnings) and session_phase(game_state) == "active",
         "defeat_warnings": warnings,

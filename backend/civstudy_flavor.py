@@ -44,7 +44,15 @@ def defeat_receipt_title(receipt: Dict[str, Any]) -> str:
     return f"# {RECEIPT_HEADERS['defeat-outcome']}\n\n*{flavor}*"
 
 
-def victory_receipt_title(_receipt: Dict[str, Any]) -> str:
+def victory_receipt_title(receipt: Dict[str, Any]) -> str:
+    vtype = receipt.get("victory_type", "joint")
+    epilogue = receipt.get("epilogue_message")
+    if vtype == "cultural_alternate":
+        body = epilogue or "Cultural supremacy — prestige and wonder eclipse rival courts."
+        return f"# {RECEIPT_HEADERS['victory-outcome']}\n\n*Cultural victory — {body}*"
+    if vtype == "domination":
+        body = epilogue or "Military conquest — the map submits to your legacy."
+        return f"# {RECEIPT_HEADERS['victory-outcome']}\n\n*Domination victory — {body}*"
     return f"# {RECEIPT_HEADERS['victory-outcome']}\n\n*Joint victory — all milestones achieved across rival courts.*"
 
 

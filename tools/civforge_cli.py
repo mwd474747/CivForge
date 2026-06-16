@@ -40,6 +40,33 @@ def _get(path):
 def _post(path, json=None):
     return requests.post(f"{BASE}{path}", json=json, timeout=15).json()
 
+
+def cmd_snapshot():
+    s = _get("/state")
+    mech = _get("/game/mechanics/status")
+    idx_script = ROOT / "tools" / "civforge_receipt_index.py"
+    idx = subprocess.run(
+        [sys.executable, str(idx_script)],
+        capture_output=True,
+        text=True,
+        cwd=str(ROOT),
+    )
+    receipt_index = {}
+    if idx.returncode == 0 and idx.stdout.strip():
+        try:
+            receipt_index = json.loads(idx.stdout)
+        except json.JSONDecodeError:
+            receipt_index = {"raw": idx.stdout[:500]}
+    print(json.dumps({
+        "turn": s.get("current_turn"),
+        "session_phase": s.get("session_phase"),
+        "fun_score": s.get("fun_score"),
+        "victory_hud": s.get("victory_hud"),
+        "mechanics_status": mech,
+        "receipt_index": receipt_index,
+    }, indent=2))
+
+
 def cmd_status():
     s = _get("/state")
     print(json.dumps({
@@ -86,6 +113,7 @@ def main():
     p = argparse.ArgumentParser(description="CivForge governance CLI (FastAPI workspace)")
     sub = p.add_subparsers(dest="cmd")
 
+    sub.add_parser("snapshot", help="State + mechanics status + receipt index")
     sub.add_parser("status", help="Show current /state (fun, resources, receipts)")
     sub.add_parser("advance", help="Run one full governance cycle (agents + FunForge + gate + receipt)")
     sub.add_parser("recommend", help="Get current gravity-mosaic recommendation from the brains")
@@ -114,7 +142,9 @@ def main():
 
     args = p.parse_args()
 
-    if args.cmd == "status":
+    if args.cmd == "snapshot":
+        cmd_snapshot()
+    elif args.cmd == "status":
         cmd_status()
     elif args.cmd == "advance":
         cmd_advance()

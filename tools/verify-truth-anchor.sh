@@ -122,7 +122,7 @@ for wp in CLOSED_WPS:
     elif f"\n    lifecycle: closed" not in text.split(f"{wp}:")[1].split("\n\n", 1)[0]:
         errors.append(f"{wp} not closed in registry")
 
-for block_id in ("block_a", "block_b"):
+for block_id in ("block_a", "block_b", "block_c"):
     marker = f"  {block_id}:"
     if marker not in text:
         errors.append(f"missing blocks.{block_id} in registry")
@@ -132,7 +132,9 @@ for block_id in ("block_a", "block_b"):
 closure_docs = (
     "receipts/BLOCK-A-CLOSURE-20260616.md",
     "receipts/BLOCK-B-CLOSURE-20260616.md",
+    "receipts/BLOCK-C-CLOSURE-20260616.md",
     "receipts/cursor-execution-wp-grok-block-a-20260616.md",
+    "receipts/cursor-execution-wp-grok-block-c-20260616.md",
 )
 for rel in closure_docs:
     if not (ROOT / rel).is_file():

@@ -15,13 +15,14 @@ def test_work_pack_status_summary_block_a_closed():
     summary = work_pack_status_summary()
     assert summary["closed_block_a"] is True
     assert summary["blocks"]["block_b"]["status"] == "closed"
+    assert summary.get("closed_block_c") is True
     assert "WP-GROK-PLAYER-AGENT-001" not in summary["next_planning"]
     assert "WP-GROK-COMPETITION-DEPTH-001" not in summary["next_planning"]
 
 
 def test_registry_pytest_total_is_documented():
     summary = work_pack_status_summary()
-    assert summary["pytest_total_expected"] >= 130
+    assert summary["pytest_total_expected"] >= 138
 
 
 def test_registry_head_matches_git_when_committed():

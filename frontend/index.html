@@ -571,10 +571,12 @@
           }
           overlay.classList.remove("hidden");
         } else if (vp.outcome === "victory" || pct >= 100 || data.session_phase === "epilogue") {
-          title.textContent = "Joint Victory";
+          const hud = data.victory_hud || {};
+          const vlabel = hud.victory_type_label || "Joint Victory";
+          title.textContent = vlabel;
           title.style.color = "var(--ok)";
           document.querySelector(".outcome-card").style.borderColor = "var(--ok)";
-          text.textContent = "All milestones complete. Governance quorum achieved across factions.";
+          text.textContent = hud.epilogue_message || vp.epilogue_message || "All milestones complete. Governance quorum achieved across factions.";
           overlay.classList.remove("hidden");
         } else {
           overlay.classList.add("hidden");
