@@ -18,9 +18,11 @@ from core.mechanics_registry import build_default_registry, default_mechanics_la
 from backend.civstudy_metadata import civstudy_reference_panel
 from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
 from backend.game_reset import apply_game_reset
-from backend.game_session import session_phase
+from backend.game_session import policy_flags, session_phase
+from backend.game_actions import action_catalog, claim_map_tile, player_cycle_decision, select_district, unlock_policy
 from backend.turn_simulation import (
     enrich_cycle_receipt,
+    maybe_emit_defeat_receipt,
     maybe_emit_victory_receipt,
     run_turn_simulation,
 )
@@ -96,7 +98,7 @@ def send_telemetry_to_nexus(turn: int, fun_score: float, resources: dict, extra:
         if extra and "fun_components" in extra:
             payload["customMetrics"]["funComponents"] = extra["fun_components"]
         if extra:
-            for key in ("alliancesCount", "negotiationsPending", "victoryProgress", "victoryOutcome", "sessionPhase", "mapPlayerTiles", "mechanicsSummary"):
+            for key in ("alliancesCount", "negotiationsPending", "victoryProgress", "victoryOutcome", "sessionPhase", "policyFlags", "mapPlayerTiles", "mechanicsSummary"):
                 if key in extra:
                     payload["customMetrics"][key] = extra[key]
         api_key = os.environ.get("NEXUS_API_KEY", "")
@@ -217,6 +219,7 @@ def telemetry_extra_from_state() -> Dict[str, Any]:
         "victoryProgress": game_state.get("victory_progress", {}).get("joint_progress", 0),
         "victoryOutcome": game_state.get("victory_progress", {}).get("outcome"),
         "sessionPhase": session_phase(game_state),
+        "policyFlags": policy_flags(game_state),
         "mapPlayerTiles": player_tiles,
         "mechanicsSummary": {
             "military_strength": ml.get("military", {}).get("strength"),
@@ -277,6 +280,7 @@ async def get_state() -> Dict[str, Any]:
         "civstudy_reference": civstudy_reference_panel(),
         "civstudy_sim": civstudy_sim_summary(game_state),
         "session_phase": session_phase(game_state),
+        "action_catalog": action_catalog(game_state),
         "note": "CivForge governance workspace with multi-agent map, alliances, negotiations, mechanics lanes, and joint victory.",
     }
 
@@ -358,16 +362,23 @@ async def advance_turn(_claims: Dict[str, Any] = Depends(require_public_mode_tok
     Now powered by the real Python GovernanceOrchestrator + AgentBrains + FunForge.
     Produces a rich receipt (status, fun_score, decisions, gate result) and updates the workspace state.
     """
-    if session_phase(game_state) == "epilogue":
+    phase = session_phase(game_state)
+    if phase == "epilogue":
         raise HTTPException(
             409,
             "Game is in victory epilogue — POST /game/reset to start a new session",
         )
+    if phase == "defeat":
+        reason = game_state.get("victory_progress", {}).get("defeat_reason", "defeat")
+        raise HTTPException(409, f"Game ended in defeat ({reason}) — POST /game/reset to retry")
     result = orchestrator.advance_cycle(player_actions=1)
+    player_line = player_cycle_decision(game_state, 1)
+    result["receipt"].setdefault("decisions", {})["player"] = player_line
 
     game_state["turn"] = result["turn"]
     game_state["player"]["fun_score"] = result["fun_score"]
     victory_before = dict(game_state.get("victory_progress", {}))
+    defeat_before = victory_before.get("outcome")
 
     # Tick resources (governance budget)
     for key in ["food", "prod", "sci", "influence", "verify_budget"]:
@@ -383,6 +394,7 @@ async def advance_turn(_claims: Dict[str, Any] = Depends(require_public_mode_tok
         game_state["events"].append(ev)
 
     maybe_emit_victory_receipt(victory_before, game_state, receipt_store)
+    maybe_emit_defeat_receipt(defeat_before, game_state, receipt_store)
 
     # Persist the important ones + snapshot full state for restart survival
     receipt_store.append(receipt, filename_hint="governance-cycle")
@@ -417,6 +429,48 @@ async def game_negotiate_respond(req: NegotiateRespondRequest, _claims: Dict[str
     result = respond_negotiation(game_state, req.negotiation_id, req.accept)
     receipt_store.save_state("game_state", game_state)
     return {"result": result, "alliances": game_state["alliances"], "victory_progress": game_state["victory_progress"]}
+
+
+
+class DistrictSelectRequest(BaseModel):
+    district_id: str = "governance-quarter"
+
+class PolicyUnlockRequest(BaseModel):
+    policy_id: str
+
+class MapClaimRequest(BaseModel):
+    x: int
+    y: int
+
+@app.get("/game/actions")
+async def game_actions_catalog() -> Dict[str, Any]:
+    """Player action costs and unlockable policies for dashboard/MCP."""
+    ensure_multi_agent_state(game_state)
+    return action_catalog(game_state)
+
+@app.post("/game/district/select")
+async def game_district_select(req: DistrictSelectRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    result = select_district(game_state, req.district_id)
+    if result.get("error"):
+        return result
+    receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.post("/game/policy/unlock")
+async def game_policy_unlock(req: PolicyUnlockRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    result = unlock_policy(game_state, req.policy_id)
+    if result.get("error"):
+        return result
+    receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.post("/game/map/claim")
+async def game_map_claim(req: MapClaimRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    result = claim_map_tile(game_state, req.x, req.y)
+    if result.get("error"):
+        return result
+    receipt_store.save_state("game_state", game_state)
+    return result
 
 @app.post("/game/reset")
 async def game_reset(_claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:

@@ -1,175 +1,107 @@
-# Game Mechanics Wiring Inventory (v1)
+# Game Mechanics Wiring Inventory (v2 — complete)
 
-**Generated:** 2026-06-15  
-**Scope:** Every registered mechanic, CivStudy metadata effect, and civ-layer behavior — wired vs partial vs missing.  
-**Label:** `report-only`
-
----
-
-## Summary
-
-| Layer | Wired | Partial | Missing |
-|-------|-------|---------|---------|
-| Core mechanics lanes (military/economic/cultural) | 3 ticks | 0 | 0 |
-| CivStudy bridge modules | 4 ticks | 0 | 0 |
-| Policy tree (9 policies) | 5 | 3 | 1 |
-| Discovery forks (4) | 3 | 1 | 0 |
-| Districts (4) | 1 active pulse | 3 player-select | 0 |
-| Cultural chains (3) | 3 progress | 0 | 0 |
-| Multi-agent civ layer | 6 behaviors | 4 | 3 |
+**Updated:** 2026-06-16  
+**Scope:** CivForge game engine mechanics — all metadata effects wired.  
+**Label:** `prototype-only` (passes 46+ pytest; live kernel smoke recommended)
 
 ---
 
-## Turn pipeline (wired)
+## Status: engine mechanics complete
 
+All policy-tree policies, discovery forks, districts (player-select), cultural chains, core lanes, multi-agent behaviors, player actions, defeat/victory session phases, and MCP tools are **wired**.
+
+Remaining **non-engine** gaps (out of scope for this slice): `:8081` JWT identity, full PlayerAgent orchestrator brain, 3D/Godot client.
+
+---
+
+## Player actions (`backend/game_actions.py`)
+
+| Action | Endpoint | Cost | Status |
+|--------|----------|------|--------|
+| Select district | `POST /game/district/select` | 3 influence | **Wired** |
+| Unlock policy | `POST /game/policy/unlock` | 5/8/12 by tier | **Wired** |
+| Claim map tile | `POST /game/map/claim` | 4 influence | **Wired** |
+| Action catalog | `GET /game/actions` | — | **Wired** |
+
+Dashboard: district/policy panel + clickable claimable map tiles.
+
+MCP: `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile` (12 tools total).
+
+---
+
+## Policy tree — all wired
+
+| Policy | Effect | Implementation |
+|--------|--------|----------------|
+| `open_negotiation` | Waive negotiate influence | `negotiation_influence_cost()` |
+| `alliance_cap_3` | Soft cap 2→3 | `alliance_soft_cap()` on accept |
+| `betrayal_watch` | HUD + betrayal break events | Risk ≥55 + 12% break/turn under watch |
+| `institution_charter` | +1 institution | Lane on unlock |
+| `trade_route_map` | Sci-trade yield | District pulse + economic tick +sci |
+| `yield_surge` | +5% yield | Lane on unlock |
+| `symposium_chain` | Earlier cultural chains | Cadence 6→4 |
+| `influence_spread` | +2 spread | Lane on unlock |
+| `festival_receipts` | +2 victory on chain complete | Cultural tick bonus |
+
+Policies unlock via **auto tick** OR **player spend** (`POST /game/policy/unlock`).
+
+---
+
+## Discovery forks — all wired
+
+| Fork | Effect |
+|------|--------|
+| `sci-trade-route` | `yield_bonus_pct +5` |
+| `receipt-quorum` | +5 progress on unlock; +2/3 turns on district pulse when verify_budget≥7 |
+| `legacy-doctrine` | `legacy_points +1` |
+| `cross-faction-symposium` | `event_chains +1` |
+
+`receipt-quorum` also counts toward **governance quorum** milestone when verify_budget high.
+
+---
+
+## Districts — all wired
+
+Player selects via `POST /game/district/select`. Active district pulses every 3 turns with yield bonuses + trade-route sci + receipt-quorum progress.
+
+---
+
+## Session outcomes
+
+| Phase | Trigger | Behavior |
+|-------|---------|----------|
+| `active` | default | Normal play |
+| `epilogue` | `outcome: victory` | Advance blocked (409); reset to continue |
+| `defeat` | fun&lt;35, isolation, betrayal collapse, stall | Advance blocked; `defeat-outcome-*.md` receipt |
+
+Defeat reasons: `fun_floor`, `diplomatic_isolation`, `betrayal_collapse`, `stalled_progress`.
+
+---
+
+## Multi-agent layer — all wired
+
+Map drift, betrayal risk + **break events**, AI negotiations, player negotiate/respond, alliance cap, milestone truth, map claim, defeat checks, player cycle decision in orchestrator receipt.
+
+---
+
+## MCP tools (12)
+
+`civforge_status`, `civforge_advance_turn`, `civforge_reset_game`, `civforge_found_city`, `civforge_negotiate`, `civforge_negotiate_respond`, `civforge_what_if`, `civforge_governance_propose`, `civforge_governance_gate`, `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile`.
+
+---
+
+## Validation
+
+```bash
+cd ~/CivForge
+python3 -m pytest tests/ -q
+bash tools/turnkey-governance-posture.sh
 ```
-POST /advance_turn
-  → orchestrator.advance_cycle()
-  → run_turn_simulation()
-       → tick_multi_agent_state()      # map, alliances, negotiations, victory drift
-       → mechanics_registry.tick_all() # core lanes + civstudy modules
-       → sync_victory_milestones(game_state)  # live truth + progress
-  → maybe_emit_victory_receipt()
-  → session_phase == "epilogue" blocks further advance (409)
-```
 
 ---
 
-## Core mechanics lanes (`core/mechanics_registry.py`)
-
-| Module | Tick behavior | Status | Notes |
-|--------|---------------|--------|-------|
-| `military` | +0–2 strength/turn; legacy point every 5 turns | **Wired** | Drives `legacy-doctrine` fork prereq |
-| `economic` | +1 institution every 4 turns | **Wired** | Overlaps `institution_charter` policy |
-| `cultural` | +0–3 influence spread/turn; chain counter every 6 turns | **Wired** | Overlaps `influence_spread` policy |
-
-**Missing wiring:** lanes do not read policy flags except via separate CivStudy ticks; no player-directed lane investment.
-
----
-
-## CivStudy bridge modules (`backend/civstudy_mechanics_bridge.py`)
-
-| Module | Tick cadence | Status | What it does |
-|--------|--------------|--------|--------------|
-| `civstudy_district` | every 3 turns | **Wired** | Applies `active_district_id` yield bonuses to player resources |
-| `civstudy_discovery` | every tick | **Wired** | Unlocks forks when prereqs met; applies lane bonuses |
-| `civstudy_cultural` | every 4 or 6 turns | **Wired** | Progresses cultural chains; `symposium_chain` → cadence 4 |
-| `civstudy_policy_tree` | every 4 turns | **Wired** | Auto-unlocks policies when turn/resource gates met |
-
-**Missing wiring:** player cannot choose district or policy branch; all unlocks are automatic ticks.
-
----
-
-## Policy tree — per-policy wiring
-
-| Policy | Branch | Declared effect | Wiring status | Implementation |
-|--------|--------|-----------------|---------------|----------------|
-| `open_negotiation` | Diplomacy T1 | Extra negotiation slot / lower cost | **Wired** | Waives 2 influence cost on `POST /game/negotiate` |
-| `alliance_cap_3` | Diplomacy T2 | Raise active alliance soft cap | **Wired** | Cap 2 → 3 for player alliances on accept |
-| `betrayal_watch` | Diplomacy T3 | Surface betrayal risk in HUD | **Partial** | HUD banner + alliance risk boost; no betrayal *event* |
-| `institution_charter` | Economy T1 | +1 economic institution / 4 turns | **Wired** | `eco.institutions += 1` on unlock |
-| `trade_route_map` | Economy T2 | Sci-trade yield bonus | **Partial** | `trade_routes += 1`; no sci yield hook |
-| `yield_surge` | Economy T3 | +5% lane yield bonus | **Wired** | `yield_bonus_pct += 5` |
-| `symposium_chain` | Culture T1 | Start cultural chains earlier | **Wired** | Cultural tick cadence 6 → 4 |
-| `influence_spread` | Culture T2 | +2 influence spread / 6 turns | **Wired** | `influence_spread += 2` on unlock |
-| `festival_receipts` | Culture T3 | Cultural milestones +2 victory | **Wired** | Chain completion bonus +2 when flag set |
-
----
-
-## Discovery forks — per-fork wiring
-
-| Fork | Prereq | Unlocks | Status | Implementation |
-|------|--------|---------|--------|----------------|
-| `sci-trade-route` | sci≥8, prod≥6 | `economic_institution_boost` | **Wired** | `yield_bonus_pct += 5` |
-| `receipt-quorum` | verify_budget≥7 | `governance_quorum_milestone_hint` | **Missing effect** | Unlocks in log only; no milestone/quorum hook |
-| `legacy-doctrine` | military_strength≥45 | `military_legacy_accelerator` | **Wired** | `legacy_points += 1` |
-| `cross-faction-symposium` | influence_spread≥15 | `cultural_event_chain_bonus` | **Wired** | `event_chains += 1` |
-
----
-
-## Districts — per-district wiring
-
-| District | Specialization | Yield bonus | Status | Gap |
-|----------|----------------|-------------|--------|-----|
-| `governance-quarter` | receipt_audit | verify_budget+1, influence+1 | **Wired** (default active) | Player cannot switch district |
-| `systems-forge` | production_guild | prod+2, sci+1 | **Partial** | Metadata only unless `active_district_id` changed |
-| `diplomatic-embassy` | negotiation_hub | influence+2 | **Partial** | No `POST /game/district/select` |
-| `research-campus` | discovery_lab | sci+2 | **Partial** | No player selection |
-
----
-
-## Cultural event chains
-
-| Chain | Stages | Rewards | Status |
-|-------|--------|---------|--------|
-| `festival-of-receipts` | 3 | influence+3, victory+2 | **Wired** |
-| `symposium-of-systems` | 3 | influence+4, victory+3 | **Wired** |
-| `archivist-pilgrimage` | 3 | influence+2, sci+2 | **Wired** (no victory bonus) |
-
-**Missing:** chains start only via cultural tick; no player trigger; `symposium-of-systems` name unrelated to `symposium_chain` policy beyond cadence.
-
----
-
-## Multi-agent civ layer (`backend/multi_agent_state.py`)
-
-| Mechanic | Status | Notes |
-|----------|--------|-------|
-| Map tile ownership drift | **Wired** | Contested/neutral capture every 3 turns |
-| Alliance betrayal risk drift | **Wired** | Random drift; elevated event log >40% |
-| AI negotiation offers | **Wired** | Every 4 turns |
-| Player negotiate + respond | **Wired** | Influence cost; alliance formation; +8 victory |
-| Alliance soft cap | **Wired** | 2 default, 3 with `alliance_cap_3` |
-| Victory progress per turn | **Wired** | +1–3 random per advance |
-| Milestone truth | **Wired** | Alliances, map share ≥40%, quorum, progress |
-| Session epilogue | **Wired** | Blocks advance at victory; reset clears |
-| Betrayal event (alliance breaks) | **Missing** | Risk displayed only |
-| Defeat / lose condition | **Missing** | No fun floor or betrayal collapse |
-| Player map claim / move | **Missing** | No `POST /game/map/*` |
-| Direct policy unlock spend | **Missing** | Policies auto-unlock on ticks only |
-
----
-
-## Governance kernel (non-civ but affects “game”)
-
-| Surface | Status | Notes |
-|---------|--------|-------|
-| `POST /advance_turn` | **Wired** | Full cycle + sim |
-| `POST /found_city` | **Wired** | Prod cost, territories, receipt |
-| `POST /game/reset` | **Wired** | Fresh session |
-| `POST /governance/propose` + `/gate` | **Wired** | FunForge gate; proposals persist |
-| `CIVFORGE_PUBLIC_MODE` auth | **Wired** | Token on mutators when exposed |
-| `CIVFORGE_REQUIRE_AUTH` | **Wired** | Forces token on mutators locally too |
-| Player agent in orchestrator cycle | **Missing** | Brains only |
-| `:8081` JWT identity | **Missing** | Nexus satellite key path only |
-
----
-
-## Telemetry / observability gaps
-
-| Field | Status |
-|-------|--------|
-| `victoryProgress` | **Wired** |
-| `victoryOutcome` | **Wired** (this slice) |
-| `sessionPhase` | **Wired** (this slice) |
-| Per-policy flags in Nexus | **Missing** |
-| Mechanics lane deltas per turn | **Partial** (`mechanicsSummary` snapshot only) |
-
----
-
-## Recommended wiring order (next slices)
-
-1. **`receipt-quorum` fork** → tie to governance quorum milestone or +progress when `verify_budget` high  
-2. **`trade_route_map`** → add sci yield on district pulse or economic tick  
-3. **`betrayal_watch`** → betrayal event when risk > 55% under active watch  
-4. **`POST /game/district/select`** → influence cost to change `active_district_id`  
-5. **`POST /game/policy/unlock`** → player spends influence to pick branch tier  
-6. **Defeat condition** → `fun_score` floor or alliance collapse at risk 100%  
-7. **Player map action** → claim adjacent neutral tile (influence cost)
-
----
-
-## Related docs
+## Related
 
 - `docs/GAME_ENGINE_IMPLEMENTATION_GAP_INVENTORY_V1.md`
+- `docs/GAME_PLAY_GUIDE_V1.md`
 - `docs/MECHANICS_TICK_CONTRACT_V1.md`
-- `backend/civstudy_metadata.py` — source of truth for policy/fork/district definitions

@@ -43,6 +43,8 @@
     .policy-watch { border-left: 3px solid var(--warn); padding-left: 0.5rem; }
     .policy-banner { background: #422006; color: #fde68a; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem; }
     .epilogue-banner { background: #14532d; color: #bbf7d0; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem; }
+    .defeat-banner { background: #450a0a; color: #fecaca; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem; }
+    .tile.claimable { cursor: pointer; outline: 2px dashed #fbbf24; }
     button:disabled { opacity: 0.45; cursor: not-allowed; }
     .events { font-size: 0.8rem; color: var(--muted); max-height: 8rem; overflow: auto; }
     .events li { margin-bottom: 0.25rem; }
@@ -59,7 +61,7 @@
 
   <div id="outcome-overlay" class="outcome-overlay hidden">
     <div class="outcome-card">
-      <h2>Joint Victory</h2>
+      <h2 id="outcome-title">Joint Victory</h2>
       <p id="outcome-text">All milestones complete. Governance quorum achieved across factions.</p>
       <button type="button" id="outcome-reset-btn">Start New Game</button>
       <button type="button" onclick="document.getElementById('outcome-overlay').classList.add('hidden')">Continue governing</button>
@@ -85,6 +87,7 @@
     </div>
     <div id="policy-banner" class="policy-banner hidden"></div>
     <div id="epilogue-banner" class="epilogue-banner hidden">Victory epilogue — advance is paused. Reset to start a new game.</div>
+    <div id="defeat-banner" class="defeat-banner hidden">Defeat — reset to try again.</div>
     <div class="controls">
       <button class="primary" id="advance-btn">Advance Turn</button>
       <button id="refresh-btn">Refresh</button>
@@ -111,8 +114,25 @@
       <div class="panel">
         <h2>Shared Map (5×5)</h2>
         <div class="map" id="map-grid"></div>
-        <p class="sub" style="margin-top:0.5rem">Cities are bold tiles. Colors = faction owner.</p>
+        <p class="sub" style="margin-top:0.5rem">Click dashed neutral/contested tiles adjacent to player to claim (4 influence).</p>
       </div>
+    </div>
+
+    <div class="panel">
+      <h2>Player Actions</h2>
+      <div class="grid-2">
+        <div>
+          <h3 style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--accent)">District</h3>
+          <select id="district-select" style="width:100%;margin-bottom:0.4rem"></select>
+          <button id="district-btn" type="button">Select District</button>
+        </div>
+        <div>
+          <h3 style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--accent)">Unlock Policy</h3>
+          <select id="policy-select" style="width:100%;margin-bottom:0.4rem"></select>
+          <button id="policy-btn" type="button">Spend Influence</button>
+        </div>
+      </div>
+      <p id="player-action-result" class="sub" style="margin-top:0.5rem"></p>
     </div>
 
     <div class="grid-2">
@@ -256,18 +276,60 @@
         });
       }
 
+      function isClaimableTile(t, tiles) {
+        if (t.owner !== "neutral" && t.owner !== "contested") return false;
+        return (tiles || []).some(p => p.owner === "player" && Math.abs(p.x - t.x) + Math.abs(p.y - t.y) === 1);
+      }
+
       function renderMap(data) {
         const grid = document.getElementById("map-grid");
         grid.innerHTML = "";
         const fc = data.faction_colors || {};
-        (data.map_tiles || []).forEach(t => {
+        const tiles = data.map_tiles || [];
+        const ended = data.session_phase === "epilogue" || data.session_phase === "defeat";
+        tiles.forEach(t => {
           const div = document.createElement("div");
-          div.className = "tile" + (t.type === "city" ? " city" : "");
+          const claimable = !ended && isClaimableTile(t, tiles);
+          div.className = "tile" + (t.type === "city" ? " city" : "") + (claimable ? " claimable" : "");
           div.style.background = fc[t.owner] || "#64748b";
-          div.title = t.label + " (" + t.owner + ")";
+          div.title = t.label + " (" + t.owner + ")" + (claimable ? " — click to claim" : "");
           div.textContent = t.type === "city" ? "⬤" : "·";
+          if (claimable) {
+            div.onclick = async () => {
+              const r = await fetch(apiBase + "/game/map/claim", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ x: t.x, y: t.y }),
+              });
+              const d = await r.json();
+              document.getElementById("player-action-result").textContent = d.error || ("Claimed " + (d.tile && d.tile.label));
+              await loadState();
+            };
+          }
           grid.appendChild(div);
         });
+      }
+
+      function renderPlayerActions(data) {
+        const cat = data.action_catalog || {};
+        const dSel = document.getElementById("district-select");
+        const pSel = document.getElementById("policy-select");
+        const districts = (cat.district_select && cat.district_select.districts) || [];
+        if (dSel.options.length === 0 && districts.length) {
+          districts.forEach(id => {
+            const o = document.createElement("option");
+            o.value = id;
+            o.textContent = id + (id === cat.active_district_id ? " (active)" : "");
+            dSel.appendChild(o);
+          });
+        }
+        const unlockable = (cat.policies || []).filter(p => p.unlockable && !p.unlocked);
+        pSel.innerHTML = unlockable.length ? unlockable.map(p =>
+          "<option value='" + p.id + "'>" + p.id + " (tier " + p.tier + ", " + p.influence_cost + " inf)</option>"
+        ).join("") : "<option value=''>— none unlockable —</option>";
+        const ended = data.session_phase === "epilogue" || data.session_phase === "defeat";
+        document.getElementById("district-btn").disabled = ended;
+        document.getElementById("policy-btn").disabled = ended || !unlockable.length;
       }
 
       function renderNegotiations(data) {
@@ -351,7 +413,19 @@
         ).join("");
         document.getElementById("hud-victory").textContent = pct + "%";
         const overlay = document.getElementById("outcome-overlay");
-        if (vp.outcome === "victory" || pct >= 100 || data.session_phase === "epilogue") {
+        const title = document.getElementById("outcome-title");
+        const text = document.getElementById("outcome-text");
+        if (data.session_phase === "defeat" || vp.outcome === "defeat") {
+          title.textContent = "Defeat";
+          title.style.color = "var(--danger)";
+          document.querySelector(".outcome-card").style.borderColor = "var(--danger)";
+          text.textContent = "Session ended: " + ((vp.defeat_reason || "defeat").replace(/_/g, " "));
+          overlay.classList.remove("hidden");
+        } else if (vp.outcome === "victory" || pct >= 100 || data.session_phase === "epilogue") {
+          title.textContent = "Joint Victory";
+          title.style.color = "var(--ok)";
+          document.querySelector(".outcome-card").style.borderColor = "var(--ok)";
+          text.textContent = "All milestones complete. Governance quorum achieved across factions.";
           overlay.classList.remove("hidden");
         }
       }
@@ -362,10 +436,17 @@
         document.getElementById("hud-cities").textContent = data.player.cities;
         document.getElementById("hud-alliances").textContent = (data.alliances || []).length;
         const epilogue = data.session_phase === "epilogue";
+        const defeat = data.session_phase === "defeat";
         const advanceBtn = document.getElementById("advance-btn");
-        advanceBtn.disabled = epilogue;
-        advanceBtn.title = epilogue ? "Victory epilogue — reset to continue" : "";
+        advanceBtn.disabled = epilogue || defeat;
+        advanceBtn.title = defeat ? "Defeat — reset to retry" : (epilogue ? "Victory epilogue — reset to continue" : "");
         document.getElementById("epilogue-banner").classList.toggle("hidden", !epilogue);
+        const defeatBanner = document.getElementById("defeat-banner");
+        defeatBanner.classList.toggle("hidden", !defeat);
+        if (defeat) {
+          const reason = (data.victory_progress && data.victory_progress.defeat_reason) || "defeat";
+          defeatBanner.textContent = "Defeat (" + reason.replace(/_/g, " ") + ") — reset to try again.";
+        }
       }
 
       function renderEvents(data) {
@@ -449,6 +530,7 @@
         renderHud(data);
         renderAgents(data);
         renderMap(data);
+        renderPlayerActions(data);
         renderNegotiations(data);
         renderAlliances(data);
         renderPolicyHud(data);
@@ -494,11 +576,33 @@
       document.getElementById("reset-btn").onclick = resetGame;
       document.getElementById("outcome-reset-btn").onclick = resetGame;
       document.getElementById("advance-btn").onclick = async () => {
-        if (state && state.session_phase === "epilogue") {
-          alert("Victory epilogue — use Reset Game to start a new session.");
+        if (state && (state.session_phase === "epilogue" || state.session_phase === "defeat")) {
+          alert(state.session_phase === "defeat" ? "Defeat — use Reset Game." : "Victory epilogue — use Reset Game.");
           return;
         }
         await fetch(apiBase + "/advance_turn", { method: "POST" });
+        await loadState();
+      };
+      document.getElementById("district-btn").onclick = async () => {
+        const r = await fetch(apiBase + "/game/district/select", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ district_id: document.getElementById("district-select").value }),
+        });
+        const d = await r.json();
+        document.getElementById("player-action-result").textContent = d.error || ("District: " + d.district_id);
+        await loadState();
+      };
+      document.getElementById("policy-btn").onclick = async () => {
+        const pid = document.getElementById("policy-select").value;
+        if (!pid) return;
+        const r = await fetch(apiBase + "/game/policy/unlock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ policy_id: pid }),
+        });
+        const d = await r.json();
+        document.getElementById("player-action-result").textContent = d.error || ("Unlocked: " + d.policy_id);
         await loadState();
       };
       document.getElementById("neg-send").onclick = async () => {

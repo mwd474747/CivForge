@@ -31,9 +31,39 @@ def enrich_cycle_receipt(receipt: Dict[str, Any], game_state: Dict[str, Any]) ->
         "joint_progress": vp.get("joint_progress"),
         "target": vp.get("target"),
         "outcome": vp.get("outcome"),
+        "defeat_reason": vp.get("defeat_reason"),
         "milestones_done": sum(1 for m in vp.get("milestones", []) if m.get("done")),
     }
     return receipt
+
+
+def maybe_emit_defeat_receipt(
+    defeat_before: Optional[str],
+    game_state: Dict[str, Any],
+    receipt_store: ReceiptStore,
+) -> Optional[str]:
+    vp = game_state.get("victory_progress", {})
+    reason = vp.get("defeat_reason")
+    if vp.get("outcome") != "defeat" or not reason:
+        return None
+    if defeat_before == "defeat":
+        return None
+
+    player = game_state.get("player", {})
+    receipt = {
+        "turn": game_state["turn"],
+        "action": "session_defeat",
+        "status": "DEFEAT",
+        "outcome": "defeat",
+        "defeat_reason": reason,
+        "fun_score": player.get("fun_score", 0),
+        "victory_progress": deepcopy(vp),
+    }
+    path = receipt_store.append(receipt, filename_hint="defeat-outcome")
+    game_state.setdefault("events", []).append(
+        f"Turn {game_state['turn']}: Defeat outcome logged — {path.name}."
+    )
+    return str(path)
 
 
 def maybe_emit_victory_receipt(

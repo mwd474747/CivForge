@@ -20,7 +20,7 @@ CivForge = **local Python FastAPI governance backend** running on `0.0.0.0:8080`
 - **Civ Game Layer**: **Prototype live** on the kernel — multi-agent map, alliances, negotiations, joint victory, `MechanicsRegistry` + CivStudy policy-tree ticks, turn simulation runner, victory-outcome receipts, `POST /game/reset`, dashboard at `/dashboard`, 9 MCP tools. Gap inventory: `docs/GAME_ENGINE_IMPLEMENTATION_GAP_INVENTORY_V1.md`. Planning canon: `docs/GAME_PLAY_GUIDE_V1.md`, `docs/MECHANICS_TICK_CONTRACT_V1.md`, `receipts/LOCKED-CIV-GAME-PLAN-*.md`.
 
 **Persistence**: Enabled (ReceiptStore now supports db_path). State snapshots + receipts load on startup.
-**MCP readiness**: `tools/mcp_server.py` — 9 tools (status, advance, reset, found city, negotiate, what-if, governance propose/gate).
+**MCP readiness**: `tools/mcp_server.py` — 12 tools (status, advance, reset, found city, negotiate, district, policy, map claim, what-if, governance propose/gate).
 **Execution lanes (v2):** Grok swarm (grok.com) plans; Cursor executes; OpenClaw escalates for wt. See `docs/EXECUTION_LANE_V2.md`.
 **Bridge**: `bridge/civforge_http_bridge.py` — Cursor/scripts call get_state(), advance_cycle(), etc.
 

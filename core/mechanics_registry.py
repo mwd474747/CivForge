@@ -1,13 +1,11 @@
-"""MechanicsRegistry — pluggable military / economic / cultural modules.
-
-Extensions register tick handlers; advance_turn runs them after governance cycle.
-"""
+"""MechanicsRegistry — pluggable military / economic / cultural modules."""
 
 from __future__ import annotations
 
 import random
 from typing import Any, Callable, Dict, List
 
+from backend.game_session import TRADE_ROUTE_SCI_BONUS, trade_route_sci_active
 from core.mechanics_tick_contract import TickFn, wrap_tick
 
 
@@ -68,12 +66,19 @@ def _tick_military(game_state: Dict[str, Any]) -> List[str]:
 def _tick_economic(game_state: Dict[str, Any]) -> List[str]:
     lane = game_state.setdefault("mechanics_lanes", default_mechanics_lanes())["economic"]
     turn = game_state["turn"]
+    events: List[str] = []
     if turn % 4 == 0:
         lane["institutions"] = lane.get("institutions", 1) + 1
         msg = f"Turn {turn}: Economic institution founded (#{lane['institutions']})."
         lane.setdefault("recent", []).insert(0, msg)
-        return [msg]
-    return []
+        events.append(msg)
+    if trade_route_sci_active(game_state) and turn % 4 == 0:
+        resources = game_state.setdefault("player", {}).setdefault("resources", {})
+        resources["sci"] = resources.get("sci", 0) + TRADE_ROUTE_SCI_BONUS
+        msg = f"Turn {turn}: Trade route sci yield +{TRADE_ROUTE_SCI_BONUS}."
+        lane.setdefault("recent", []).insert(0, msg)
+        events.append(msg)
+    return events
 
 
 def _tick_cultural(game_state: Dict[str, Any]) -> List[str]:

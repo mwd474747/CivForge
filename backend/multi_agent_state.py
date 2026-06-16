@@ -9,7 +9,11 @@ import random
 from typing import Any, Dict, List, Optional
 
 from backend.game_session import (
+    BETRAYAL_COLLAPSE_THRESHOLD,
+    BETRAYAL_WATCH_THRESHOLD,
     alliance_soft_cap,
+    apply_defeat,
+    check_defeat_conditions,
     milestone_truth,
     negotiation_influence_cost,
     player_alliance_count,
@@ -219,11 +223,19 @@ def sync_victory_milestones(
                 prefix = f"Turn {turn}: " if turn is not None else ""
                 events.append(f"{prefix}Milestone unlocked — {label}.")
 
-    if progress >= target:
+    if progress >= target and vp.get("outcome") != "defeat":
         vp["outcome"] = "victory"
     elif vp.get("outcome") == "victory" and progress < target:
         vp.pop("outcome", None)
     return events
+
+
+def finalize_turn_outcomes(game_state: Dict[str, Any], turn: Optional[int] = None) -> List[str]:
+    """Check defeat after ticks."""
+    reason = check_defeat_conditions(game_state)
+    if reason:
+        apply_defeat(game_state, reason, turn)
+    return []
 
 
 def _agent_id_from_decisions(decisions: Dict[str, Any]) -> Optional[str]:
@@ -245,14 +257,29 @@ def tick_multi_agent_state(game_state: Dict[str, Any], decisions: Optional[Dict[
     vp["joint_progress"] = min(vp["target"], vp.get("joint_progress", 0) + random.randint(1, 3))
     events.extend(sync_victory_milestones(vp, turn, game_state))
 
-    # Drift betrayal risk on alliances
+    # Drift betrayal risk on alliances; betrayal_watch can break alliances
+    watch = policy_flags(game_state).get("betrayal_watch")
     for alliance in game_state["alliances"]:
+        if alliance.get("status") == "broken":
+            continue
         drift = random.randint(-2, 4)
         alliance["betrayal_risk"] = max(0, min(100, alliance.get("betrayal_risk", 10) + drift))
         if alliance["betrayal_risk"] > 40 and alliance["status"] == "active":
             events.append(
                 f"Turn {turn}: Alliance {alliance['id']} betrayal risk elevated to {alliance['betrayal_risk']}%."
             )
+        should_break = alliance["betrayal_risk"] >= BETRAYAL_COLLAPSE_THRESHOLD
+        if watch and alliance["betrayal_risk"] >= BETRAYAL_WATCH_THRESHOLD and random.randint(1, 100) <= 12:
+            should_break = True
+        if should_break and alliance["status"] in ("active", "provisional"):
+            alliance["status"] = "broken"
+            events.append(
+                f"Turn {turn}: BETRAYAL — alliance {alliance['id']} collapsed at risk {alliance['betrayal_risk']}%."
+            )
+            if "player" in alliance.get("parties", []):
+                vp["joint_progress"] = max(0, vp.get("joint_progress", 0) - 10)
+                player = game_state.setdefault("player", {})
+                player["fun_score"] = max(0.0, player.get("fun_score", 0) - 5.0)
 
     # Occasional map shift (contested tile capture)
     tiles = game_state["map_tiles"]
@@ -288,6 +315,8 @@ def tick_multi_agent_state(game_state: Dict[str, Any], decisions: Optional[Dict[
             events.append(f"Turn {turn}: {AGENT_LABELS[aid]} — {text}")
 
     game_state["events"].extend(events)
+
+    defeat_events = finalize_turn_outcomes(game_state, turn)
     return events
 
 

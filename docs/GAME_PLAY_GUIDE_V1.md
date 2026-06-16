@@ -31,7 +31,7 @@ python3 tools/civforge_cli.py advance
 python3 tools/civforge_cli.py mcp-serve   # stdio MCP for agent players
 ```
 
-## MCP tools (9)
+## MCP tools (12)
 
 | Tool | Action |
 |------|--------|
@@ -44,6 +44,25 @@ python3 tools/civforge_cli.py mcp-serve   # stdio MCP for agent players
 | `civforge_what_if` | `POST /simulation/what_if` |
 | `civforge_governance_propose` | `POST /governance/propose` |
 | `civforge_governance_gate` | `POST /governance/gate` |
+| `civforge_select_district` | `POST /game/district/select` |
+| `civforge_unlock_policy` | `POST /game/policy/unlock` |
+| `civforge_claim_tile` | `POST /game/map/claim` |
+
+## Player actions
+
+| Action | Endpoint | Cost |
+|--------|----------|------|
+| Select district | `POST /game/district/select` | 3 influence |
+| Unlock policy | `POST /game/policy/unlock` | 5/8/12 by tier |
+| Claim map tile | `POST /game/map/claim` | 4 influence (adjacent neutral/contested) |
+| Catalog | `GET /game/actions` | — |
+
+Dashboard **Player Actions** panel + clickable claimable map tiles (dashed outline).
+
+## Session outcomes
+
+- **Victory epilogue** — advance blocked; use Reset Game.
+- **Defeat** — fun floor, diplomatic isolation, betrayal collapse, or stalled progress; `defeat-outcome-*.md` receipt.
 
 ## Victory
 

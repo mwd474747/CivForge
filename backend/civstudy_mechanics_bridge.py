@@ -11,7 +11,14 @@ from backend.civstudy_metadata import (
     default_districts,
     default_policy_tree,
 )
-from backend.game_session import cultural_tick_cadence
+from backend.game_session import (
+    RECEIPT_QUORUM_PROGRESS_BONUS,
+    RECEIPT_QUORUM_VERIFY_MIN,
+    TRADE_ROUTE_SCI_BONUS,
+    cultural_tick_cadence,
+    receipt_quorum_active,
+    trade_route_sci_active,
+)
 
 
 def default_civstudy_sim_state() -> Dict[str, Any]:
@@ -92,6 +99,18 @@ def tick_civstudy_district_pulse(game_state: Dict[str, Any]) -> List[str]:
             resources[key] += delta
             applied.append(f"{key}+{delta}")
 
+    if trade_route_sci_active(game_state) and "sci" in resources:
+        resources["sci"] += TRADE_ROUTE_SCI_BONUS
+        applied.append(f"sci+{TRADE_ROUTE_SCI_BONUS} (trade route)")
+
+    if receipt_quorum_active(game_state) and resources.get("verify_budget", 0) >= RECEIPT_QUORUM_VERIFY_MIN:
+        vp = game_state.setdefault("victory_progress", {})
+        vp["joint_progress"] = min(
+            vp.get("target", 100),
+            vp.get("joint_progress", 0) + RECEIPT_QUORUM_PROGRESS_BONUS,
+        )
+        applied.append(f"victory+{RECEIPT_QUORUM_PROGRESS_BONUS} (receipt quorum)")
+
     if not applied:
         return []
 
@@ -133,6 +152,13 @@ def tick_civstudy_discovery(game_state: Dict[str, Any]) -> List[str]:
         elif unlock == "cultural_event_chain_bonus":
             cul = lanes.setdefault("cultural", {})
             cul["event_chains"] = cul.get("event_chains", 0) + 1
+        elif unlock == "governance_quorum_milestone_hint":
+            vp = game_state.setdefault("victory_progress", {})
+            vp["joint_progress"] = min(
+                vp.get("target", 100),
+                vp.get("joint_progress", 0) + 5,
+            )
+            sim.setdefault("fork_effects", {})["receipt_quorum"] = True
         events.append(msg)
 
     return events
@@ -176,7 +202,7 @@ def _policy_prereqs_met(game_state: Dict[str, Any], branch: Dict[str, Any], tier
     return True
 
 
-def _apply_policy_effect(game_state: Dict[str, Any], policy: Dict[str, Any], sim: Dict[str, Any]) -> None:
+def apply_policy_effect(game_state: Dict[str, Any], policy: Dict[str, Any], sim: Dict[str, Any]) -> None:
     pid = policy["id"]
     flags = _policy_tree_state(sim).setdefault("policy_flags", {})
     lanes = game_state.setdefault("mechanics_lanes", {})
@@ -220,7 +246,7 @@ def tick_civstudy_policy_tree(game_state: Dict[str, Any]) -> List[str]:
                 continue
             unlocked.add(pid)
             pt["unlocked"] = sorted(unlocked)
-            _apply_policy_effect(game_state, policy, sim)
+            apply_policy_effect(game_state, policy, sim)
             msg = (
                 f"Turn {turn}: Policy unlocked — {branch['name']} / {pid} "
                 f"(tier {tier}: {policy.get('effect', '')})."

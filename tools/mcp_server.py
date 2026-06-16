@@ -62,6 +62,21 @@ TOOLS = [
         "properties": {"proposal_id": {"type": "string"}},
         "required": ["proposal_id"],
     }},
+    {"name": "civforge_select_district", "description": "Select active CivStudy district (influence cost)", "inputSchema": {
+        "type": "object",
+        "properties": {"district_id": {"type": "string"}},
+        "required": ["district_id"],
+    }},
+    {"name": "civforge_unlock_policy", "description": "Spend influence to unlock a policy tier", "inputSchema": {
+        "type": "object",
+        "properties": {"policy_id": {"type": "string"}},
+        "required": ["policy_id"],
+    }},
+    {"name": "civforge_claim_tile", "description": "Claim adjacent neutral/contested map tile", "inputSchema": {
+        "type": "object",
+        "properties": {"x": {"type": "integer"}, "y": {"type": "integer"}},
+        "required": ["x", "y"],
+    }},
 ]
 
 
@@ -113,6 +128,12 @@ def _call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         })
     elif name == "civforge_governance_gate":
         result = _http("POST", "/governance/gate", {"proposal_id": arguments["proposal_id"]})
+    elif name == "civforge_select_district":
+        result = _http("POST", "/game/district/select", {"district_id": arguments["district_id"]})
+    elif name == "civforge_unlock_policy":
+        result = _http("POST", "/game/policy/unlock", {"policy_id": arguments["policy_id"]})
+    elif name == "civforge_claim_tile":
+        result = _http("POST", "/game/map/claim", {"x": int(arguments["x"]), "y": int(arguments["y"])})
     else:
         result = {"error": f"unknown tool: {name}"}
     text = json.dumps(result, indent=2)
