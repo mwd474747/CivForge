@@ -86,7 +86,7 @@ python3 tools/civforge_cli.py status           # includes mechanics_proposals + 
 
 ## HEAD
 
-**Repo:** `4b57418` on `main` (feature landed `956d251`)
+**Repo:** `f55aad4` on `main` (feature landed `956d251`)
 
 ---
 

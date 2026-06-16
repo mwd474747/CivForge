@@ -6,7 +6,7 @@
 **Handoff seed:** `prompts/grok_swarm_handoff_seed.md`  
 **Cursor execution:** `receipts/cursor-execution-mechanics-proposal-lane-20260616.md`  
 **Work pack:** `receipts/work-pack-grok-mechanics-propose-001.md`  
-**CivForge HEAD:** `4b57418` on `main` (verify: `git pull && git rev-parse --short HEAD`; feature `956d251`)
+**CivForge HEAD:** `f55aad4` on `main` (verify: `git pull && git rev-parse --short HEAD`; feature `956d251`)
 
 **Cursor execution (live `:8080` proof):** `receipts/cursor-execution-wp-grok-mech-district-001-20260616.md`
 
