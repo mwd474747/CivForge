@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from backend.civstudy_corpus_cards import default_adjacency_bonuses, default_corpus_cards
+from backend.corpus_card_registry import get_corpus_card_registry
 
 
 def default_districts() -> List[Dict[str, Any]]:
@@ -147,6 +147,7 @@ def default_cultural_event_chains() -> List[Dict[str, Any]]:
 
 def civstudy_reference_panel() -> Dict[str, Any]:
     """Read-only civstudy pattern hints for dashboard and agent-play."""
+    corpus = get_corpus_card_registry()
     return {
         "status": "read_only_reference",
         "repo": "mwd474747/civstudy",
@@ -163,8 +164,8 @@ def civstudy_reference_panel() -> Dict[str, Any]:
             "Empire Council session records (receipt chronicles)",
             "Governor entity management metaphors",
         ],
-        "corpus_cards": default_corpus_cards(),
-        "adjacency_bonuses": default_adjacency_bonuses(),
+        "corpus_cards": corpus.all_cards(),
+        "adjacency_bonuses": corpus.all_adjacency(),
         "districts": default_districts(),
         "policy_tree": default_policy_tree(),
         "discovery_forks": default_discovery_forks(),

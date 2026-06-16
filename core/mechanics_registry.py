@@ -28,6 +28,20 @@ class MechanicsRegistry:
                 events.append(f"Mechanics {name} tick error: {exc}")
         return events
 
+    def pass_through_tick(
+        self,
+        game_state: Dict[str, Any],
+        *,
+        audit_key: str = "_mechanics_tick_audit",
+    ) -> List[str]:
+        """Single entry point for game-mechanics mutations (WP-DEEP-DIVE-ANALYSIS-003)."""
+        game_state[audit_key] = {
+            "modules": self.module_names(),
+            "turn": game_state.get("turn"),
+            "layer": "mechanics",
+        }
+        return self.tick_all(game_state)
+
 
 def default_mechanics_lanes() -> Dict[str, Any]:
     return {

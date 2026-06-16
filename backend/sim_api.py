@@ -16,6 +16,12 @@ from core import AgentBrain, FunForge, GovernanceOrchestrator, ReceiptStore
 from core.swarm_join import FORGE_COORDINATOR_ID
 from core.mechanics_registry import build_default_registry, default_mechanics_lanes
 from backend.civstudy_flavor import game_state_note
+from backend.agent_control import agent_controls_summary, issue_directive, select_agent, toggle_autonomy
+from backend.competition_modes import competition_summary, set_competition_mode, spectator_log, COMPETITION_MODES
+from backend.dashboard_components import get_dashboard_registry
+from backend.simulation_boundary import boundary_summary
+from backend.telemetry_enrich import enrich_telemetry_payload
+
 from backend.civstudy_metadata import civstudy_reference_panel
 from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
 from backend.game_reset import apply_defeat_cascade_seed, apply_game_reset
@@ -222,7 +228,7 @@ def telemetry_extra_from_state() -> Dict[str, Any]:
     player_tiles = sum(1 for t in game_state.get("map_tiles", []) if t.get("owner") == "player")
     pending_neg = sum(1 for n in game_state.get("negotiations", []) if n.get("status") == "pending")
     ml = game_state.get("mechanics_lanes", {})
-    return {
+    base = {
         "territories": game_state["player"].get("territories", 0),
         "cities": game_state["player"].get("cities", 0),
         "events": game_state.get("events", []),
@@ -239,6 +245,7 @@ def telemetry_extra_from_state() -> Dict[str, Any]:
             "cultural_chains": ml.get("cultural", {}).get("event_chains"),
         },
     }
+    return enrich_telemetry_payload(game_state, base)
 
 forge_coordinator = orchestrator.register_agent(
     FORGE_COORDINATOR_ID, "Forge Coordinator (in-kernel)"
@@ -299,6 +306,10 @@ async def get_state() -> Dict[str, Any]:
         "mechanics_proposals": proposals_summary(game_state),
         "mechanics_overrides": game_state.get("mechanics_overrides", {}),
         "note": game_state_note(),
+        "agent_controls": agent_controls_summary(game_state),
+        "competition_mode": competition_summary(game_state),
+        "simulation_boundary": boundary_summary(game_state),
+        "dashboard_components": get_dashboard_registry().all_components(),
     }
 
 @app.get("/game/founding-session")
@@ -477,6 +488,21 @@ class MechanicsGateRequest(BaseModel):
     proposal_id: str
     fun_score_override: Optional[float] = None
 
+
+class AgentSelectRequest(BaseModel):
+    agent_id: str
+
+class AgentDirectiveRequest(BaseModel):
+    agent_id: str
+    directive: str
+
+class AgentAutonomyRequest(BaseModel):
+    agent_id: str
+    autonomous: bool = True
+
+class CompetitionModeRequest(BaseModel):
+    mode: str = "none"
+
 class MechanicsApplyRequest(BaseModel):
     proposal_id: str
 
@@ -563,6 +589,44 @@ async def game_mechanics_apply(
     if result.get("applied"):
         receipt_store.save_state("game_state", game_state)
     return result
+
+
+@app.post("/game/agent/select")
+async def game_agent_select(req: AgentSelectRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    result = select_agent(game_state, req.agent_id)
+    if result.get("ok"):
+        receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.post("/game/agent/directive")
+async def game_agent_directive(req: AgentDirectiveRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    result = issue_directive(game_state, req.agent_id, req.directive)
+    if result.get("ok"):
+        receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.post("/game/agent/autonomy")
+async def game_agent_autonomy(req: AgentAutonomyRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    result = toggle_autonomy(game_state, req.agent_id, req.autonomous)
+    if result.get("ok"):
+        receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.post("/game/competition/mode")
+async def game_competition_mode(req: CompetitionModeRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    result = set_competition_mode(game_state, req.mode)
+    if result.get("ok"):
+        receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.get("/game/competition/spectator")
+async def game_competition_spectator(limit: int = 20) -> Dict[str, Any]:
+    return {"spectator_log": spectator_log(game_state, limit=limit), "modes": list(COMPETITION_MODES)}
+
+@app.get("/game/dashboard/components")
+async def game_dashboard_components() -> Dict[str, Any]:
+    reg = get_dashboard_registry()
+    return {"tabs": reg.tabs(), "panels": reg.panels()}
 
 @app.post("/game/reset")
 async def game_reset(

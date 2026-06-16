@@ -6,7 +6,7 @@ from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
 from backend.civstudy_flavor import defeat_receipt_title, victory_receipt_title
-from backend.multi_agent_state import sync_victory_milestones, tick_multi_agent_state
+from backend.simulation_boundary import run_simulation_layer
 from core.mechanics_registry import MechanicsRegistry
 from core.receipts import ReceiptStore
 
@@ -16,12 +16,10 @@ def run_turn_simulation(
     registry: MechanicsRegistry,
     decisions: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
-    """Run civ + mechanics ticks, then post-tick victory milestone sync."""
+    """Run simulation layer then mechanics registry (explicit boundary)."""
     events: List[str] = []
-    events.extend(tick_multi_agent_state(game_state, decisions or {}))
-    events.extend(registry.tick_all(game_state))
-    vp = game_state.setdefault("victory_progress", {})
-    events.extend(sync_victory_milestones(vp, game_state["turn"], game_state))
+    events.extend(run_simulation_layer(game_state, decisions or {}))
+    events.extend(registry.pass_through_tick(game_state))
     return events
 
 

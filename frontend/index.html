@@ -151,6 +151,36 @@
     </div>
 
     <div class="grid-2">
+      <div class="panel" id="agent-control-panel">
+        <h2>Agent Control</h2>
+        <p class="sub">Select a rival governor, issue directives, or restore autonomy.</p>
+        <label>Active governor</label>
+        <select id="agent-select" style="width:100%;margin:0.35rem 0"></select>
+        <button id="agent-select-btn" type="button">Select Governor</button>
+        <label style="display:block;margin-top:0.5rem">Directive</label>
+        <textarea id="agent-directive" rows="2" placeholder="Fortify the marches…" style="width:100%"></textarea>
+        <button id="agent-directive-btn" type="button" style="margin-top:0.35rem">Issue Directive</button>
+        <button id="agent-autonomy-btn" type="button" style="margin-top:0.35rem">Restore Autonomy</button>
+        <p id="agent-control-result" class="sub" style="margin-top:0.5rem"></p>
+      </div>
+      <div class="panel" id="competition-panel">
+        <h2>Competition Mode</h2>
+        <p class="sub">PvA duels, tournaments, alliance leagues, or shared-victory co-op.</p>
+        <select id="competition-mode" style="width:100%;margin:0.35rem 0">
+          <option value="none">Standard Campaign</option>
+          <option value="pva_duel">PvA Duel</option>
+          <option value="free_for_all">Free-For-All Tournament</option>
+          <option value="alliance_league">Alliance League</option>
+          <option value="shared_victory_coop">Shared-Victory Co-op</option>
+        </select>
+        <button id="competition-set-btn" type="button">Set Mode</button>
+        <p id="competition-status" class="sub" style="margin-top:0.5rem"></p>
+        <h3 style="margin-top:0.75rem;font-size:0.9rem;color:var(--accent)">Spectator Log</h3>
+        <ul class="events" id="spectator-log"></ul>
+      </div>
+    </div>
+
+    <div class="grid-2">
       <div class="panel">
         <h2>Negotiation Panel</h2>
         <label>To agent</label>
@@ -575,6 +605,35 @@
         return "mech-status mech-status-" + (status || "PROPOSED");
       }
 
+      function renderAgentControl(data) {
+        const ac = data.agent_controls || {};
+        const sel = document.getElementById("agent-select");
+        if (!sel) return;
+        const governors = ac.governors || [];
+        sel.innerHTML = governors.map(g =>
+          "<option value='" + g.agent_id + "'" + (g.agent_id === ac.active_agent_id ? " selected" : "") + ">" +
+          (g.label || g.agent_id) + " (" + g.control_level + ")</option>"
+        ).join("");
+        document.getElementById("agent-control-result").textContent =
+          "Active: " + (ac.active_agent_id || "player") +
+          (ac.player_override ? " · player override" : " · autonomous court");
+      }
+
+      function renderCompetition(data) {
+        const cm = data.competition_mode || {};
+        const modeEl = document.getElementById("competition-mode");
+        if (modeEl && cm.mode) modeEl.value = cm.mode;
+        document.getElementById("competition-status").textContent =
+          (cm.label || "Standard") +
+          (cm.win_condition_broadcast ? " — " + cm.win_condition_broadcast : "") +
+          " · scores: " + JSON.stringify(cm.scores || {});
+        const log = document.getElementById("spectator-log");
+        const entries = cm.spectator_log_tail || [];
+        log.innerHTML = entries.length ?
+          entries.map(e => "<li>Turn " + e.turn + ": " + e.message + "</li>").join("") :
+          "<li><em>No competition events yet.</em></li>";
+      }
+
       function renderMechanicsProposalsPanel(data) {
         const summary = data.mechanics_proposals || {};
         const overrides = data.mechanics_overrides || {};
@@ -758,6 +817,8 @@
         renderAgents(data);
         renderMap(data);
         renderPlayerActions(data);
+        renderAgentControl(data);
+        renderCompetition(data);
         renderNegotiations(data);
         renderAlliances(data);
         renderPolicyHud(data);
@@ -862,6 +923,53 @@
           body: JSON.stringify({ to: document.getElementById("neg-to").value, offer: document.getElementById("neg-offer").value }),
         });
         document.getElementById("neg-offer").value = "";
+        await loadState();
+      };
+
+      document.getElementById("agent-select-btn").onclick = async () => {
+        const r = await fetch(apiBase + "/game/agent/select", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agent_id: document.getElementById("agent-select").value }),
+        });
+        const d = await r.json();
+        document.getElementById("agent-control-result").textContent = d.error || ("Active governor: " + d.active_agent_id);
+        await loadState();
+      };
+      document.getElementById("agent-directive-btn").onclick = async () => {
+        const r = await fetch(apiBase + "/game/agent/directive", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            agent_id: document.getElementById("agent-select").value,
+            directive: document.getElementById("agent-directive").value,
+          }),
+        });
+        const d = await r.json();
+        document.getElementById("agent-control-result").textContent = d.error || "Directive issued.";
+        await loadState();
+      };
+      document.getElementById("agent-autonomy-btn").onclick = async () => {
+        const r = await fetch(apiBase + "/game/agent/autonomy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            agent_id: document.getElementById("agent-select").value,
+            autonomous: true,
+          }),
+        });
+        const d = await r.json();
+        document.getElementById("agent-control-result").textContent = d.error || "Autonomy restored.";
+        await loadState();
+      };
+      document.getElementById("competition-set-btn").onclick = async () => {
+        const r = await fetch(apiBase + "/game/competition/mode", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: document.getElementById("competition-mode").value }),
+        });
+        const d = await r.json();
+        document.getElementById("competition-status").textContent = d.error || ("Mode: " + (d.competition_mode && d.competition_mode.label));
         await loadState();
       };
 

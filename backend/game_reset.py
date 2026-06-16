@@ -5,7 +5,9 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Dict, List
 
+from backend.agent_control import default_agent_controls
 from backend.civstudy_flavor import DEFEAT_CASCADE_SEED_LINES
+from backend.competition_modes import default_competition_state
 from backend.civstudy_mechanics_bridge import default_civstudy_sim_state, ensure_civstudy_sim_state
 from backend.multi_agent_state import (
     default_alliances,
@@ -69,6 +71,8 @@ def build_initial_game_state() -> Dict[str, Any]:
         "mechanics_lanes": default_mechanics_lanes(),
         "mechanics_proposals": [],
         "mechanics_overrides": {},
+        "agent_controls": default_agent_controls(),
+        "competition_mode": default_competition_state(),
     }
     ensure_multi_agent_state(state)
     state["victory_progress"] = fresh_victory_progress(state)
