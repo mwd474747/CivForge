@@ -18,6 +18,7 @@ from core.mechanics_registry import build_default_registry, default_mechanics_la
 from backend.civstudy_metadata import civstudy_reference_panel
 from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
 from backend.game_reset import apply_game_reset
+from backend.game_session import session_phase
 from backend.turn_simulation import (
     enrich_cycle_receipt,
     maybe_emit_victory_receipt,
@@ -57,7 +58,7 @@ def require_public_mode_token(
     exposed through a tunnel or public host, set `CIVFORGE_PUBLIC_MODE=1` and one
     of `CIVFORGE_OPERATOR_TOKEN`, `CIVFORGE_API_KEY`, or `NEXUS_API_KEY`.
     """
-    if not _truthy_env("CIVFORGE_PUBLIC_MODE"):
+    if not _truthy_env("CIVFORGE_PUBLIC_MODE") and not _truthy_env("CIVFORGE_REQUIRE_AUTH"):
         return {"public_mode": False, "scope": "local"}
 
     allowed = [
@@ -70,7 +71,7 @@ def require_public_mode_token(
         candidates.append(authorization.split(" ", 1)[1] if authorization.lower().startswith("bearer ") else authorization)
     if any(_constant_time_match(candidate, allowed) for candidate in candidates):
         return {"public_mode": True, "scope": "mutate"}
-    raise HTTPException(401, "CIVFORGE_PUBLIC_MODE requires a valid CivForge or Nexus API token for mutating routes")
+    raise HTTPException(401, "Mutating routes require a valid CivForge or Nexus API token (CIVFORGE_PUBLIC_MODE or CIVFORGE_REQUIRE_AUTH)")
 
 
 def send_telemetry_to_nexus(turn: int, fun_score: float, resources: dict, extra: dict = None):
@@ -95,7 +96,7 @@ def send_telemetry_to_nexus(turn: int, fun_score: float, resources: dict, extra:
         if extra and "fun_components" in extra:
             payload["customMetrics"]["funComponents"] = extra["fun_components"]
         if extra:
-            for key in ("alliancesCount", "negotiationsPending", "victoryProgress", "mapPlayerTiles", "mechanicsSummary"):
+            for key in ("alliancesCount", "negotiationsPending", "victoryProgress", "victoryOutcome", "sessionPhase", "mapPlayerTiles", "mechanicsSummary"):
                 if key in extra:
                     payload["customMetrics"][key] = extra[key]
         api_key = os.environ.get("NEXUS_API_KEY", "")
@@ -214,6 +215,8 @@ def telemetry_extra_from_state() -> Dict[str, Any]:
         "alliancesCount": len(game_state.get("alliances", [])),
         "negotiationsPending": pending_neg,
         "victoryProgress": game_state.get("victory_progress", {}).get("joint_progress", 0),
+        "victoryOutcome": game_state.get("victory_progress", {}).get("outcome"),
+        "sessionPhase": session_phase(game_state),
         "mapPlayerTiles": player_tiles,
         "mechanicsSummary": {
             "military_strength": ml.get("military", {}).get("strength"),
@@ -273,6 +276,7 @@ async def get_state() -> Dict[str, Any]:
         "mechanics_lanes": game_state.get("mechanics_lanes", default_mechanics_lanes()),
         "civstudy_reference": civstudy_reference_panel(),
         "civstudy_sim": civstudy_sim_summary(game_state),
+        "session_phase": session_phase(game_state),
         "note": "CivForge governance workspace with multi-agent map, alliances, negotiations, mechanics lanes, and joint victory.",
     }
 
@@ -354,6 +358,11 @@ async def advance_turn(_claims: Dict[str, Any] = Depends(require_public_mode_tok
     Now powered by the real Python GovernanceOrchestrator + AgentBrains + FunForge.
     Produces a rich receipt (status, fun_score, decisions, gate result) and updates the workspace state.
     """
+    if session_phase(game_state) == "epilogue":
+        raise HTTPException(
+            409,
+            "Game is in victory epilogue — POST /game/reset to start a new session",
+        )
     result = orchestrator.advance_cycle(player_actions=1)
 
     game_state["turn"] = result["turn"]
@@ -390,12 +399,15 @@ async def advance_turn(_claims: Dict[str, Any] = Depends(require_public_mode_tok
         "agent_decisions": receipt.get("decisions", {}),
         "victory_progress": game_state["victory_progress"],
         "mechanics_lanes": game_state.get("mechanics_lanes"),
+        "session_phase": session_phase(game_state),
     }
 
 @app.post("/game/negotiate")
 async def game_negotiate(req: NegotiateRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
     """Player proposes a negotiation offer to another agent."""
     entry = add_negotiation(game_state, req.to, req.offer, from_agent="player")
+    if entry.get("error"):
+        return entry
     receipt_store.save_state("game_state", game_state)
     return {"negotiation": entry, "negotiations": negotiations_for_api(game_state)}
 

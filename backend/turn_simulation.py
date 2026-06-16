@@ -20,7 +20,7 @@ def run_turn_simulation(
     events.extend(tick_multi_agent_state(game_state, decisions or {}))
     events.extend(registry.tick_all(game_state))
     vp = game_state.setdefault("victory_progress", {})
-    events.extend(sync_victory_milestones(vp, game_state["turn"]))
+    events.extend(sync_victory_milestones(vp, game_state["turn"], game_state))
     return events
 
 

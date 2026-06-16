@@ -42,6 +42,8 @@
     .risk-low { color: var(--ok); }
     .policy-watch { border-left: 3px solid var(--warn); padding-left: 0.5rem; }
     .policy-banner { background: #422006; color: #fde68a; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem; }
+    .epilogue-banner { background: #14532d; color: #bbf7d0; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
     .events { font-size: 0.8rem; color: var(--muted); max-height: 8rem; overflow: auto; }
     .events li { margin-bottom: 0.25rem; }
     .hidden { display: none !important; }
@@ -82,6 +84,7 @@
       <div class="stat" id="hud-policy-stat" style="display:none"><span>Policies</span><strong id="hud-policies">—</strong></div>
     </div>
     <div id="policy-banner" class="policy-banner hidden"></div>
+    <div id="epilogue-banner" class="epilogue-banner hidden">Victory epilogue — advance is paused. Reset to start a new game.</div>
     <div class="controls">
       <button class="primary" id="advance-btn">Advance Turn</button>
       <button id="refresh-btn">Refresh</button>
@@ -348,7 +351,7 @@
         ).join("");
         document.getElementById("hud-victory").textContent = pct + "%";
         const overlay = document.getElementById("outcome-overlay");
-        if (vp.outcome === "victory" || pct >= 100) {
+        if (vp.outcome === "victory" || pct >= 100 || data.session_phase === "epilogue") {
           overlay.classList.remove("hidden");
         }
       }
@@ -358,6 +361,11 @@
         document.getElementById("hud-fun").textContent = data.fun_score;
         document.getElementById("hud-cities").textContent = data.player.cities;
         document.getElementById("hud-alliances").textContent = (data.alliances || []).length;
+        const epilogue = data.session_phase === "epilogue";
+        const advanceBtn = document.getElementById("advance-btn");
+        advanceBtn.disabled = epilogue;
+        advanceBtn.title = epilogue ? "Victory epilogue — reset to continue" : "";
+        document.getElementById("epilogue-banner").classList.toggle("hidden", !epilogue);
       }
 
       function renderEvents(data) {
@@ -486,6 +494,10 @@
       document.getElementById("reset-btn").onclick = resetGame;
       document.getElementById("outcome-reset-btn").onclick = resetGame;
       document.getElementById("advance-btn").onclick = async () => {
+        if (state && state.session_phase === "epilogue") {
+          alert("Victory epilogue — use Reset Game to start a new session.");
+          return;
+        }
         await fetch(apiBase + "/advance_turn", { method: "POST" });
         await loadState();
       };

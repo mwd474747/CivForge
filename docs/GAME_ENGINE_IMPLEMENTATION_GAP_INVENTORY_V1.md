@@ -41,16 +41,16 @@ Prioritized backlog. **P0** = blocks “playable loop”; **P1** = core fun/inte
 
 | Gap | Why it matters | Suggested work |
 |-----|----------------|----------------|
-| Post-victory mode | Victory sets `outcome` but loop continues unchanged | Epilogue state: halt auto-advance, offer reset-only or sandbox mode |
+| Post-victory mode | Victory sets `outcome` but loop continues unchanged | **Done (2026-06-15)** — `session_phase: epilogue` blocks advance; dashboard disables Advance |
 | Defeat / stall conditions | No lose state or stalemate | Define failure triggers (betrayal collapse, fun floor, turn cap) |
-| Milestone truth | “First alliance” / “Shared map control” not tied to real alliances/tiles | Wire `sync_victory_milestones` to live alliance count + player tile majority |
-| E2E HTTP test | No full `advance_turn` → victory receipt path in CI | `tests/test_game_loop_e2e.py` against TestClient |
+| Milestone truth | “First alliance” / “Shared map control” not tied to real alliances/tiles | **Done (2026-06-15)** — `milestone_truth()` in `sync_victory_milestones` |
+| E2E HTTP test | No full `advance_turn` → victory receipt path in CI | **Done (2026-06-15)** — `tests/test_game_loop_e2e.py` |
 
 ### P1 — Mechanics & player agency
 
 | Gap | Why it matters | Suggested work |
 |-----|----------------|----------------|
-| Policy effect wiring | `open_negotiation`, `symposium_chain` set flags only | Route flags into negotiation bonuses / cultural chain acceleration |
+| Policy effect wiring | `open_negotiation`, `symposium_chain` set flags only | **Partial (2026-06-15)** — open_negotiation waives negotiate cost; symposium_chain shortens cultural cadence; see `GAME_MECHANICS_WIRING_INVENTORY_V1.md` |
 | Player map actions | No claim tile, move garrison, choose district | `POST /game/map/*` or district selection endpoint |
 | Player policy choices | Policies unlock via ticks only | `POST /game/policy/unlock` with influence cost |
 | Agent play parity | Brains decide; player is mostly observer | Register `PlayerAgent` decisions in orchestrator cycle |
@@ -60,9 +60,9 @@ Prioritized backlog. **P0** = blocks “playable loop”; **P1** = core fun/inte
 
 | Gap | Why it matters | Suggested work |
 |-----|----------------|----------------|
-| Auth on mutators | Local `:8080` ungated; protected path is demo only | Wire `:8081` JWT or Nexus satellite key on `advance_turn`, `reset`, `found_city` |
+| Auth on mutators | Local `:8080` ungated; protected path is demo only | **Partial (2026-06-15)** — `CIVFORGE_REQUIRE_AUTH=1` forces token on mutators |
 | CivStudy corpus | Reference metadata only | Optional live read of CivStudy repo for district/policy definitions |
-| Nexus outcome telemetry | Sends `victoryProgress` number, not `outcome` | Add `victoryOutcome` to `customMetrics` |
+| Nexus outcome telemetry | Sends `victoryProgress` number, not `outcome` | **Done (2026-06-15)** — `victoryOutcome` + `sessionPhase` in telemetry |
 | Documentation drift | `IMPLEMENTATION_STATUS.md` lagged | Keep status doc aligned with mechanics integration receipts |
 
 ### P2 — Game feel & operations

@@ -11,6 +11,7 @@ from backend.civstudy_metadata import (
     default_districts,
     default_policy_tree,
 )
+from backend.game_session import cultural_tick_cadence
 
 
 def default_civstudy_sim_state() -> Dict[str, Any]:
@@ -235,7 +236,7 @@ def tick_civstudy_cultural_chains(game_state: Dict[str, Any]) -> List[str]:
     """Progress cultural event chains from CivStudy metadata."""
     sim = ensure_civstudy_sim_state(game_state)
     turn = game_state["turn"]
-    if turn % 6 != 0:
+    if turn % cultural_tick_cadence(game_state) != 0:
         return []
 
     chains = sim.setdefault("active_chains", {})

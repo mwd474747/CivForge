@@ -18,7 +18,13 @@ from backend.multi_agent_state import (  # noqa: E402
 
 
 def _blank_state() -> dict:
-    return {"turn": 10, "events": [], "ai_civs": [], "negotiations": []}
+    return {
+        "turn": 10,
+        "events": [],
+        "ai_civs": [],
+        "negotiations": [],
+        "player": {"resources": {"influence": 50}},
+    }
 
 
 def test_next_negotiation_id_unique_same_turn():
