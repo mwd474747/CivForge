@@ -2,7 +2,7 @@
 
 **Generated:** 2026-06-16  
 **Authority:** `current`  
-**Anchor:** (set on commit — update `config/work_pack_registry.yaml`)  
+**Anchor:** `d52c15f`  
 **Scope:** Grok drift / lane correction hardening
 
 ---
