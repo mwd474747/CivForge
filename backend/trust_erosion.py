@@ -10,6 +10,7 @@ BASE_NEGOTIATION_SUCCESS_PCT = 65.0
 ENVOY_SUCCESS_BONUS_PCT = 10.0
 ALLIANCE_SUCCESS_BONUS_PCT = 8.0
 BETRAYAL_PENALTY_SCALE = 0.35
+SHARED_INTEL_SUCCESS_BONUS_PCT = 25.0
 NEGOTIATION_RECOVERY_RISK_DELTA = 5
 TRUST_BETRAYAL_THRESHOLD = 65
 TRUST_CRITICAL_THRESHOLD = 90
@@ -39,6 +40,8 @@ def negotiation_success_rate(game_state: Dict[str, Any], to_agent: str) -> float
     rate = BASE_NEGOTIATION_SUCCESS_PCT
     if policy_flags(game_state).get("envoy_network"):
         rate += ENVOY_SUCCESS_BONUS_PCT
+    if policy_flags(game_state).get("shared_intel"):
+        rate += SHARED_INTEL_SUCCESS_BONUS_PCT
     if player_alliance_with(game_state, to_agent):
         rate += ALLIANCE_SUCCESS_BONUS_PCT
     max_risk = max_player_alliance_betrayal_risk(game_state)
@@ -72,6 +75,17 @@ def apply_negotiation_recovery(game_state: Dict[str, Any], counterparty: str) ->
             )
 
 
+def negotiation_rates_for_agents(game_state: Dict[str, Any]) -> Dict[str, float]:
+    """Per-agent success rates for negotiate panel (WP-GROK-TRUST-EROSION-003)."""
+    from backend.multi_agent_state import AGENT_IDS
+
+    return {
+        aid: negotiation_success_rate(game_state, aid)
+        for aid in AGENT_IDS
+        if aid != "player"
+    }
+
+
 def trust_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
     alliances = []
     for alliance in game_state.get("alliances", []):
@@ -90,5 +104,7 @@ def trust_summary(game_state: Dict[str, Any]) -> Dict[str, Any]:
         "betrayal_threshold": TRUST_BETRAYAL_THRESHOLD,
         "critical_threshold": TRUST_CRITICAL_THRESHOLD,
         "max_betrayal_risk": max_player_alliance_betrayal_risk(game_state),
+        "negotiation_success_rates": negotiation_rates_for_agents(game_state),
+        "shared_intel_bonus_pct": SHARED_INTEL_SUCCESS_BONUS_PCT,
         "alliances": alliances,
     }

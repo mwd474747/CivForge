@@ -17,10 +17,11 @@ from core.swarm_join import FORGE_COORDINATOR_ID
 from core.mechanics_registry import build_default_registry, default_mechanics_lanes
 from backend.civstudy_metadata import civstudy_reference_panel
 from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
-from backend.game_reset import apply_game_reset
-from backend.game_session import policy_flags, session_phase
+from backend.game_reset import apply_defeat_cascade_seed, apply_game_reset
+from backend.game_session import apply_defeat, check_defeat_conditions, policy_flags, session_phase
 from backend.game_actions import action_catalog, claim_map_tile, player_cycle_decision, select_district, send_envoy, unlock_policy
 from backend.trust_erosion import trust_summary
+from backend.victory_hud import victory_hud_summary
 from backend.mechanics_proposals import (
     apply_mechanics,
     gate_mechanics,
@@ -292,6 +293,7 @@ async def get_state() -> Dict[str, Any]:
         "session_phase": session_phase(game_state),
         "action_catalog": action_catalog(game_state),
         "trust_erosion": trust_summary(game_state),
+        "victory_hud": victory_hud_summary(game_state),
         "session_history": game_state.get("session_history", [])[-5:],
         "mechanics_proposals": proposals_summary(game_state),
         "mechanics_overrides": game_state.get("mechanics_overrides", {}),
@@ -456,6 +458,9 @@ class MapClaimRequest(BaseModel):
     x: int
     y: int
 
+class GameResetRequest(BaseModel):
+    seed_profile: Optional[str] = None
+
 class SendEnvoyRequest(BaseModel):
     alliance_id: str
 
@@ -559,9 +564,20 @@ async def game_mechanics_apply(
     return result
 
 @app.post("/game/reset")
-async def game_reset(_claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+async def game_reset(
+    req: GameResetRequest = GameResetRequest(),
+    _claims: Dict[str, Any] = Depends(require_public_mode_token),
+) -> Dict[str, Any]:
     """Start a fresh game: reset in-memory state, orchestrator working memory, and SQLite snapshot."""
     summary = apply_game_reset(game_state, orchestrator)
+    if req.seed_profile == "defeat_cascade":
+        apply_defeat_cascade_seed(game_state)
+        orchestrator.turn = game_state["turn"]
+        defeat_before = game_state.get("victory_progress", {}).get("outcome")
+        reason = check_defeat_conditions(game_state)
+        if reason:
+            apply_defeat(game_state, reason, game_state["turn"])
+            maybe_emit_defeat_receipt(defeat_before, game_state, receipt_store)
     _sync_governance_proposals_to_state()
     reset_receipt = {
         "turn": game_state["turn"],
@@ -582,7 +598,11 @@ async def game_reset(_claims: Dict[str, Any] = Depends(require_public_mode_token
         extra,
     )
     return {
-        "message": "Game reset to turn 1.",
+        "message": (
+            f"Game reset with defeat-cascade seed (turn {game_state['turn']}, defeat={session_phase(game_state) == 'defeat'})."
+            if req.seed_profile == "defeat_cascade"
+            else "Game reset to turn 1."
+        ),
         "summary": summary,
         "session_phase": session_phase(game_state),
         "session_history": game_state.get("session_history", []),

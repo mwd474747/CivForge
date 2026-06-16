@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from backend.military_conflict_defeat_review import (  # noqa: E402
+    run_kernel_defeat_simulation,
     run_kernel_simulation,
     run_local_simulation,
     write_sim_artifacts,
@@ -25,7 +26,7 @@ from backend.military_conflict_defeat_review import (  # noqa: E402
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Military/conflict/defeat review simulation block")
-    parser.add_argument("--mode", choices=("local", "kernel"), default="kernel")
+    parser.add_argument("--mode", choices=("local", "kernel", "kernel-defeat"), default="kernel")
     parser.add_argument("--rounds", type=int, default=50)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--defeat-seed", action="store_true", help="Start from low-fun / broken-alliance state")
@@ -35,6 +36,8 @@ def main() -> int:
 
     if args.mode == "local":
         result = run_local_simulation(rounds=args.rounds, seed=args.seed, defeat_seed=args.defeat_seed)
+    elif args.mode == "kernel-defeat":
+        result = run_kernel_defeat_simulation(kernel_url=args.kernel, max_rounds=args.rounds)
     else:
         result = run_kernel_simulation(kernel_url=args.kernel, rounds=args.rounds)
 
@@ -43,14 +46,19 @@ def main() -> int:
         result["artifact_paths"] = {"json": str(json_path), "markdown": str(md_path)}
         print(f"Wrote {json_path.name} and {md_path.name}")
 
-    print(json.dumps({
+    summary = {
         "work_pack_id": result["work_pack_id"],
         "mode": result["mode"],
         "rounds_completed": result["rounds_completed"],
         "stopped_early": result["stopped_early"],
         "final_metrics": result["final_metrics"],
-        "event_counts": result["event_counts"],
-    }, indent=2))
+    }
+    if "event_counts" in result:
+        summary["event_counts"] = result["event_counts"]
+    if "defeat_outcome_receipts" in result:
+        summary["defeat_outcome_receipts"] = result["defeat_outcome_receipts"]
+        summary["stop_reason"] = result.get("stop_reason")
+    print(json.dumps(summary, indent=2))
     return 0
 
 

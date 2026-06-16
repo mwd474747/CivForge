@@ -113,3 +113,21 @@ def apply_game_reset(game_state: Dict[str, Any], orchestrator: GovernanceOrchest
         "victory_progress": game_state["victory_progress"],
         "session_phase": "active",
     }
+
+
+def apply_defeat_cascade_seed(game_state: Dict[str, Any]) -> None:
+    """Low-fun / broken-alliance starting posture for defeat sim (WP-GROK-SIM-DEFEAT-CASCADE-002)."""
+    game_state["turn"] = 22
+    game_state["player"]["fun_score"] = 30.0
+    vp = game_state.setdefault("victory_progress", {})
+    vp["joint_progress"] = 8
+    vp.pop("outcome", None)
+    vp.pop("defeat_reason", None)
+    broken = 0
+    for alliance in game_state.get("alliances", []):
+        if "player" in alliance.get("parties", []):
+            alliance["status"] = "broken"
+            broken += 1
+    game_state.setdefault("events", []).append(
+        f"Turn {game_state['turn']}: Defeat-cascade seed applied ({broken} player alliances broken, fun=30)."
+    )

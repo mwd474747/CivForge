@@ -58,6 +58,7 @@ s = get("/state")
 assert s["status"] == "active"
 assert "mechanics_proposals" in s, "missing mechanics_proposals on /state"
 assert "trust_erosion" in s, "missing trust_erosion on /state"
+assert "victory_hud" in s, "missing victory_hud on /state"
 assert len(s.get("map_tiles", [])) == 25
 assert set((s.get("mechanics_lanes") or {}).keys()) == {"military", "economic", "cultural"}
 cs = s.get("civstudy_reference", {})

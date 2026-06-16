@@ -177,12 +177,9 @@ def run_local_simulation(
 
     game_state = build_initial_game_state()
     if defeat_seed:
-        game_state["turn"] = 22
-        game_state["player"]["fun_score"] = 30.0
-        game_state["victory_progress"]["joint_progress"] = 8
-        for alliance in game_state.get("alliances", []):
-            if "player" in alliance.get("parties", []):
-                alliance["status"] = "broken"
+        from backend.game_reset import apply_defeat_cascade_seed
+
+        apply_defeat_cascade_seed(game_state)
     orchestrator = _new_orchestrator()
     registry = build_default_registry()
     round_log: List[Dict[str, Any]] = []
@@ -289,6 +286,60 @@ def run_kernel_simulation(
         "round_snapshots": round_log,
         "final_metrics": extract_metrics_from_api_state(final_state),
         "agents": list(AGENT_IDS),
+    }
+
+
+def run_kernel_defeat_simulation(
+    *,
+    kernel_url: str = "http://127.0.0.1:8080",
+    max_rounds: int = 15,
+) -> Dict[str, Any]:
+    """Kernel defeat-cascade seed + advance until defeat epilogue (WP-GROK-SIM-DEFEAT-CASCADE-002)."""
+    from pathlib import Path
+
+    receipts_before = set((Path(__file__).resolve().parent.parent / "receipts").glob("defeat-outcome-*.md"))
+    _kernel_post(kernel_url, "/game/reset", {"seed_profile": "defeat_cascade"})
+    state = _kernel_get(kernel_url, "/state")
+    if state.get("session_phase") == "defeat":
+        completed = 0
+        stopped_early = True
+        stop_reason = "defeat_on_seed"
+    else:
+        completed = 0
+        stopped_early = False
+        stop_reason = None
+
+        for rnd in range(1, max_rounds + 1):
+            try:
+                _kernel_post(kernel_url, "/advance_turn", {})
+            except urllib.error.HTTPError as exc:
+                if exc.code == 409:
+                    stopped_early = True
+                    stop_reason = exc.read().decode(errors="replace")[:200]
+                    break
+                raise
+            completed = rnd
+            state = _kernel_get(kernel_url, "/state")
+            if state.get("session_phase") == "defeat":
+                stopped_early = True
+                stop_reason = "defeat"
+                break
+
+    final_state = _kernel_get(kernel_url, "/state")
+    receipts_after = set((Path(__file__).resolve().parent.parent / "receipts").glob("defeat-outcome-*.md"))
+    new_receipts = sorted(str(p.name) for p in receipts_after - receipts_before)
+
+    return {
+        "work_pack_id": "WP-GROK-SIM-DEFEAT-CASCADE-002",
+        "mode": "kernel_defeat",
+        "kernel_url": kernel_url,
+        "generated_at": utc_now(),
+        "rounds_completed": completed,
+        "stopped_early": stopped_early,
+        "stop_reason": stop_reason,
+        "defeat_outcome_receipts": new_receipts,
+        "final_metrics": extract_metrics_from_api_state(final_state),
+        "sample_events": (final_state.get("recent_events") or [])[-8:],
     }
 
 

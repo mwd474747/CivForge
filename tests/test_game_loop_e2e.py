@@ -59,3 +59,23 @@ def test_http_epilogue_blocks_advance_turn():
     assert body["victory_progress"].get("outcome") is None
     assert body["summary"]["prior_session"]["outcome"] == "victory"
     assert client.get("/state").json()["session_phase"] == "active"
+
+
+def test_http_defeat_cascade_reset_message():
+    from fastapi.testclient import TestClient
+
+    import backend.sim_api as api
+
+    api.game_state = build_initial_game_state()
+    api.orchestrator.turn = api.game_state["turn"]
+
+    client = TestClient(api.app)
+    reset = client.post("/game/reset", json={"seed_profile": "defeat_cascade"})
+    assert reset.status_code == 200
+    body = reset.json()
+    assert "defeat-cascade" in body["message"]
+    assert body["session_phase"] == "defeat"
+    assert body["victory_progress"]["defeat_reason"] == "fun_floor"
+    state = client.get("/state").json()
+    assert state["current_turn"] == 22
+    assert state["player"]["fun_score"] == 30.0

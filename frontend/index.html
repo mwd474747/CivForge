@@ -51,6 +51,8 @@
     .mech-overrides { font-size: 0.8rem; color: var(--muted); }
     .epilogue-banner { background: #14532d; color: #bbf7d0; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem; }
     .defeat-banner { background: #450a0a; color: #fecaca; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem; }
+    .victory-warning { background: #713f12; color: #fde68a; padding: 0.5rem 0.75rem; border-radius: 6px; margin: 0.5rem 0; font-size: 0.85rem; }
+    .cultural-path { font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; }
     .tile.claimable { cursor: pointer; outline: 2px dashed #fbbf24; }
     button:disabled { opacity: 0.45; cursor: not-allowed; }
     .events { font-size: 0.8rem; color: var(--muted); max-height: 8rem; overflow: auto; }
@@ -153,6 +155,7 @@
         <h2>Negotiation Panel</h2>
         <label>To agent</label>
         <select id="neg-to"></select>
+        <p id="neg-success-rate" class="sub" style="margin:0.35rem 0"></p>
         <label style="display:block;margin-top:0.5rem">Offer</label>
         <textarea id="neg-offer" placeholder="Propose joint governance review…"></textarea>
         <button class="primary" id="neg-send" style="margin-top:0.5rem">Send Offer</button>
@@ -161,9 +164,11 @@
       <div class="panel">
         <h2>Alliance Tracker</h2>
         <div id="alliance-list"></div>
-        <h2 style="margin-top:1rem">Joint Victory</h2>
+        <h2 style="margin-top:1rem">Victory &amp; Cultural Path</h2>
+        <div id="victory-defeat-warning" class="victory-warning hidden"></div>
         <div class="victory-bar"><div class="victory-fill" id="victory-fill" style="width:0%"></div></div>
         <p id="victory-text"></p>
+        <div id="cultural-path" class="cultural-path"></div>
         <ul id="victory-milestones"></ul>
       </div>
     </div>
@@ -391,6 +396,17 @@
         }
       }
 
+      function updateNegotiationSuccessRate(data) {
+        const rates = (data.trust_erosion && data.trust_erosion.negotiation_success_rates) || {};
+        const to = document.getElementById("neg-to").value;
+        const el = document.getElementById("neg-success-rate");
+        if (to && rates[to] != null) {
+          el.textContent = "Estimated success vs " + to + ": " + rates[to] + "%";
+        } else {
+          el.textContent = "";
+        }
+      }
+
       function renderNegotiations(data) {
         const log = document.getElementById("neg-log");
         const sel = document.getElementById("neg-to");
@@ -403,6 +419,8 @@
             sel.appendChild(o);
           });
         }
+        sel.onchange = () => updateNegotiationSuccessRate(data);
+        updateNegotiationSuccessRate(data);
         const pending = (data.negotiations || []).filter(n => n.status === "pending");
         log.innerHTML = pending.length ? pending.map(n =>
           "<div class='neg-item'><strong>" + n.from + " → " + n.to + "</strong>: " + n.offer +
@@ -463,10 +481,25 @@
       }
 
       function renderVictory(data) {
+        const hud = data.victory_hud || {};
         const vp = data.victory_progress || { joint_progress: 0, target: 100, milestones: [] };
-        const pct = Math.round(100 * (vp.joint_progress || 0) / (vp.target || 100));
+        const pct = hud.progress_pct != null ? hud.progress_pct : Math.round(100 * (vp.joint_progress || 0) / (vp.target || 100));
         document.getElementById("victory-fill").style.width = pct + "%";
-        document.getElementById("victory-text").textContent = "Joint progress: " + (vp.joint_progress || 0) + " / " + (vp.target || 100) + " (" + pct + "%)";
+        document.getElementById("victory-text").textContent =
+          "Joint progress: " + (vp.joint_progress || 0) + " / " + (vp.target || 100) + " (" + pct + "%)" +
+          " · milestones " + (hud.milestones_done != null ? hud.milestones_done : "?") + "/" + (hud.milestones_total || 4);
+        const cp = hud.cultural_path || {};
+        document.getElementById("cultural-path").innerHTML =
+          "Cultural path: chains <strong>" + (cp.event_chains || 0) + "</strong>, spread <strong>" +
+          (cp.influence_spread || 0) + "</strong>, cadence <strong>" + (cp.tick_cadence || "—") +
+          "</strong>, active <strong>" + (cp.active_chain_count || 0) + "</strong>";
+        const warn = document.getElementById("victory-defeat-warning");
+        if (hud.defeat_warning) {
+          warn.classList.remove("hidden");
+          warn.textContent = "Defeat risk: " + (hud.defeat_warnings || []).join(", ").replace(/_/g, " ");
+        } else {
+          warn.classList.add("hidden");
+        }
         document.getElementById("victory-milestones").innerHTML = (vp.milestones || []).map(m =>
           "<li>" + (m.done ? "✅" : "⬜") + " " + m.name + "</li>"
         ).join("");

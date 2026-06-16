@@ -2,7 +2,7 @@
 
 **Updated:** 2026-06-16  
 **Scope:** CivForge game engine mechanics — all metadata effects wired.  
-**Label:** `prototype-only` (passes 57 pytest; live kernel smoke recommended)
+**Label:** `prototype-only` (passes 80 pytest; live kernel smoke recommended)
 
 ---
 
@@ -21,11 +21,12 @@ Remaining **non-engine** gaps (out of scope for this slice): `:8081` JWT identit
 | Select district | `POST /game/district/select` | 3 influence | **Wired** |
 | Unlock policy | `POST /game/policy/unlock` | 5/8/12 by tier | **Wired** |
 | Claim map tile | `POST /game/map/claim` | 4 influence | **Wired** |
+| Send envoy | `POST /game/send_envoy` | 6 influence | **Wired** — +10 negotiation success bonus on target alliance (turn-limited shield) |
 | Action catalog | `GET /game/actions` | — | **Wired** |
 
 | Dashboard | district/policy panel + clickable map + **mechanics proposals tab** |
 
-MCP: `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile` (16 tools total — see below).
+MCP: `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile`, `civforge_send_envoy` (**17 tools** total — see below).
 
 ---
 
@@ -35,6 +36,8 @@ MCP: `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile`
 |--------|--------|----------------|
 | `open_negotiation` | Waive negotiate influence | `negotiation_influence_cost()` |
 | `alliance_cap_3` | Soft cap 2→3 | `alliance_soft_cap()` on accept |
+| `envoy_network` | Softer betrayal drift + lower watch break odds | `multi_agent_state` when tier-2 unlocked (12 influence) |
+| `shared_intel` | +25% negotiation success when active | `trust_erosion.negotiation_success_rate()` + HUD rates (10 influence) |
 | `betrayal_watch` | HUD + betrayal break events | Risk ≥55 + 12% break/turn under watch |
 | `institution_charter` | +1 institution | Lane on unlock |
 | `trade_route_map` | Sci-trade yield | District pulse + economic tick +sci |
@@ -42,9 +45,8 @@ MCP: `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile`
 | `symposium_chain` | Earlier cultural chains | Cadence 6→4 |
 | `influence_spread` | +2 spread | Lane on unlock |
 | `festival_receipts` | +2 victory on chain complete | Cultural tick bonus |
-| `envoy_network` | Softer betrayal drift + lower watch break odds | `multi_agent_state` when tier-2 unlocked (12 influence) |
 
-Policies unlock via **auto tick** OR **player spend** (`POST /game/policy/unlock`).
+Policies unlock via **auto tick** OR **player spend** (`POST /game/policy/unlock`). **11 policies** total (diplomacy 5, economy 3, culture 3).
 
 ---
 
@@ -77,6 +79,19 @@ Player selects via `POST /game/district/select`. Active district pulses every 3 
 
 Defeat reasons: `fun_floor`, `diplomatic_isolation`, `betrayal_collapse`, `stalled_progress`.
 
+**Defeat sim seed:** `POST /game/reset` with `{"seed_profile":"defeat_cascade"}` applies low-fun posture (turn 22, fun 30, broken alliance) and finalizes `fun_floor` defeat + `defeat-outcome-*.md` receipt for review sims.
+
+---
+
+## `/state` observability (batch-005)
+
+| Field | Purpose |
+|-------|---------|
+| `victory_hud` | Progress %, cultural path, defeat warnings, milestones |
+| `trust_erosion` | Per-agent `negotiation_success_rates`, alliance risk tiers |
+| `mechanics_proposals` / `mechanics_overrides` | Proposal lane + applied `param_override` |
+| `civstudy_reference` | Read-only policy/fork/district catalog (includes `shared_intel`) |
+
 ---
 
 ## Multi-agent layer — all wired
@@ -85,9 +100,9 @@ Map drift, betrayal risk + **break events**, AI negotiations, player negotiate/r
 
 ---
 
-## MCP tools (16)
+## MCP tools (17)
 
-Play/governance: `civforge_status`, `civforge_advance_turn`, `civforge_reset_game`, `civforge_found_city`, `civforge_negotiate`, `civforge_negotiate_respond`, `civforge_what_if`, `civforge_governance_propose`, `civforge_governance_gate`, `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile`.
+Play/governance: `civforge_status`, `civforge_advance_turn`, `civforge_reset_game`, `civforge_found_city`, `civforge_negotiate`, `civforge_negotiate_respond`, `civforge_send_envoy`, `civforge_what_if`, `civforge_governance_propose`, `civforge_governance_gate`, `civforge_select_district`, `civforge_unlock_policy`, `civforge_claim_tile`.
 
 Mechanics proposal lane: `civforge_propose_mechanics`, `civforge_gate_mechanics`, `civforge_apply_mechanics`, `civforge_list_mechanics_proposals`.
 

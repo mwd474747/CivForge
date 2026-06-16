@@ -53,6 +53,12 @@ def default_policy_tree() -> Dict[str, Any]:
                         "effect": "Diplomatic outpost network: softer betrayal drift, lower break risk",
                         "influence_cost": 12,
                     },
+                    {
+                        "id": "shared_intel",
+                        "tier": 2,
+                        "effect": "Shared intel network: +25% negotiation success when active",
+                        "influence_cost": 10,
+                    },
                     {"id": "betrayal_watch", "tier": 3, "effect": "Surface betrayal risk in HUD"},
                 ],
             },
