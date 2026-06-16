@@ -9,23 +9,23 @@
       "receipt_class": "posture"
     },
     {
-      "path": "receipts/game-reset-20260616-005325.md",
+      "path": "receipts/game-reset-20260616-025235.md",
       "receipt_class": "other"
     },
     {
-      "path": "receipts/game-reset-20260616-005253.md",
-      "receipt_class": "other"
+      "path": "receipts/cursor-execution-mechanics-proposal-lane-20260616.md",
+      "receipt_class": "execution"
     },
     {
-      "path": "receipts/game-reset-20260616-005212.md",
-      "receipt_class": "other"
-    },
-    {
-      "path": "receipts/work-pack-grok-mechanics-propose-001.md",
+      "path": "receipts/HANDOFF-GROK-SWARM-20260616.md",
       "receipt_class": "planning"
     },
     {
-      "path": "receipts/openclaw-governance-turnkey-20260616-004644.md",
+      "path": "receipts/game-reset-20260616-014757.md",
+      "receipt_class": "other"
+    },
+    {
+      "path": "receipts/openclaw-governance-turnkey-20260616-005332.md",
       "receipt_class": "openclaw_ops"
     },
     {
@@ -37,29 +37,64 @@
       "receipt_class": "posture"
     },
     {
-      "path": "receipts/game-reset-20260616-004643.md",
+      "path": "receipts/game-reset-20260616-005325.md",
       "receipt_class": "other"
     },
     {
-      "path": "receipts/openclaw-governance-turnkey-20260616-004334.md",
-      "receipt_class": "openclaw_ops"
+      "path": "receipts/game-reset-20260616-005253.md",
+      "receipt_class": "other"
     },
     {
-      "path": "receipts/game-reset-20260616-004333.md",
+      "path": "receipts/game-reset-20260616-005212.md",
       "receipt_class": "other"
     }
   ],
-  "generated_at": "2026-06-16T00:53:32Z",
+  "generated_at": "2026-06-16T02:52:35Z",
   "latest_files": [
     {
-      "mtime": "2026-06-16T00:53:32Z",
+      "mtime": "2026-06-16T02:52:35Z",
       "path": "receipts/civforge-poller-posture-latest.md",
       "size": 157
     },
     {
-      "mtime": "2026-06-16T00:53:32Z",
+      "mtime": "2026-06-16T02:52:35Z",
       "path": "receipts/civforge-contract-parity-latest.md",
       "size": 153
+    },
+    {
+      "mtime": "2026-06-16T02:52:35Z",
+      "path": "receipts/game-reset-20260616-025235.md",
+      "size": 588
+    },
+    {
+      "mtime": "2026-06-16T01:52:37Z",
+      "path": "receipts/cursor-execution-mechanics-proposal-lane-20260616.md",
+      "size": 1551
+    },
+    {
+      "mtime": "2026-06-16T01:52:37Z",
+      "path": "receipts/HANDOFF-GROK-SWARM-20260616.md",
+      "size": 4565
+    },
+    {
+      "mtime": "2026-06-16T01:47:57Z",
+      "path": "receipts/game-reset-20260616-014757.md",
+      "size": 588
+    },
+    {
+      "mtime": "2026-06-16T00:53:32Z",
+      "path": "receipts/openclaw-governance-turnkey-20260616-005332.md",
+      "size": 557
+    },
+    {
+      "mtime": "2026-06-16T00:53:32Z",
+      "path": "receipts/civforge-governance-posture-latest.md",
+      "size": 190
+    },
+    {
+      "mtime": "2026-06-16T00:53:32Z",
+      "path": "receipts/civforge-receipt-index-latest.md",
+      "size": 1126
     },
     {
       "mtime": "2026-06-16T00:53:25Z",
@@ -75,47 +110,26 @@
       "mtime": "2026-06-16T00:52:12Z",
       "path": "receipts/game-reset-20260616-005212.md",
       "size": 588
-    },
-    {
-      "mtime": "2026-06-16T00:51:42Z",
-      "path": "receipts/work-pack-grok-mechanics-propose-001.md",
-      "size": 3082
-    },
-    {
-      "mtime": "2026-06-16T00:46:44Z",
-      "path": "receipts/openclaw-governance-turnkey-20260616-004644.md",
-      "size": 557
-    },
-    {
-      "mtime": "2026-06-16T00:46:43Z",
-      "path": "receipts/civforge-governance-posture-latest.md",
-      "size": 190
-    },
-    {
-      "mtime": "2026-06-16T00:46:43Z",
-      "path": "receipts/civforge-receipt-index-latest.md",
-      "size": 1122
-    },
-    {
-      "mtime": "2026-06-16T00:46:43Z",
-      "path": "receipts/game-reset-20260616-004643.md",
-      "size": 588
-    },
-    {
-      "mtime": "2026-06-16T00:43:34Z",
-      "path": "receipts/openclaw-governance-turnkey-20260616-004334.md",
-      "size": 557
-    },
-    {
-      "mtime": "2026-06-16T00:43:33Z",
-      "path": "receipts/game-reset-20260616-004333.md",
-      "size": 588
     }
   ],
   "schema": "civforge.receipt_index.v1",
   "sqlite": {
     "exists": true,
     "latest": [
+      {
+        "action": "game_reset",
+        "created_at": "2026-06-16T02:52:35.305432",
+        "id": "r-1-20260616-025235",
+        "status": "SUCCESS",
+        "turn": 1
+      },
+      {
+        "action": "game_reset",
+        "created_at": "2026-06-16T01:47:57.664941",
+        "id": "r-1-20260616-014757",
+        "status": "SUCCESS",
+        "turn": 1
+      },
       {
         "action": "game_reset",
         "created_at": "2026-06-16T00:53:25.134334",
@@ -136,23 +150,9 @@
         "id": "r-1-20260616-005212",
         "status": "SUCCESS",
         "turn": 1
-      },
-      {
-        "action": "game_reset",
-        "created_at": "2026-06-16T00:46:43.053412",
-        "id": "r-1-20260616-004643",
-        "status": "SUCCESS",
-        "turn": 1
-      },
-      {
-        "action": "game_reset",
-        "created_at": "2026-06-16T00:43:33.637055",
-        "id": "r-1-20260616-004333",
-        "status": "SUCCESS",
-        "turn": 1
       }
     ],
-    "receipts": 336,
+    "receipts": 338,
     "state_snapshots": 1
   },
   "status": "pass",
@@ -160,13 +160,13 @@
     "latest_file_count": 12,
     "receipt_classes": {
       "execution": 5,
-      "governance_cycle": 3,
+      "governance_cycle": 2,
       "openclaw_ops": 11,
-      "other": 13,
+      "other": 14,
       "planning": 4,
       "posture": 4
     },
-    "sqlite_receipts": 336,
+    "sqlite_receipts": 338,
     "sqlite_state_snapshots": 1
   }
 }

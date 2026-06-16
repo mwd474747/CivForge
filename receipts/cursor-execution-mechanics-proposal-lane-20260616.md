@@ -44,7 +44,12 @@ python3 tools/civforge_contract_parity.py
 ```
 
 **HEAD before commit:** `60a8515`  
-**HEAD after commit:** `7452f57` on `main` (feature `956d251`)  
+**HEAD after commit:** `4b57418` on `main` (feature `956d251`)
+
+## Live execution proof (2026-06-16)
+
+- `receipts/cursor-execution-wp-grok-mech-district-001-20260616.md` — WP-GROK-MECH-DISTRICT-001 applied on `:8080`
+- Kernel restarted; `/state.mechanics_proposals` + `/state.mechanics_overrides` confirmed live
 
 ---
 

@@ -1,6 +1,6 @@
 # CivForge Contract Parity
 
-- generated_at: `2026-06-16T00:53:32Z`
+- generated_at: `2026-06-16T02:52:36Z`
 - status: `pass`
 - routes: `24`
 - mcp_tools: `16`

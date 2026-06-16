@@ -20,8 +20,7 @@ Commands:
 
 All real changes to the *separate* gravity-mosaic project still require running
 the verified deploy.sh manually after governance receipts.
-Auth prototype (separate) is enabled from /Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype
-and driven from CivForge through the thin client.
+Auth prototype (separate) is enabled via tools/auth-prototype/{clone.sh,start.sh} and the thin client.
 """
 
 import argparse
@@ -46,7 +45,10 @@ def cmd_status():
     print(json.dumps({
         "turn": s["current_turn"],
         "fun_score": s["fun_score"],
+        "session_phase": s.get("session_phase"),
         "player": s["player"],
+        "mechanics_proposals": s.get("mechanics_proposals"),
+        "mechanics_overrides": s.get("mechanics_overrides"),
         "recent_receipts": s.get("receipts", [])[-3:],
         "recent_events": s.get("recent_events", []),
     }, indent=2))
@@ -101,10 +103,7 @@ def main():
     # === New commands added per Mac Studio backend lock-in receipt (swarm execution) ===
     sub.add_parser("mcp-serve", help="Start stdio MCP tool server (forwards to kernel :8080)")
     sub.add_parser("advisor", help="Safe gravity advisor (proposal-only, never auto-executes deploy.sh)")
-    np = sub.add_parser("nexus-poll", help="Poll dawsos-nexus (8082) for pending commands and surface as governed proposals (thin bridge, commands propose not execute).")
-    np.add_argument("--once", action="store_true", help="Single poll cycle then exit")
-    np.add_argument("--loop", action="store_true", help="Continuous poll loop")
-    np.add_argument("--interval", type=int, default=30, help="Loop sleep seconds")
+    sub.add_parser("nexus-poll", help="Poll dawsos-nexus (8082) for pending commands and surface as governed proposals (thin bridge, commands propose not execute). Supports --once/--loop.")
 
     # Auth/control: Nexus 8082 machine satellite (telemetry + proposals, governance_kernel). Identity long-term auth-prototype 8081. No "replaces" per boundary contract.
     auth_p = sub.add_parser("auth", help="Auth prototype commands (separate identity plane :8081). Nexus 8082 is machine satellite only (telemetry + proposals). See SEPARATION planes.")
@@ -130,6 +129,7 @@ def main():
     elif args.cmd == "run-deploy":
         cmd_run_deploy()
     elif args.cmd == "mcp-serve":
+        import subprocess
         mcp = Path(__file__).parent / "mcp_server.py"
         print(f"Starting CivForge MCP server (stdio) → {os.environ.get('CIVFORGE_KERNEL_URL', 'http://127.0.0.1:8080')}")
         os.execv(sys.executable, [sys.executable, str(mcp)])
@@ -150,20 +150,8 @@ def main():
         poller_script = str(ROOT / "tools" / "nexus_command_poller.py")
         print("=== dawsos-nexus Command Poller (thin bridge) ===")
         print("Commands from nexus are surfaced as 8080 proposals (never auto-executed).")
-        cmd = ["python3", poller_script]
-        if args.loop:
-            cmd.extend(["--loop", "--interval", str(args.interval)])
-        else:
-            cmd.append("--once")
-        env = os.environ.copy()
-        if not env.get("NEXUS_API_KEY"):
-            key_file = Path.home() / ".openclaw" / "runtime" / "nexus-satellite-api-keys.json"
-            try:
-                data = json.loads(key_file.read_text(encoding="utf-8"))
-                env["NEXUS_API_KEY"] = data["civforge-kernel"]["apiKey"]
-            except Exception:
-                pass
-        subprocess.run(cmd, env=env)
+        print("Run directly with --loop for continuous: python tools/nexus_command_poller.py --loop")
+        subprocess.run(["python3", poller_script, "--once"])
 
     elif args.cmd == "auth":
         # Delegate to the thin client for the separate dawsos-auth-prototype (enables protected governance)
@@ -179,7 +167,10 @@ def main():
             subprocess.run(cmd)
         elif args.action == "start":
             print("=== Enabling auth function (separate prototype on :8081) ===")
-            print("Canonical sibling repo:")
+            print("Recommended: run the dedicated bridge script for literal verification + clone safety")
+            print("  ./tools/auth-prototype/start.sh")
+            print("")
+            print("Direct (if you already have the clone):")
             print("  cd /Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype")
             print("  python3 -m uvicorn backend.auth_api:app --reload --host 0.0.0.0 --port 8081")
             print("")
@@ -192,13 +183,13 @@ def main():
             print("  GitHub: https://github.com/mwd474747/dawsos-auth-prototype")
             print("")
             print("To enable:")
-            print("  cd /Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype")
-            print("  python3 -m uvicorn backend.auth_api:app --reload --host 0.0.0.0 --port 8081")
+            print("  ./tools/auth-prototype/clone.sh")
+            print("  ./tools/auth-prototype/start.sh   # (in another terminal or background)")
             print("")
             print("Then obtain tokens and call CivForge /governance/protected_advance with Authorization: Bearer ...")
             print("Use: python tools/civforge_cli.py auth register-device <id> [pk]")
             print("     python tools/civforge_cli.py auth token <identity_id> govern")
-            print("See HANDOFF_CONTEXT.md for full steps.")
+            print("See tools/auth-prototype/README.md and HANDOFF_CONTEXT.md for full steps.")
         else:
             print("Unknown auth action. Try: status, start, register-device, token, verify")
     else:

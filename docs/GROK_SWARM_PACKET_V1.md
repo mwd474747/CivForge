@@ -84,5 +84,6 @@ See `prompts/grok_swarm_handoff_seed.md` § dawsOS MCP tools.
 - `docs/EXECUTION_LANE_V2.md`
 - `docs/dawsos_nexus_reference.md` (all apps use dawsos-nexus pattern)
 - `receipts/HANDOFF-GROK-SWARM-20260615.md`
-- `receipts/HANDOFF-GROK-SWARM-20260616.md` (mechanics proposal lane)
+- **Cursor execution (live `:8080` proof):** `receipts/cursor-execution-wp-grok-mech-district-001-20260616.md`
+- **Swarm correction ingest:** `receipts/swarm-alignment-correction-mechanics-lane-20260616.md`
 - `docs/OPENCLAW_ESCALATION_PACKET_V1.md` (when wt needed)
