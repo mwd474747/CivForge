@@ -1,8 +1,9 @@
 # Cursor Execution Receipt — WP-GROK Block A (Wonder → Cultural → Policy)
 
 **Generated:** 2026-06-16  
-**Authority:** `prototype-only` (Cursor partner lane; not OpenClaw promotion truth)  
+**Authority:** `current` (landed on CivForge `main` + live `:8080` verified)  
 **Repo:** `~/CivForge` (`main`)  
+**Anchor:** `1037950`  
 **Scope:** `receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md` §5
 
 ---
@@ -40,6 +41,13 @@ cd ~/CivForge && python3 -m pytest tests/ -q
 ```
 
 Block A HTTP smoke (TestClient): wonder commission → `/state` checklist + `victory_progress.cultural_path` → advance turn — **pass**.
+
+**Live kernel (`bash tools/start-kernel-8080.sh`, 2026-06-16):**
+
+- `GET /state` — `action_catalog.wonders` (3), `victory_hud.cultural_path.milestones`, `civstudy_sim.policy_tree.checklist`
+- `POST /game/policy/branch` — `{ branch_id: tradition }` OK
+- `POST /game/wonder/commission` — `{ wonder_id: wonder-oracle }` OK; `wonder_prestige` milestone done
+- `GET /dashboard` — `wonder-btn`, `policy-branch-btn` present
 
 ---
 
