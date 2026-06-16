@@ -44,7 +44,7 @@ python3 tools/civforge_contract_parity.py
 ```
 
 **HEAD before commit:** `60a8515`  
-**HEAD after commit:** `22f872c` on `main` (feature `956d251`)  
+**HEAD after commit:** `df5e8b7` on `main` (feature `956d251`)  
 
 ---
 
