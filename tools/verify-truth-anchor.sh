@@ -52,9 +52,29 @@ expected_pytest = int(pytest_match.group(1))
 live_head = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True, cwd=ROOT).strip()
 sync_anchor = os.environ.get("SYNC_ANCHOR", "0") == "1"
 
+
+def parent_short_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD~1"],
+            text=True,
+            cwd=ROOT,
+        ).strip()
+    except subprocess.CalledProcessError:
+        return ""
+
+
+def anchor_head_ok() -> bool:
+    if registry_head == live_head:
+        return True
+    parent = parent_short_head()
+    # Allow anchor sync follow-up: registry points at land commit (HEAD~1).
+    return bool(parent) and registry_head == parent
+
+
 errors = []
 
-if registry_head != live_head:
+if not anchor_head_ok():
     msg = f"registry anchor.head {registry_head} != git HEAD {live_head}"
     if sync_anchor:
         text = text.replace(f"  head: {registry_head}", f"  head: {live_head}", 1)
@@ -62,7 +82,11 @@ if registry_head != live_head:
         print(f"SYNC: updated registry anchor.head → {live_head}")
         registry_head = live_head
     else:
-        errors.append(msg + " (run: bash tools/verify-truth-anchor.sh --sync)")
+        parent = parent_short_head()
+        hint = f" (run: bash tools/verify-truth-anchor.sh --sync)"
+        if parent:
+            hint += f"; or land commit + anchor sync (HEAD~1={parent})"
+        errors.append(msg + hint)
 
 pytest_run = subprocess.run(
     ["python3", "-m", "pytest", "tests/", "-q"],

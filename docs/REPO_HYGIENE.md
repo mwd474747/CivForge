@@ -64,10 +64,12 @@ bash tools/validate-game.sh    # optional; needs :8080
 
 ```bash
 bash tools/verify-truth-anchor.sh --sync
-git add config/work_pack_registry.yaml && git commit -m "Sync registry anchor.head to $(git rev-parse --short HEAD)."
+git add config/work_pack_registry.yaml && git commit -m "Sync registry anchor.head to land commit."
 ```
 
-Do **not** rely on verify auto-writing the registry — default mode is read-only (2026-06-16 hygiene fix).
+Verify accepts `anchor.head == HEAD` **or** `anchor.head == HEAD~1` when the latest commit is the anchor sync follow-up (land commit + registry sync = two-commit pattern).
+
+Default verify mode is **read-only** — it does not mutate the registry (2026-06-16 hygiene fix).
 
 - No `_archive/` or Godot paths in active docs
 - No `tools/auth-prototype/` references (identity → sibling `dawsos-auth-prototype` repo)

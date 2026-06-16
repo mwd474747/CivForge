@@ -29,12 +29,23 @@ def test_registry_head_matches_git_when_committed():
 
     summary = work_pack_status_summary()
     live = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True).strip()
+    try:
+        parent = subprocess.check_output(["git", "rev-parse", "--short", "HEAD~1"], text=True).strip()
+    except subprocess.CalledProcessError:
+        parent = ""
     anchor = summary.get("anchor_head")
     assert anchor, "registry missing anchor.head"
-    # When working tree is clean, anchor must match git HEAD (verify-truth-anchor default).
-    status = subprocess.run(["git", "status", "--porcelain", "config/work_pack_registry.yaml"], capture_output=True, text=True)
+    status = subprocess.run(
+        ["git", "status", "--porcelain", "config/work_pack_registry.yaml"],
+        capture_output=True,
+        text=True,
+    )
     if not status.stdout.strip():
-        assert anchor == live, f"anchor.head {anchor} != git HEAD {live} — run verify-truth-anchor.sh --sync"
+        ok = anchor == live or (parent and anchor == parent)
+        assert ok, (
+            f"anchor.head {anchor} must match git HEAD {live} "
+            f"or land commit HEAD~1 {parent} — run verify-truth-anchor.sh --sync"
+        )
 
 
 def test_policy_branch_extensions_in_metadata():
