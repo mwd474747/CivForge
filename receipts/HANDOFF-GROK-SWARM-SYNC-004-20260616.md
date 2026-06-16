@@ -4,7 +4,7 @@
 **Label:** `current`  
 **Grok PRIME:** `WP-GROK-SYNC-HANDOFF-004` (planning)  
 **Cursor execution:** `receipts/cursor-execution-wp-grok-sync-handoff-004-20260616.md`  
-**CivForge HEAD:** run `git pull origin main && git rev-parse --short HEAD`
+**CivForge HEAD:** **`a1235dc`**
 
 ---
 

@@ -42,4 +42,4 @@ python3 tools/military_conflict_defeat_review_sim.py --mode local --defeat-seed 
 
 ---
 
-**HEAD:** _(filled at commit)_
+**HEAD:** `a1235dc`
