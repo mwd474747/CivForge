@@ -136,6 +136,7 @@ python3 tools/civforge_contract_parity.py
 
 ## Related
 
+- `docs/SIM_GAME_BOUNDARY_V1.md` — simulation vs mechanics boundary, agent control, competitions
 - `docs/GAME_ENGINE_IMPLEMENTATION_GAP_INVENTORY_V1.md`
 - `docs/GAME_PLAY_GUIDE_V1.md`
 - `docs/MECHANICS_TICK_CONTRACT_V1.md`
