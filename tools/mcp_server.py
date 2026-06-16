@@ -77,6 +77,11 @@ TOOLS = [
         "properties": {"x": {"type": "integer"}, "y": {"type": "integer"}},
         "required": ["x", "y"],
     }},
+    {"name": "civforge_send_envoy", "description": "Send envoy to reduce alliance betrayal risk (requires envoy_network policy)", "inputSchema": {
+        "type": "object",
+        "properties": {"alliance_id": {"type": "string"}},
+        "required": ["alliance_id"],
+    }},
     {"name": "civforge_propose_mechanics", "description": "Propose a game mechanic update (Grok swarm proposal lane)", "inputSchema": {
         "type": "object",
         "properties": {
@@ -163,6 +168,8 @@ def _call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         result = _http("POST", "/game/policy/unlock", {"policy_id": arguments["policy_id"]})
     elif name == "civforge_claim_tile":
         result = _http("POST", "/game/map/claim", {"x": int(arguments["x"]), "y": int(arguments["y"])})
+    elif name == "civforge_send_envoy":
+        result = _http("POST", "/game/diplomacy/send_envoy", {"alliance_id": arguments["alliance_id"]})
     elif name == "civforge_propose_mechanics":
         result = _http("POST", "/game/mechanics/propose", {
             "kind": arguments["kind"],

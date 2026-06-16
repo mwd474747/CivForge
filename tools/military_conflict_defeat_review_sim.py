@@ -28,12 +28,13 @@ def main() -> int:
     parser.add_argument("--mode", choices=("local", "kernel"), default="kernel")
     parser.add_argument("--rounds", type=int, default=50)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--defeat-seed", action="store_true", help="Start from low-fun / broken-alliance state")
     parser.add_argument("--kernel", default="http://127.0.0.1:8080")
     parser.add_argument("--no-write", action="store_true", help="Skip writing receipts/* artifacts")
     args = parser.parse_args()
 
     if args.mode == "local":
-        result = run_local_simulation(rounds=args.rounds, seed=args.seed)
+        result = run_local_simulation(rounds=args.rounds, seed=args.seed, defeat_seed=args.defeat_seed)
     else:
         result = run_kernel_simulation(kernel_url=args.kernel, rounds=args.rounds)
 

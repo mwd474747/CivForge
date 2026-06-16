@@ -19,7 +19,8 @@ from backend.civstudy_metadata import civstudy_reference_panel
 from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
 from backend.game_reset import apply_game_reset
 from backend.game_session import policy_flags, session_phase
-from backend.game_actions import action_catalog, claim_map_tile, player_cycle_decision, select_district, unlock_policy
+from backend.game_actions import action_catalog, claim_map_tile, player_cycle_decision, select_district, send_envoy, unlock_policy
+from backend.trust_erosion import trust_summary
 from backend.mechanics_proposals import (
     apply_mechanics,
     gate_mechanics,
@@ -290,6 +291,7 @@ async def get_state() -> Dict[str, Any]:
         "civstudy_sim": civstudy_sim_summary(game_state),
         "session_phase": session_phase(game_state),
         "action_catalog": action_catalog(game_state),
+        "trust_erosion": trust_summary(game_state),
         "session_history": game_state.get("session_history", [])[-5:],
         "mechanics_proposals": proposals_summary(game_state),
         "mechanics_overrides": game_state.get("mechanics_overrides", {}),
@@ -454,6 +456,9 @@ class MapClaimRequest(BaseModel):
     x: int
     y: int
 
+class SendEnvoyRequest(BaseModel):
+    alliance_id: str
+
 class MechanicsProposeRequest(BaseModel):
     kind: str
     title: str
@@ -494,6 +499,14 @@ async def game_policy_unlock(req: PolicyUnlockRequest, _claims: Dict[str, Any] =
 @app.post("/game/map/claim")
 async def game_map_claim(req: MapClaimRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
     result = claim_map_tile(game_state, req.x, req.y)
+    if result.get("error"):
+        return result
+    receipt_store.save_state("game_state", game_state)
+    return result
+
+@app.post("/game/diplomacy/send_envoy")
+async def game_send_envoy(req: SendEnvoyRequest, _claims: Dict[str, Any] = Depends(require_public_mode_token)) -> Dict[str, Any]:
+    result = send_envoy(game_state, req.alliance_id)
     if result.get("error"):
         return result
     receipt_store.save_state("game_state", game_state)

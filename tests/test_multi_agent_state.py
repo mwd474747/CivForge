@@ -41,7 +41,7 @@ def test_negotiations_for_api_includes_all_pending():
     gs = _blank_state()
     ensure_multi_agent_state(gs)
     for i in range(15):
-        add_negotiation(gs, "harper", f"offer {i}")
+        add_negotiation(gs, "player", f"offer {i}", from_agent="sebastian")
     for i in range(5):
         gs["negotiations"][i]["status"] = "accepted"
     api = negotiations_for_api(gs, resolved_limit=3)
@@ -62,7 +62,7 @@ def test_sync_victory_milestones_at_target():
 def test_respond_negotiation_accepts_by_unique_id():
     gs = _blank_state()
     ensure_multi_agent_state(gs)
-    entry = add_negotiation(gs, "sebastian", "Joint audit")
+    entry = add_negotiation(gs, "player", "Joint audit", from_agent="sebastian")
     result = respond_negotiation(gs, entry["id"], accept=True)
     assert result["status"] == "accepted"
     assert any(a["parties"] == ["player", "sebastian"] for a in gs["alliances"])

@@ -169,12 +169,20 @@ def run_local_simulation(
     *,
     rounds: int = 50,
     seed: Optional[int] = 42,
+    defeat_seed: bool = False,
 ) -> Dict[str, Any]:
-    """In-process 50-round block with 5 agents (deterministic when seed set)."""
+    """In-process multi-round block with 5 agents (deterministic when seed set)."""
     if seed is not None:
         random.seed(seed)
 
     game_state = build_initial_game_state()
+    if defeat_seed:
+        game_state["turn"] = 22
+        game_state["player"]["fun_score"] = 30.0
+        game_state["victory_progress"]["joint_progress"] = 8
+        for alliance in game_state.get("alliances", []):
+            if "player" in alliance.get("parties", []):
+                alliance["status"] = "broken"
     orchestrator = _new_orchestrator()
     registry = build_default_registry()
     round_log: List[Dict[str, Any]] = []

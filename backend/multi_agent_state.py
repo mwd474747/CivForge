@@ -19,6 +19,12 @@ from backend.game_session import (
     player_alliance_count,
     policy_flags,
 )
+from backend.trust_erosion import (
+    TRUST_CRITICAL_THRESHOLD,
+    apply_negotiation_recovery,
+    negotiation_success_rate,
+    trust_tier,
+)
 
 AGENT_IDS = ("player", "harper", "sebastian", "lysander", "aris")
 
@@ -277,14 +283,25 @@ def tick_multi_agent_state(game_state: Dict[str, Any], decisions: Optional[Dict[
         drift = random.randint(-2, 4)
         if envoy and drift > 2:
             drift = 2
+        shield_until = alliance.get("envoy_shield_until_turn")
+        if isinstance(shield_until, int) and turn <= shield_until and drift > 0:
+            drift = min(drift, 1)
+        if isinstance(shield_until, int) and turn > shield_until:
+            alliance.pop("envoy_shield_until_turn", None)
         alliance["betrayal_risk"] = max(0, min(100, alliance.get("betrayal_risk", 10) + drift))
         if alliance["betrayal_risk"] > 40 and alliance["status"] == "active":
             events.append(
-                f"Turn {turn}: Alliance {alliance['id']} betrayal risk elevated to {alliance['betrayal_risk']}%."
+                f"Turn {turn}: Alliance {alliance['id']} betrayal risk elevated to {alliance['betrayal_risk']}% "
+                f"({trust_tier(alliance['betrayal_risk'])})."
             )
         should_break = alliance["betrayal_risk"] >= BETRAYAL_COLLAPSE_THRESHOLD
         break_odds = 7 if envoy else 12
         if watch and alliance["betrayal_risk"] >= BETRAYAL_WATCH_THRESHOLD and random.randint(1, 100) <= break_odds:
+            should_break = True
+        if (
+            alliance["betrayal_risk"] >= TRUST_CRITICAL_THRESHOLD
+            and random.randint(1, 100) <= (18 if envoy else 25)
+        ):
             should_break = True
         if should_break and alliance["status"] in ("active", "provisional"):
             alliance["status"] = "broken"
@@ -364,6 +381,16 @@ def add_negotiation(game_state: Dict[str, Any], to: str, offer: str, from_agent:
     game_state["events"].append(
         f"Turn {game_state['turn']}: {AGENT_LABELS.get(from_agent, from_agent)} proposed to {AGENT_LABELS.get(to, to)}: {offer}"
     )
+    if from_agent == "player" and to in AGENT_IDS and to != "player":
+        rate = negotiation_success_rate(game_state, to)
+        entry["success_rate_pct"] = rate
+        roll = random.randint(1, 100)
+        if roll <= rate:
+            return respond_negotiation(game_state, entry["id"], accept=True)
+        entry["status"] = "declined"
+        game_state["events"].append(
+            f"Turn {game_state['turn']}: {AGENT_LABELS.get(to, to)} declined (roll {roll} > {rate}% success rate)."
+        )
     return entry
 
 
@@ -380,6 +407,10 @@ def respond_negotiation(game_state: Dict[str, Any], neg_id: str, accept: bool) -
                         f"({alliance_soft_cap(game_state)}) reached."
                     )
                     return neg
+                apply_negotiation_recovery(
+                    game_state,
+                    neg["to"] if neg["from"] == "player" else neg["from"],
+                )
                 alliance = {
                     "id": f"alliance-{neg['from']}-{neg['to']}-{game_state['turn']}",
                     "parties": sorted([neg["from"], neg["to"]]),

@@ -14,6 +14,10 @@ from backend.game_session import (
 )
 from backend.multi_agent_state import AGENT_LABELS, ensure_multi_agent_state, sync_victory_milestones
 
+SEND_ENVOY_INFLUENCE_COST = 6
+SEND_ENVOY_RISK_REDUCTION = 15
+SEND_ENVOY_SHIELD_TURNS = 3
+
 _POLICY_TIER_TURN = {1: 6, 2: 12, 3: 18}
 
 
@@ -54,6 +58,22 @@ def action_catalog(game_state: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "district_select": {"influence_cost": DISTRICT_SELECT_INFLUENCE_COST, "districts": list(_district_catalog().keys())},
         "map_claim": {"influence_cost": MAP_CLAIM_INFLUENCE_COST},
+        "send_envoy": {
+            "influence_cost": SEND_ENVOY_INFLUENCE_COST,
+            "risk_reduction": SEND_ENVOY_RISK_REDUCTION,
+            "shield_turns": SEND_ENVOY_SHIELD_TURNS,
+            "available": bool(policy_flags(game_state).get("envoy_network")),
+            "alliances": [
+                {
+                    "id": a.get("id"),
+                    "parties": a.get("parties"),
+                    "betrayal_risk": a.get("betrayal_risk"),
+                    "status": a.get("status"),
+                }
+                for a in game_state.get("alliances", [])
+                if "player" in a.get("parties", []) and a.get("status") in ("active", "provisional")
+            ],
+        },
         "policies": policies,
         "active_district_id": sim.get("active_district_id"),
     }
@@ -198,6 +218,58 @@ def claim_map_tile(game_state: Dict[str, Any], x: int, y: int) -> Dict[str, Any]
         "influence_spent": cost,
         "territories": game_state["player"]["territories"],
         "victory_progress": vp,
+    }
+
+
+def _find_player_alliance(game_state: Dict[str, Any], alliance_id: str) -> Optional[Dict[str, Any]]:
+    for alliance in game_state.get("alliances", []):
+        if alliance.get("id") != alliance_id:
+            continue
+        if "player" not in alliance.get("parties", []):
+            continue
+        if alliance.get("status") not in ("active", "provisional"):
+            continue
+        return alliance
+    return None
+
+
+def send_envoy(game_state: Dict[str, Any], alliance_id: str) -> Dict[str, Any]:
+    """Spend influence to reduce betrayal risk when envoy_network policy is active (WP-GROK-POLICY-003)."""
+    ensure_multi_agent_state(game_state)
+    if not policy_flags(game_state).get("envoy_network"):
+        return {
+            "error": "envoy_network policy required",
+            "hint": "Unlock envoy_network via POST /game/policy/unlock",
+        }
+
+    alliance = _find_player_alliance(game_state, alliance_id)
+    if not alliance:
+        return {"error": "alliance not found or not player-owned", "alliance_id": alliance_id}
+
+    resources = player_resources(game_state)
+    if resources.get("influence", 0) < SEND_ENVOY_INFLUENCE_COST:
+        return {
+            "error": "not enough influence",
+            "required": SEND_ENVOY_INFLUENCE_COST,
+            "available": resources.get("influence", 0),
+        }
+
+    resources["influence"] -= SEND_ENVOY_INFLUENCE_COST
+    before = int(alliance.get("betrayal_risk", 0))
+    alliance["betrayal_risk"] = max(0, before - SEND_ENVOY_RISK_REDUCTION)
+    alliance["envoy_shield_until_turn"] = game_state["turn"] + SEND_ENVOY_SHIELD_TURNS
+
+    msg = (
+        f"Turn {game_state['turn']}: Envoy dispatched to {alliance_id} — "
+        f"betrayal risk {before}% → {alliance['betrayal_risk']}% "
+        f"(shield {SEND_ENVOY_SHIELD_TURNS} turns)."
+    )
+    game_state.setdefault("events", []).append(msg)
+    return {
+        "alliance_id": alliance_id,
+        "betrayal_risk": alliance["betrayal_risk"],
+        "influence_spent": SEND_ENVOY_INFLUENCE_COST,
+        "envoy_shield_until_turn": alliance["envoy_shield_until_turn"],
     }
 
 

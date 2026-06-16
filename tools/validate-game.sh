@@ -57,6 +57,7 @@ post("/game/reset", {})
 s = get("/state")
 assert s["status"] == "active"
 assert "mechanics_proposals" in s, "missing mechanics_proposals on /state"
+assert "trust_erosion" in s, "missing trust_erosion on /state"
 assert len(s.get("map_tiles", [])) == 25
 assert set((s.get("mechanics_lanes") or {}).keys()) == {"military", "economic", "cultural"}
 cs = s.get("civstudy_reference", {})
@@ -89,7 +90,8 @@ for mech in (
     "civforge_list_mechanics_proposals",
 ):
     assert mech in names, f"missing MCP tool {mech}"
-assert len(names) == 16, f"expected 16 MCP tools, got {len(names)}"
+assert "civforge_send_envoy" in names
+assert len(names) == 17, f"expected 17 MCP tools, got {len(names)}"
 print("  API + MCP probes OK")
 PY
 

@@ -140,6 +140,11 @@
           <button id="policy-btn" type="button">Spend Influence</button>
         </div>
       </div>
+      <div id="envoy-panel" class="hidden" style="margin-top:0.75rem">
+        <h3 style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--accent)">Send Envoy (6 influence)</h3>
+        <select id="envoy-alliance-select" style="width:100%;margin-bottom:0.4rem"></select>
+        <button id="envoy-btn" type="button">Dispatch Envoy</button>
+      </div>
       <p id="player-action-result" class="sub" style="margin-top:0.5rem"></p>
     </div>
 
@@ -372,6 +377,18 @@
         const ended = data.session_phase === "epilogue" || data.session_phase === "defeat";
         document.getElementById("district-btn").disabled = ended;
         document.getElementById("policy-btn").disabled = ended || !unlockable.length;
+        const envoy = cat.send_envoy || {};
+        const envoyPanel = document.getElementById("envoy-panel");
+        const eSel = document.getElementById("envoy-alliance-select");
+        if (envoy.available && (envoy.alliances || []).length) {
+          envoyPanel.classList.remove("hidden");
+          eSel.innerHTML = envoy.alliances.map(a =>
+            "<option value='" + a.id + "'>" + a.id + " (risk " + a.betrayal_risk + "%)</option>"
+          ).join("");
+          document.getElementById("envoy-btn").disabled = ended;
+        } else {
+          envoyPanel.classList.add("hidden");
+        }
       }
 
       function renderNegotiations(data) {
@@ -749,6 +766,19 @@
         });
         const d = await r.json();
         document.getElementById("player-action-result").textContent = d.error || ("Unlocked: " + d.policy_id);
+        await loadState();
+      };
+      document.getElementById("envoy-btn").onclick = async () => {
+        const aid = document.getElementById("envoy-alliance-select").value;
+        if (!aid) return;
+        const r = await fetch(apiBase + "/game/diplomacy/send_envoy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ alliance_id: aid }),
+        });
+        const d = await r.json();
+        document.getElementById("player-action-result").textContent = d.error ||
+          ("Envoy → " + aid + ", risk now " + d.betrayal_risk + "%");
         await loadState();
       };
       document.getElementById("neg-send").onclick = async () => {

@@ -87,7 +87,7 @@ def test_betrayal_watch_can_break_alliance(monkeypatch):
         "id": "alliance-player-test",
         "parties": ["player", "harper"],
         "status": "active",
-        "betrayal_risk": 60,
+        "betrayal_risk": 70,
         "formed_turn": 1,
         "note": "test",
     }]
