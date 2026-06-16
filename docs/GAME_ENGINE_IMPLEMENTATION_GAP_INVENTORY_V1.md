@@ -10,9 +10,9 @@
 
 CivForge has a **working governance kernel** with a **playable civ layer**: turn advance, multi-agent map/diplomacy (incl. AI-initiated negotiations), mechanics registry ticks, CivStudy policy-tree bridge, **joint + alternate victory paths** (cultural, domination), competition modes, player agent strategies, receipts, dashboard, and **17 MCP tools**.
 
-Remaining gaps are mostly **platform** (JWT `:8081`, save slots, Vercel deploy) and **polish** (turn pacing costs, full wonder card-text).
+Remaining gaps are mostly **platform** (save slots, Vercel deploy) and **polish** (turn pacing costs, full wonder card-text).
 
-**Validation baseline:** **138 pytest** · `bash tools/validate-game.sh --read-only`
+**Validation baseline:** **147 pytest** · `bash tools/validate-game.sh --read-only`
 
 ---
 
@@ -25,6 +25,8 @@ Remaining gaps are mostly **platform** (JWT `:8081`, save slots, Vercel deploy) 
 | Block A | ✅ closed | Wonder, cultural path, policy branch |
 | Block B | ✅ closed | Competition depth, player agent |
 | Block C | ✅ closed | Cultural epilogue, domination path, soak, AI diplomacy, tooling |
+| Block D | ✅ closed | JWT identity on mutators (`:8081`) |
+| Auth / identity | ✅ | `CIVFORGE_REQUIRE_AUTH=1` + static token or govern JWT |
 | Alternate victory | ✅ | `cultural_alternate`, `domination`, `joint` + epilogue UX |
 | AI diplomacy | ✅ | Agents propose negotiations to player each cycle |
 | Tooling | ✅ | `GET /game/mechanics/status`, `civforge_cli snapshot` |
@@ -39,7 +41,7 @@ Remaining gaps are mostly **platform** (JWT `:8081`, save slots, Vercel deploy) 
 
 | Gap | Suggested work |
 |-----|----------------|
-| Auth on mutators | Partial — `CIVFORGE_REQUIRE_AUTH=1`; full JWT via `:8081` |
+| ~~`:8081` JWT identity~~ | **Fixed Block D** — `backend/auth_identity.py`, `GET /game/auth/status` |
 | CivStudy live corpus | Optional metadata fetch |
 | Save slots | Named sessions / export JSON |
 

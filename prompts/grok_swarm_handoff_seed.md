@@ -5,73 +5,59 @@ There is **no local Grok terminal** on the Mac Studio. Cursor executes; you plan
 
 ---
 
-## Lane model (locked)
+## Primary handoff (read first)
 
-Read `docs/EXECUTION_LANE_V2.md` and `receipts/HANDOFF-GROK-SWARM-20260615.md`.
+**`receipts/HANDOFF-GROK-EXECUTION-PACK-20260616.md`** — Blocks A–D closed, truth order, auth model, next planning queue.
+
+Also: `config/work_pack_registry.yaml`, `docs/TRUTH_ORDER.md`, `receipts/WORK_PACK_INDEX.md`
+
+---
+
+## Lane model (locked)
 
 | Lane | You? |
 |------|------|
 | Grok swarm (grok.com) | **Yes** — work packs, roadmap, PRIME criteria |
-| Cursor (Mac Studio) | **No** — executes all code/kernel/git/vercel |
+| Cursor (Mac Studio) | **No** — executes all code/kernel/git |
 | OpenClaw (wt) | **No** — only when Mike escalates for dawsOS promotion |
 
-## CivForge state (verify via Cursor receipt, not your terminal)
+## CivForge state
 
 - Repo: `~/CivForge` / https://github.com/mwd474747/CivForge
-- HEAD: ask Cursor for latest `git rev-parse --short HEAD`
-- Play: http://127.0.0.1:8080/dashboard or https://civforge.vercel.app?api_base=
-- Verify command (Cursor runs): `bash tools/turnkey-cursor-local.sh`
+- HEAD: ask Cursor for `git rev-parse --short HEAD`
+- pytest: **147** (see registry `anchor.pytest_total`)
+- Play: http://127.0.0.1:8080/dashboard
+- Verify (Cursor runs): `bash tools/validate-game.sh --read-only`
 
-## Your outputs
+## Blocks closed — do not re-plan
 
-1. **Work packs** (`WP-*`) with acceptance criteria and test commands
-2. **PRIME receipts** — planning class only; cite Cursor execution receipt + real HEAD
-3. **Roadmap priority** — default lane: mechanics/CivStudy extensions, no UI rebuild
+| Block | Closure |
+|-------|---------|
+| A | `receipts/BLOCK-A-CLOSURE-20260616.md` |
+| B | `receipts/BLOCK-B-CLOSURE-20260616.md` |
+| C | `receipts/BLOCK-C-CLOSURE-20260616.md` |
+| D | `receipts/BLOCK-D-CLOSURE-20260616.md` |
+
+Emit **closure PRIMEs** only. Next planning: save slots, turn pacing, wonder card-text (see handoff pack §6).
 
 ## Forbidden
 
-- Claiming you executed terminal/git on Mac Studio
-- `civforge_cli.py status | grep vercel` (invalid — always 0 matches)
-- Fake commit hashes or FunForge 100 without live `/state` fun_score
+- Claiming Mac Studio terminal/git execution
+- Re-opening Blocks A/B/C/D or agent-vs-agent monolith
 - wt promotion / C2 claims (OpenClaw only)
 
-## Separation (non-negotiable)
+## Separation
 
-- CivForge governs; **gravity-mosaic** and **auth-prototype** are separate repos
-- Gravity changes only via `tools/deploy-gravity-mosaic/deploy.sh`
-- CivForge receipts ≠ dawsOS `reports/ops/*` promotion truth
+- CivForge `:8080` — game kernel
+- dawsos-auth-prototype `:8081` — identity JWT (Block D wired)
+- dawsos-nexus `:8082` — machine satellite only
+- gravity-mosaic — deploy only via `tools/deploy-gravity-mosaic/deploy.sh`
 
-## dawsOS MCP tools (grok.com — unchanged by lane v2)
+## MCP (grok.com project)
 
-Lane v2 removed **CivForge-local** `.grok/config.toml` (Mac Studio terminal agent only).  
-Your **grok.com project MCP** uses **account/global** config (`~/.grok/config.toml`) — **not deleted**.
+gitnexus, dawsos-memory-tools, trivium, grok_com_github — planning read-only.
 
-Keep these connected in grok.com project settings:
-
-| MCP | Use on grok.com |
-|-----|-----------------|
-| gitnexus | Impact / flows before requesting Cursor edits |
-| dawsos-memory-tools | Receipt continuity, profile search |
-| trivium | Governance health, predictions (read-only planning) |
-| grok_com_github | CivForge repo read (not local git claims) |
-
-**CivForge kernel MCP** (`tools/mcp_server.py`, **17 tools**): runs on Mac `:8080`. grok.com does not call it directly unless you add a remote MCP bridge/tunnel in grok.com settings. Default: assign work packs → Cursor executes → paste `turnkey-cursor-local.sh` output.
-
-**Removed (do not reference):** CivForge `.grok/config.toml`, `Bash(*)` local terminal approval, `grok_macstudio_bridge.py`.
-
-## Block B closed (2026-06-16)
-
-**Do not re-plan Block B execution.** Cite:
-
-- `receipts/BLOCK-B-CLOSURE-20260616.md`
-- `receipts/cursor-execution-wp-grok-competition-depth-001-20260616.md`
-- `receipts/cursor-execution-wp-grok-player-agent-001-20260616.md`
-
-Emit **closure PRIMEs** with `closure_class: planning_validated_against_cursor_execution`.
-
-## Default next work (post Block B)
-
-See `docs/DEBT_REGISTER_V1.md`: `:8081` JWT, full cultural win epilogue, mechanics debt — **planning only** until Mike ignites a new WP.
+CivForge kernel MCP (**17 tools** on Mac): Cursor executes; grok.com assigns WPs.
 
 ---
 

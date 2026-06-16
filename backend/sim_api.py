@@ -16,6 +16,7 @@ from core import AgentBrain, FunForge, GovernanceOrchestrator, ReceiptStore
 from core.swarm_join import FORGE_COORDINATOR_ID
 from core.mechanics_registry import build_default_registry, default_mechanics_lanes
 from backend.civstudy_flavor import game_state_note
+from backend.auth_identity import auth_status_summary, identity_auth_enabled, looks_like_jwt, verify_identity_token
 from backend.agent_control import agent_controls_summary, issue_directive, select_agent, toggle_autonomy
 from backend.competition_modes import (
     COMPETITION_MODES,
@@ -87,6 +88,17 @@ def _constant_time_match(candidate: str, allowed: list[str]) -> bool:
     return any(token and hmac.compare_digest(candidate, token) for token in allowed)
 
 
+def _extract_auth_candidates(
+    authorization: Optional[str],
+    x_civforge_token: Optional[str],
+    x_nexus_api_key: Optional[str],
+) -> list:
+    candidates = [x for x in (x_civforge_token, x_nexus_api_key) if isinstance(x, str) and x]
+    if isinstance(authorization, str) and authorization:
+        candidates.append(authorization.split(" ", 1)[1] if authorization.lower().startswith("bearer ") else authorization)
+    return candidates
+
+
 def require_public_mode_token(
     authorization: Optional[str] = Header(None),
     x_civforge_token: Optional[str] = Header(None, alias="X-CivForge-Token"),
@@ -94,24 +106,38 @@ def require_public_mode_token(
 ) -> Dict[str, Any]:
     """Optional exposure guard for mutating routes.
 
-    Local development remains permissive by default. If the kernel is intentionally
-    exposed through a tunnel or public host, set `CIVFORGE_PUBLIC_MODE=1` and one
-    of `CIVFORGE_OPERATOR_TOKEN`, `CIVFORGE_API_KEY`, or `NEXUS_API_KEY`.
+    Local development remains permissive by default. When `CIVFORGE_PUBLIC_MODE=1` or
+    `CIVFORGE_REQUIRE_AUTH=1`, accept static tokens or JWT verified via dawsos-auth-prototype (:8081).
     """
     if not _truthy_env("CIVFORGE_PUBLIC_MODE") and not _truthy_env("CIVFORGE_REQUIRE_AUTH"):
-        return {"public_mode": False, "scope": "local"}
+        return {"public_mode": False, "scope": "local", "source": "local_permissive"}
 
     allowed = [
         os.environ.get("CIVFORGE_OPERATOR_TOKEN", ""),
         os.environ.get("CIVFORGE_API_KEY", ""),
         os.environ.get("NEXUS_API_KEY", ""),
     ]
-    candidates = [x for x in (x_civforge_token, x_nexus_api_key) if isinstance(x, str) and x]
-    if isinstance(authorization, str) and authorization:
-        candidates.append(authorization.split(" ", 1)[1] if authorization.lower().startswith("bearer ") else authorization)
+    candidates = _extract_auth_candidates(authorization, x_civforge_token, x_nexus_api_key)
     if any(_constant_time_match(candidate, allowed) for candidate in candidates):
-        return {"public_mode": True, "scope": "mutate"}
-    raise HTTPException(401, "Mutating routes require a valid CivForge or Nexus API token (CIVFORGE_PUBLIC_MODE or CIVFORGE_REQUIRE_AUTH)")
+        return {"public_mode": True, "scope": "mutate", "source": "static_token"}
+
+    if identity_auth_enabled():
+        for candidate in candidates:
+            if looks_like_jwt(candidate):
+                verified = verify_identity_token(candidate, required_scope="govern")
+                if verified.get("valid"):
+                    return {
+                        "public_mode": True,
+                        "scope": verified.get("scope", "govern"),
+                        "source": verified.get("source"),
+                        "identity": verified.get("identity"),
+                    }
+
+    raise HTTPException(
+        401,
+        "Mutating routes require static token or govern JWT from dawsos-auth-prototype :8081 "
+        "(CIVFORGE_PUBLIC_MODE or CIVFORGE_REQUIRE_AUTH)",
+    )
 
 
 def send_telemetry_to_nexus(turn: int, fun_score: float, resources: dict, extra: dict = None):
@@ -604,6 +630,12 @@ async def game_send_envoy(req: SendEnvoyRequest, _claims: Dict[str, Any] = Depen
     return result
 
 
+
+@app.get("/game/auth/status")
+async def game_auth_status() -> Dict[str, Any]:
+    """Identity plane posture — dawsos-auth-prototype :8081 (WP-GROK-JWT-IDENTITY-001)."""
+    return auth_status_summary()
+
 @app.get("/game/mechanics/status")
 async def game_mechanics_status() -> Dict[str, Any]:
     """Registry module list + tick order (machine-readable tooling surface)."""
@@ -943,23 +975,29 @@ async def what_if_simulation(scenario: dict, _claims: Dict[str, Any] = Depends(r
 NEXUS_AUTH_BASE = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
 
 def require_govern_token(authorization: str = Header(None)):
-    """require_machine_satellite_key (renamed focus per agent rec + user Q2 'remove entirely').
-    Validate machine govern credential from dawsos-nexus for governance_kernel satellite.
-    Requires: x-nexus-api-key (preferred satellite key) or Bearer that passes /api/health.
-    Exact NEXUS_OPERATOR_TOKEN match path dropped (no operator fallback for CivForge satellite).
-    Thin HTTP only. Machine/command context only. Identity via auth-prototype :8081 long-term.
-    """
+    """Protected governance path: prefer identity JWT (:8081), fallback Nexus satellite health."""
     if not authorization:
-        raise HTTPException(401, "Auth token required (dawsos-nexus machine satellite key for governance_kernel)")
+        raise HTTPException(401, "Auth token required (govern JWT from :8081 or Nexus satellite key)")
     token = authorization.split(" ")[-1] if " " in authorization else authorization
-    # Verify via x-nexus-api-key or Bearer + health (satellite posture, no operator exact match)
+    if looks_like_jwt(token):
+        verified = verify_identity_token(token, required_scope="govern")
+        if verified.get("valid"):
+            return {
+                "scope": verified.get("scope", "govern"),
+                "identity": verified.get("identity"),
+                "source": verified.get("source"),
+            }
     try:
-        r = requests.get(f"{NEXUS_AUTH_BASE}/api/health", headers={"Authorization": f"Bearer {token}", "x-nexus-api-key": token}, timeout=4)
+        r = requests.get(
+            f"{NEXUS_AUTH_BASE}/api/health",
+            headers={"Authorization": f"Bearer {token}", "x-nexus-api-key": token},
+            timeout=4,
+        )
         if r.status_code == 200:
             return {"scope": "govern", "identity": "nexus-auth", "source": "nexus-verify"}
     except Exception:
         pass
-    raise HTTPException(401, "Invalid or insufficient dawsos-nexus satellite key for govern action (operator path removed per boundary)")
+    raise HTTPException(401, "Invalid govern credential — use :8081 JWT or Nexus satellite key")
 
 @app.post("/governance/protected_advance")
 async def protected_advance(claims: dict = Depends(require_govern_token)):

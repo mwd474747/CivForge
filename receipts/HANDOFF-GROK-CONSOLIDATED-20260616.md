@@ -6,7 +6,7 @@
 **Execution baseline:** `0f1aad8` (101 pytest); prior handoff `receipts/HANDOFF-GROK-PLANNING-QUEUE-20260616.md`  
 **Cursor review author:** Cursor partner lane (validation only)
 
-> **UPDATE 2026-06-16 (post-land):** Block A **closed** @ `1037950`; Block B **closed** @ `2530fc2`; Block C **closed** @ `a78e185` — see `BLOCK-*-CLOSURE`, `config/work_pack_registry.yaml`. **138 pytest.** §5 remains historical scope authority. Grok: **closure PRIMEs only** — do not re-plan Block A/B/C or RESUBMIT PRIMEs.
+> **UPDATE 2026-06-16 (post-land):** Blocks A–D **closed** — see `receipts/HANDOFF-GROK-EXECUTION-PACK-20260616.md`. **147 pytest.** Grok: **closure PRIMEs only**.
 
 ---
 

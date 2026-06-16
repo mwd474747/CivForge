@@ -1,6 +1,13 @@
 # AGENTS.md - CivForge Agentic Architecture
 
-**Bootstrap anchor:** `docs/TRUTH_ORDER.md` → `config/work_pack_registry.yaml` → latest `receipts/cursor-execution-*.md`
+**Bootstrap anchor:** `docs/TRUTH_ORDER.md` → `config/work_pack_registry.yaml` → `receipts/HANDOFF-GROK-EXECUTION-PACK-20260616.md`
+
+---
+
+## Grok planning bootstrap
+
+Read **`receipts/HANDOFF-GROK-EXECUTION-PACK-20260616.md`** first (Blocks A–D closed, auth model, next queue).  
+Short seed: `prompts/grok_swarm_handoff_seed.md`
 
 ---
 
@@ -25,8 +32,10 @@ WP lifecycle: `docs/WORK_PACK_LIFECYCLE.md`
 3. Read `docs/TRUTH_ORDER.md` — do not conflate CivForge receipts with dawsOS `reports/ops/*`
 4. If discussing landed work: open matching `receipts/cursor-execution-*.md` — **not** stale Grok PRIMEs
 
-**Block A (closed @ `1037950`):** `receipts/BLOCK-A-CLOSURE-20260616.md` — do not re-ignite.  
-**Block B (closed):** `receipts/BLOCK-B-CLOSURE-20260616.md` — COMPETITION-DEPTH + PLAYER-AGENT landed; Grok emits closure PRIMEs only.
+**Block A (closed):** `receipts/BLOCK-A-CLOSURE-20260616.md`  
+**Block B (closed):** `receipts/BLOCK-B-CLOSURE-20260616.md`  
+**Block C (closed):** `receipts/BLOCK-C-CLOSURE-20260616.md`  
+**Block D (closed):** `receipts/BLOCK-D-CLOSURE-20260616.md` — JWT identity on mutators.
 
 ---
 

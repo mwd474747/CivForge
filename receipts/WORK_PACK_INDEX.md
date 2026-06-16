@@ -44,6 +44,22 @@ Closure doc: `receipts/BLOCK-C-CLOSURE-20260616.md`
 
 ---
 
+## Closed — Block D
+
+| WP | Receipt |
+|----|---------|
+| WP-GROK-JWT-IDENTITY-001 | `receipts/cursor-execution-wp-grok-block-d-20260616.md` |
+
+Closure doc: `receipts/BLOCK-D-CLOSURE-20260616.md`
+
+---
+
+## Grok handoff (all blocks)
+
+**Primary bootstrap:** `receipts/HANDOFF-GROK-EXECUTION-PACK-20260616.md`
+
+---
+
 ## Retired / superseded
 
 | ID | Reason |

@@ -73,11 +73,27 @@ bash tools/validate-game.sh --read-only   # or --restart after code change
 
 ---
 
+## 4c. Block D closure (Cursor execution)
+
+| Field | Value |
+|-------|--------|
+| Status | **closed** |
+| Receipt | `receipts/cursor-execution-wp-grok-block-d-20260616.md` |
+| Closure | `receipts/BLOCK-D-CLOSURE-20260616.md` |
+| Grok pack | `receipts/HANDOFF-GROK-EXECUTION-PACK-20260616.md` |
+| pytest | 147 |
+
+**Do not re-ignite Block D.** JWT identity on mutators is closed.
+
+---
+
 ## 5. Next open work
 
-Blocks A, B, and C are **closed** — see closure receipts under `receipts/BLOCK-*-CLOSURE-20260616.md`.
+Blocks A, B, C, and D are **closed** — see closure receipts under `receipts/BLOCK-*-CLOSURE-20260616.md`.
 
-Grok: emit closure PRIMEs only; next planning is platform debt (`:8081` JWT, save slots, turn pacing) — no duplicate subsystems.
+**Grok bootstrap:** read `receipts/HANDOFF-GROK-EXECUTION-PACK-20260616.md` first.
+
+Next planning: save slots, turn pacing, wonder card-text depth — no duplicate subsystems.
 
 ---
 

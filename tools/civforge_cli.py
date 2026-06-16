@@ -188,10 +188,9 @@ def main():
         subprocess.run(["python3", poller_script, "--once"])
 
     elif args.cmd == "auth":
-        # Delegate to the thin client for the separate dawsos-auth-prototype (enables protected governance)
-        auth_script = str(ROOT / "tools" / "dawsos_auth_client.py")
-        if args.action in ("register-device", "token", "verify"):
-            cmd = ["python3", auth_script, args.action]
+        identity_script = str(ROOT / "tools" / "dawsos_auth_identity_client.py")
+        if args.action in ("register-device", "register-agent", "token", "verify", "health"):
+            cmd = ["python3", identity_script, args.action]
             if args.arg1:
                 cmd.append(args.arg1)
             if args.arg2:
@@ -200,21 +199,25 @@ def main():
                 cmd.append(args.arg3)
             subprocess.run(cmd)
         elif args.action == "start":
-            print("=== Enabling auth (separate dawsos-auth-prototype on :8081) ===")
+            print("=== Enabling identity auth (dawsos-auth-prototype on :8081) ===")
             print("  cd ~/Documents/GitHub/dawsos-auth-prototype")
             print("  python3 -m uvicorn backend.auth_api:app --reload --host 127.0.0.1 --port 8081")
             print("")
             print("Then: python3 tools/civforge_cli.py auth register-device <id> [pk]")
             print("      python3 tools/civforge_cli.py auth token <identity_id> govern")
+            print("      export CIVFORGE_REQUIRE_AUTH=1")
+            print("  Nexus satellite (:8082) remains separate: tools/dawsos_auth_client.py")
         elif args.action == "status":
-            print("Auth (separate dawsos-auth-prototype):")
-            print("  Repo: https://github.com/mwd474747/dawsos-auth-prototype")
-            print("  Path: ~/Documents/GitHub/dawsos-auth-prototype")
-            print("  Port: 8081")
-            print("  Client: tools/dawsos_auth_client.py")
-            print("  See SEPARATION.md and docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md")
+            try:
+                s = _get("/game/auth/status")
+                print(json.dumps(s, indent=2))
+            except Exception:
+                print("Auth identity plane (:8081):")
+                print("  Client: tools/dawsos_auth_identity_client.py")
+                print("  Kernel route: GET /game/auth/status (when :8080 live)")
+                print("  See SEPARATION.md and docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md")
         else:
-            print("Unknown auth action. Try: status, start, register-device, token, verify")
+            print("Unknown auth action. Try: status, start, health, register-device, register-agent, token, verify")
     else:
         p.print_help()
 

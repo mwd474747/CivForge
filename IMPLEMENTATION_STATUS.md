@@ -17,7 +17,7 @@ CivForge = **local Python FastAPI governance backend** running on `0.0.0.0:8080`
 - receipts/ — growing set of real governance-cycle and work-pack markdown artifacts (including auth-prototype-push, git-tools, LOCKED-CIV-GAME-PLAN, mechanics-extension-sim receipts)
 - Gravity deploy tool untouched and canonical for the separate project
 - dawsos-auth-prototype (separate repo https://github.com/mwd474747/dawsos-auth-prototype) — pushed after literal verification; only thin client integration in CivForge/tools/dawsos_auth_client.py + optional protected_advance demo
-- **Civ Game Layer**: **Block A + B + C closed**. **138 pytest.** Truth plane: `docs/TRUTH_ORDER.md`, `config/work_pack_registry.yaml`. Alternate victory (cultural + domination), AI diplomacy proposals, `GET /game/mechanics/status`, `civforge_cli snapshot`. See `docs/SIM_MILESTONE_SYNC_DECISION_V1.md`.
+- **Civ Game Layer**: **Blocks A–D closed**. **147 pytest.** Grok handoff: `receipts/HANDOFF-GROK-EXECUTION-PACK-20260616.md`. JWT identity: `GET /game/auth/status`, `tools/dawsos_auth_identity_client.py`.
 
 **Persistence**: Enabled (ReceiptStore now supports db_path). State snapshots + receipts load on startup.
 **MCP readiness**: `tools/mcp_server.py` — **17 tools** (status, advance, reset, found city, negotiate/respond, what-if, governance propose/gate, district/policy/map claim, send envoy, mechanics propose/gate/apply/list).

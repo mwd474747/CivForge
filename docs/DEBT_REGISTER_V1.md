@@ -1,6 +1,6 @@
 # Debt Register v1
 
-**Status:** `current` (post Block C — run `git rev-parse --short HEAD` for anchor)  
+**Status:** `current` (post Block D — run `git rev-parse --short HEAD` for anchor)  
 **Not promotion truth** — engineering backlog for CivForge kernel only.
 
 ---
@@ -10,7 +10,7 @@
 | ID | Debt | Notes |
 |----|------|-------|
 | ~~D-H1~~ | ~~Cultural path has no win epilogue~~ | **Fixed Block C** — `alternate_victory` + epilogue_message + dashboard overlay |
-| D-H2 | Handoff / PRIME proliferation | Mitigated by `config/work_pack_registry.yaml` + truth order — still many historical `.md` files |
+| D-H2 | Handoff / PRIME proliferation | Mitigated by `HANDOFF-GROK-EXECUTION-PACK-20260616.md` + registry |
 | D-H3 | Grok temporal staleness | Process fix in `AGENT_CLAIMS_POLICY.md`; requires Grok to read registry each session |
 
 ---
@@ -26,6 +26,7 @@
 | D-M4 | ~~Block B not started~~ | **Closed** Block B |
 | D-M5 | ~~AI diplomacy initiative missing~~ | **Fixed Block C** — `tick_ai_negotiation_proposals` |
 | D-M6 | ~~Domination victory path missing~~ | **Fixed Block C** — `domination_victory.py` |
+| D-M7 | ~~`:8081` JWT on mutators~~ | **Fixed Block D** — `auth_identity.py` + `/game/auth/status` |
 
 ---
 

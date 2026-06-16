@@ -122,7 +122,6 @@ assert st.get("autoplay", {}).get("active") is True
 post("/game/player/strategy", {"strategy": "science"})
 s3 = get("/state")
 assert s3["player_agent"]["strategy"] == "science"
-print("  API + MCP + Block A + Block B probes OK")
 
 # Block C probes
 ms = get("/game/mechanics/status")
@@ -132,8 +131,15 @@ assert ms["tick_order"] == "mechanics_first_then_alternate_victory_then_mileston
 s4 = get("/state")
 assert "domination_path" in s4.get("victory_progress", {}), "missing victory_progress.domination_path (Block C)"
 assert s4["work_pack_registry"].get("closed_block_c") is True, "Block C should be closed in registry"
-print("  Block C probes OK")
 
+# Block D auth probes
+auth = get("/game/auth/status")
+assert "auth_base" in auth
+assert auth["auth_base"].endswith("8081")
+assert "identity_auth_enabled" in auth
+assert s4["work_pack_registry"].get("closed_block_d") is True
+assert s4["work_pack_registry"].get("grok_handoff_pack") == "receipts/HANDOFF-GROK-EXECUTION-PACK-20260616.md"
+print("  API + MCP + Block A + B + C + D probes OK")
 PY
 
 if $READ_ONLY; then
