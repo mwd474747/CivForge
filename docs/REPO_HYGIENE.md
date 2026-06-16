@@ -1,36 +1,71 @@
-# CivForge Repo Hygiene (Borrowed & Adapted from dawsOS Patterns)
+# CivForge Repo Hygiene
 
-**Core Principle**: CivForge and gravity-mosaic (and any governed projects) remain **completely separate**. CivForge provides governance tooling; targets are independent.
+**Updated:** 2026-06-16  
+**Status:** `current` — active tree is FastAPI kernel + Python `core/` only
 
-## Daily/Pre-Commit Hygiene (dawsOS-style)
-- `git status --short` + review untracked/ignored.
-- Run `git clean -fdx` (dry first) only on safe paths; never on governed project sources.
-- Update .gitignore for any new local state (dbs, logs, build, OS).
-- No committing runtime artifacts (use the enhanced .gitignore).
-- All changes to governed projects (e.g. gravity-mosaic) go **only** through the strict deploy bridge with literal verification.
+---
 
-## Legacy / Debt Management
-- Archive removed features (e.g. _archive/godot-mvp-deprecated) with clear SEPARATION.md and README notes.
-- Trim archives of bloat (caches, binaries) before commit.
-- Document why legacy was removed (pivot from Godot MVP to FastAPI governance).
-- Use receipts/ for audit trail of cleanups.
+## Active tree (canonical)
 
-## Documentation Hygiene
-- Keep SEPARATION.md up-to-date as the boundary contract.
-- Borrowable patterns in docs/patterns/ for reuse on other projects (interoperable without merging).
-- Update README, IMPLEMENTATION_STATUS, planning/ on every major cleanup/push.
-- No outdated Godot/MVP references in active docs (only in archive history).
+| Path | Role |
+|------|------|
+| `backend/` | FastAPI kernel (`sim_api.py`), game mechanics modules |
+| `core/` | Orchestrator, AgentBrain, FunForge, MechanicsRegistry |
+| `frontend/` | Dashboard (`index.html`) |
+| `tools/` | CLI, MCP, validate-game, start-kernel-8080 |
+| `docs/` | Lane model, boundary, play guide |
+| `receipts/` | **Execution + planning receipts only** (not runtime cycle dumps) |
 
-## Separation + Interoperability
-- CivForge workspace: governance (core/, backend/, tools/, patterns).
-- Governed projects (gravity-mosaic, potentially dawsOS components): stay in their own repos.
-- Interop via: CLI, FastAPI endpoints, documented patterns, strict bridges.
-- Never mix source trees.
+**Removed 2026-06-16:** entire `_archive/` (Godot MVP, pre-realign orphans, auth-prototype stubs). History lives in git only.
 
-## Verification Before Push
-- Run hygiene checks above.
-- Confirm no cross-project pollution (find/grep audits).
-- `git status` clean.
-- Push only after separation and cleanliness verified.
+**Deleted remote branch:** `feature/full-hybrid-scaffold-v1` (pre-realign; PR #1 superseded by repo realign).
 
-This is adapted from dawsOS repo hygiene (receipt-first, clean boundaries, literal enforcement, generalized patterns) while preserving full separation.
+---
+
+## Branches
+
+- **`main`** — sole active branch
+- No long-lived feature branches; use Cursor execution receipts + short-lived local branches if needed
+
+---
+
+## Receipts policy
+
+**Commit:** cursor-execution, handoff, planning PRIME, LOCKED plans, posture `*-latest.*`
+
+**Do not commit** (`.gitignore`):
+
+- `receipts/governance-cycle-*.md`
+- `receipts/governance-gate-*.md`
+- `receipts/governance-proposal-*.md`
+- `receipts/game-reset-*.md`
+- `receipts/gravity-rec-*.md`
+- `receipts/defeat-outcome-*.md`
+- `receipts/military-conflict-defeat-sim-*`
+- `receipts/openclaw-governance-turnkey-*.md`
+- `receipts/openclaw-ops-run-*.md`
+
+If previously tracked, remove with `git rm --cached` once; files may remain locally for debugging.
+
+---
+
+## Pre-push checklist
+
+```bash
+cd ~/CivForge
+git status --short
+python3 -m pytest tests/ -q
+bash tools/validate-game.sh    # optional; needs :8080
+```
+
+- No `_archive/` or Godot paths in active docs
+- No `tools/auth-prototype/` references (identity → sibling `dawsos-auth-prototype` repo)
+- `docs/EXECUTION_LANE_V2.md` lane model unchanged unless intentional
+
+---
+
+## Separation (unchanged)
+
+CivForge governs; **gravity-mosaic** and **dawsos-auth-prototype** are separate repos. Deploy only via `tools/deploy-gravity-mosaic/deploy.sh`.
+
+See `SEPARATION.md`, `docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md`.

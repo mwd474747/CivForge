@@ -341,6 +341,12 @@ Extend existing civstudy_cultural + victory_hud — no new registry module.
 pytest + execution receipt; commit/push when I ask.
 ```
 
+## 0. Repo hygiene (2026-06-16)
+
+- **`main` only** — deleted remote `feature/full-hybrid-scaffold-v1` (pre-realign orphan).
+- **`_archive/` removed** from active tree (Godot MVP, hybrid scaffold, auth stubs). Audit via git history.
+- **Runtime receipts** untracked: `governance-cycle-*`, `defeat-outcome-*`, etc. See `docs/REPO_HYGIENE.md`.
+
 ---
 
 ## Related

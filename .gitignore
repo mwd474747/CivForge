@@ -19,19 +19,6 @@ __pycache__/
 *.swo
 *.swp
 *~
-# (keep committed governance receipts, but allow ignoring temp ones if needed)
-# Archived history (intentional)
-# dawsOS-borrowed hygiene
-# Godot legacy (already archived)
-# Local receipts that may be ephemeral during active work
-receipts/game-reset-*.md
-receipts/governance-cycle-*.md
-receipts/governance-gate-*.md
-receipts/governance-proposal-*.md
-receipts/gravity-rec-*.md
-receipts/openclaw-governance-turnkey-*.md
-receipts/openclaw-ops-run-*.md
-# receipts/work-pack-*.md
 build/
 develop-eggs/
 dist/
@@ -45,6 +32,19 @@ sdist/
 Thumbs.db
 var/
 wheels/
-_archive/pre-realign-orphans/
-receipts/_archive/
 .vercel
+
+# Runtime / ephemeral receipts (local kernel output — not repo truth)
+receipts/game-reset-*.md
+receipts/governance-cycle-*.md
+receipts/governance-gate-*.md
+receipts/governance-proposal-*.md
+receipts/gravity-rec-*.md
+receipts/defeat-outcome-*.md
+receipts/military-conflict-defeat-sim-*.json
+receipts/military-conflict-defeat-sim-*.md
+receipts/openclaw-governance-turnkey-*.md
+receipts/openclaw-ops-run-*.md
+
+# Historical receipt archive (gitignored; audit via git history)
+receipts/_archive/

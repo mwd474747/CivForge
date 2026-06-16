@@ -11,7 +11,7 @@ Core: receipt-first DawsOS patterns, persistent FastAPI workspace (the earlier b
 
 All changes to gravity-mosaic are made exclusively on disk at `/Users/michaeldawson/gravity-mosaic-knowledge-graph` and are **only ever deployed** via the deploy helper (which enforces full literal reads, wc/grep golden anchors + new features, Python EQUATIONS tests, zero bad legacy, exact git operations, and post-deploy verification).
 
-The Godot 4X MVP (playable UI, map, end-turn loops, etc.) has been removed in favour of the earlier FastAPI version + Python core so the original intent is fully implemented: CivForge is the intelligent local governance layer, not the game itself.
+The pre-pivot Godot 4X MVP was removed; CivForge is FastAPI + Python `core/` only (see `docs/REPO_HYGIENE.md`).
 
 ## Quick Start (Mac Studio — recommended)
 
@@ -61,7 +61,7 @@ python tools/civforge_cli.py propose-deploy
 ./tools/deploy-gravity-mosaic/deploy.sh
 ```
 
-See direct FastAPI start in Quick Start above, or `python tools/civforge_cli.py status` once backend is running. (setup_hybrid.sh and other pre-realign artifacts moved to _archive/pre-realign-orphans/ or receipts/_archive/ during governed cleanup; see receipts/orphan-cleanup-*.md and docs/CIV_GAME_MECHANICS_INSPIRATION.md for history and extracted concepts.)
+See Quick Start above. Hygiene and branch policy: `docs/REPO_HYGIENE.md`.
 
 ## What CivForge Actually Is (initial intent, now dominant)
 
@@ -94,9 +94,8 @@ The delivered value is high-fidelity, low-waste, fully receipted, agent-orchestr
 - `tools/deploy-gravity-mosaic/` — The only way changes ever reach the live gravity site.
 - `tools/civforge_cli.py` + `bridge/headless_observer.py` — Terminal and autonomous drivers.
 - `governance/`, `receipts/`, `planning/`, `skills/` — DawsOS-style artifacts.
-- `_archive/godot-mvp-deprecated/` — Old playable Godot slice (removed from active use).
 
-Everything else (old Godot scripts, GDScript playtests, Godot-specific orchestration language) has been stripped so the initial intent is implemented cleanly.
+No `_archive/` or Godot tree in the active repo (removed 2026-06-16 hygiene pass).
 
 ## Process Rules (non-negotiable for gravity-mosaic)
 

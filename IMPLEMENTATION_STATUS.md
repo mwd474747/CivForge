@@ -6,14 +6,14 @@ CivForge = **local Python FastAPI governance backend** running on `0.0.0.0:8080`
 **Locked Canon**:
 - Purpose: governed, receipt-first orchestration layer that proposes/gates/receipts work for the *separate* `gravity-mosaic-knowledge-graph` project.
 - Strict rules: CivForge never mutates gravity-mosaic directly; only advises + receipts. Only `tools/deploy-gravity-mosaic/deploy.sh` (literal wc/grep/git rules) ever touches it.
-- Godot MVP fully archived in `_archive/godot-mvp-deprecated` and never referenced in active flow.
-- All future swarm activity, pushes, CLI, bridges, and enhancements target this exact running stack.
+- Active stack: FastAPI `:8080` + Python `core/` only — no Godot, no `_archive/` (see `docs/REPO_HYGIENE.md`).
+- Execution lanes v2: Grok plans; Cursor executes; OpenClaw escalates for wt.
 
 **Active Components**:
 - backend/sim_api.py (earlier FastAPI shape preserved: /state, /found_city with detailed receipt, /advance_turn, /integrate + new /governance/*)
 - core/ fully wired with persistence (SQLite gravity_backend.db for state + receipts that survive restarts)
 - bridge/civforge_http_bridge.py — HTTP control of :8080 (Cursor local executor)
-- tools/civforge_cli.py + tools/gravity_advisor.py + tools/auth-prototype/ — terminal-first drivers, safety layer, and auth enablement bridge
+- tools/civforge_cli.py + tools/gravity_advisor.py + tools/dawsos_auth_client.py — terminal drivers + thin auth client
 - receipts/ — growing set of real governance-cycle and work-pack markdown artifacts (including auth-prototype-push, git-tools, LOCKED-CIV-GAME-PLAN, mechanics-extension-sim receipts)
 - Gravity deploy tool untouched and canonical for the separate project
 - dawsos-auth-prototype (separate repo https://github.com/mwd474747/dawsos-auth-prototype) — pushed after literal verification; only thin client integration in CivForge/tools/dawsos_auth_client.py + optional protected_advance demo
@@ -32,7 +32,7 @@ CivForge = **local Python FastAPI governance backend** running on `0.0.0.0:8080`
 - ls receipts/ shows multiple .md files
 - gravity_backend.db exists once a cycle with persistence has run
 
-See README.md, AGENTS.md, ORCHESTRATION_PATTERNS.md, ROADMAP.md, and `planning/production_deployment_assessment.md` for the full realigned picture (zero Godot, zero duplication, Mac Studio locked).
+See README.md, AGENTS.md, ORCHESTRATION_PATTERNS.md, ROADMAP.md, `docs/REPO_HYGIENE.md`, and `planning/production_deployment_assessment.md` for the full picture (Mac Studio locked).
 
 **Production/Deployment Assessment locked** (WP-PRODUCTION-ACCESS-ASSESSMENT-001):
 - Honest gap map complete: zero public exposure today.

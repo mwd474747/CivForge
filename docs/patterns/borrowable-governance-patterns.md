@@ -49,7 +49,7 @@ These patterns are designed to be repeatable and borrowable for governing other 
 - Human play: Required gamified Command Center dashboard (agent avatars, receipt timeline, workstream map, propose/gate/quality HUD).
 - Agent play: Full API/MCP (auth-gated)/CLI/handoff support — external agents register and participate.
 - See: planning/production_deployment_assessment.md (required elements), ROADMAP.md (Civ Game track), AGENTS.md (expanded role registry: GameMechanicDesigner, PlayerAgent, MechanicsSimulator, UICoordinator, InfraGovernor; plus agents/role_registry.json), docs/GIT_LANES_POLICY.md (parallel lanes), docs/CIV_GAME_MECHANICS_INSPIRATION.md (abstract historical concepts only for the required simulation layer), receipts/LOCKED-CIV-GAME-PLAN-*.md and orphan-cleanup-*.md.
-- No legacy: Pure new Python; feeds existing orchestrator/receipts/gate. Separation preserved. Pre-realign artifacts consolidated to _archive/.
+- No legacy in active tree: pre-pivot Godot/hybrid artifacts removed 2026-06-16 (`docs/REPO_HYGIENE.md`). Pure Python; feeds existing orchestrator/receipts/gate.
 
 ## 10. Git Lanes for Parallel Development (Governed Meta)
 - Use Git Worktrees + gh CLI + Draft PRs for safe parallel lanes (e.g., lane/civ-game-mechanics, lane/simulation-layer, lane/dashboard, lane/agent-play, lane/infra-required).

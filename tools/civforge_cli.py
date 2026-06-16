@@ -20,7 +20,7 @@ Commands:
 
 All real changes to the *separate* gravity-mosaic project still require running
 the verified deploy.sh manually after governance receipts.
-Auth prototype (separate) is enabled via tools/auth-prototype/{clone.sh,start.sh} and the thin client.
+Identity plane: sibling repo dawsos-auth-prototype (:8081) via tools/dawsos_auth_client.py.
 """
 
 import argparse
@@ -170,30 +170,19 @@ def main():
                 cmd.append(args.arg3)
             subprocess.run(cmd)
         elif args.action == "start":
-            print("=== Enabling auth function (separate prototype on :8081) ===")
-            print("Recommended: run the dedicated bridge script for literal verification + clone safety")
-            print("  ./tools/auth-prototype/start.sh")
+            print("=== Enabling auth (separate dawsos-auth-prototype on :8081) ===")
+            print("  cd ~/Documents/GitHub/dawsos-auth-prototype")
+            print("  python3 -m uvicorn backend.auth_api:app --reload --host 127.0.0.1 --port 8081")
             print("")
-            print("Direct (if you already have the clone):")
-            print("  cd /Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype")
-            print("  python3 -m uvicorn backend.auth_api:app --reload --host 0.0.0.0 --port 8081")
-            print("")
-            print("After it is running, use this CLI or the client directly to get tokens.")
-            print("Example protected CivForge call requires a 'govern' scope token from the prototype.")
+            print("Then: python3 tools/civforge_cli.py auth register-device <id> [pk]")
+            print("      python3 tools/civforge_cli.py auth token <identity_id> govern")
         elif args.action == "status":
-            print("Auth prototype (separate dawsos-auth-prototype) status:")
-            print("  Canonical location: /Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype")
-            print("  Expected port: 8081")
-            print("  GitHub: https://github.com/mwd474747/dawsos-auth-prototype")
-            print("")
-            print("To enable:")
-            print("  ./tools/auth-prototype/clone.sh")
-            print("  ./tools/auth-prototype/start.sh   # (in another terminal or background)")
-            print("")
-            print("Then obtain tokens and call CivForge /governance/protected_advance with Authorization: Bearer ...")
-            print("Use: python tools/civforge_cli.py auth register-device <id> [pk]")
-            print("     python tools/civforge_cli.py auth token <identity_id> govern")
-            print("See tools/auth-prototype/README.md and HANDOFF_CONTEXT.md for full steps.")
+            print("Auth (separate dawsos-auth-prototype):")
+            print("  Repo: https://github.com/mwd474747/dawsos-auth-prototype")
+            print("  Path: ~/Documents/GitHub/dawsos-auth-prototype")
+            print("  Port: 8081")
+            print("  Client: tools/dawsos_auth_client.py")
+            print("  See SEPARATION.md and docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md")
         else:
             print("Unknown auth action. Try: status, start, register-device, token, verify")
     else:

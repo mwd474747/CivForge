@@ -9,30 +9,42 @@
   },
   "documented_mcp_tools": [
     "civforge_advance_turn",
-    "civforge_apply_mechanics",
     "civforge_claim_tile",
     "civforge_found_city",
-    "civforge_gate_mechanics",
     "civforge_governance_gate",
     "civforge_governance_propose",
-    "civforge_list_mechanics_proposals",
     "civforge_negotiate",
     "civforge_negotiate_respond",
-    "civforge_propose_mechanics",
     "civforge_reset_game",
     "civforge_select_district",
+    "civforge_send_envoy",
     "civforge_status",
     "civforge_unlock_policy",
     "civforge_what_if"
   ],
   "findings": [
     {
-      "detail": "active docs/tooling should point to sibling dawsos-auth-prototype, not removed tools/auth-prototype bridge scripts",
-      "id": "stale_auth_bridge_ref:tools/civforge_cli.py",
+      "detail": "civforge_apply_mechanics",
+      "id": "mcp_tool_missing_from_guide:civforge_apply_mechanics",
+      "severity": "warn"
+    },
+    {
+      "detail": "civforge_gate_mechanics",
+      "id": "mcp_tool_missing_from_guide:civforge_gate_mechanics",
+      "severity": "warn"
+    },
+    {
+      "detail": "civforge_list_mechanics_proposals",
+      "id": "mcp_tool_missing_from_guide:civforge_list_mechanics_proposals",
+      "severity": "warn"
+    },
+    {
+      "detail": "civforge_propose_mechanics",
+      "id": "mcp_tool_missing_from_guide:civforge_propose_mechanics",
       "severity": "warn"
     }
   ],
-  "generated_at": "2026-06-16T04:45:15Z",
+  "generated_at": "2026-06-16T17:43:32Z",
   "mcp_tools": [
     "civforge_advance_turn",
     "civforge_apply_mechanics",
@@ -47,6 +59,7 @@
     "civforge_propose_mechanics",
     "civforge_reset_game",
     "civforge_select_district",
+    "civforge_send_envoy",
     "civforge_status",
     "civforge_unlock_policy",
     "civforge_what_if"
@@ -66,6 +79,27 @@
     ],
     "/game/actions": [
       "GET"
+    ],
+    "/game/agent/autonomy": [
+      "POST"
+    ],
+    "/game/agent/directive": [
+      "POST"
+    ],
+    "/game/agent/select": [
+      "POST"
+    ],
+    "/game/competition/mode": [
+      "POST"
+    ],
+    "/game/competition/spectator": [
+      "GET"
+    ],
+    "/game/dashboard/components": [
+      "GET"
+    ],
+    "/game/diplomacy/send_envoy": [
+      "POST"
     ],
     "/game/district/select": [
       "POST"
@@ -129,12 +163,12 @@
   "schema": "civforge.contract_parity.v1",
   "status": "warn",
   "summary": {
-    "documented_mcp_tool_count": 16,
+    "documented_mcp_tool_count": 13,
     "fail_count": 0,
-    "finding_count": 1,
-    "mcp_tool_count": 16,
-    "route_count": 24,
-    "warn_count": 1
+    "finding_count": 4,
+    "mcp_tool_count": 17,
+    "route_count": 31,
+    "warn_count": 4
   },
   "swarm_alignment": {
     "agents_md_refs_swarm_class": true,

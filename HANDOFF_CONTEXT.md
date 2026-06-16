@@ -24,7 +24,7 @@
 
   Key files: `backend/auth_api.py` (FastAPI :8081, real PyJWT, SQLite identities/tokens, receipt-style logging, auto-seed from `~/.openclaw/identity`), `core/identity_patterns.py` (IdentityReceiptStore, AgentAuthBrain, AuthQualityScorer — FunForge-inspired), `tools/auth_cli.py`, `tests/test_auth_flows.py` (4/4 passing), `docs/INTEROPERABILITY.md`, `AGENTS.md`, `run_prototype.sh`.  
   Thin CivForge client only: `CivForge/tools/dawsos_auth_client.py` (HTTP calls only; no code merge).  
-  **Enable auth**: use the existing sibling repo at `/Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype`; CivForge keeps only the thin client at `tools/dawsos_auth_client.py`.
+  **Clone + enable bridge in CivForge**: `tools/auth-prototype/{clone.sh, start.sh, README.md}` (see "Cloning and Enabling..." section below).
 
 - **Related dawsOS roots** (for context/interop seeds, patterns):  
   `~/.openclaw/dawsos-workspace-wt` (main dawsOS workspace)  
@@ -43,7 +43,7 @@ Key non-negotiables:
 - The **sole allowed bridge** is `tools/deploy-gravity-mosaic/deploy.sh` (inside CivForge). It always `cd`s to the gravity dir, runs exhaustive literal verification (`wc -l`, golden anchor `grep`, Python model + `EQUATIONS`/`to_artifact` tests, bad-legacy count == 0 for critical terms), then exact `git add`/`commit`/`push` of full content only. Post-push: hard-refresh https://mwd474747.github.io/gravity-mosaic-knowledge-graph/.
 - Auth prototype is **100% separate**. Only the thin HTTP client (`tools/dawsos_auth_client.py`) and demo dependency (`/governance/protected_advance` using `requests` to :8081) exist in CivForge. No backend/auth code copied in.
 - Borrowable patterns live in `docs/patterns/borrowable-governance-patterns.md` (separation template, receipt-first loop, FunForge, literal deploy bridge, FastAPI kernel, etc.). Copy/adapt the *patterns*, never the trees.
-- Daily hygiene (before any push or major work): `git status --short`, clean runtime from commits (`.gitignore` covers `*.db`, `logs/`, `__pycache__`, `_archive/`, `.DS_Store`), find/grep audits for leakage, update SEPARATION/IMPLEMENTATION_STATUS/ROADMAP when boundaries change.
+- Daily hygiene (before any push or major work): `git status --short`, clean runtime from commits (`.gitignore` covers `*.db`, logs/, `__pycache__`, ephemeral receipts, `.DS_Store`), find/grep audits for leakage, update SEPARATION/IMPLEMENTATION_STATUS/ROADMAP when boundaries change. See `docs/REPO_HYGIENE.md`.
 - Receipts for everything. No meta/summaries in governed commits (gravity pushes especially).
 
 **Current verified state (handoff snapshot)**: Audits clean, no source leakage, git clean on CivForge (`b2fd116`), gravity pristine, auth-proto locally committed and separate.
@@ -64,13 +64,13 @@ Key non-negotiables:
 - **Persistence**: Active (SQLite + disk receipts). On startup, backend restores last "game_state" snapshot if present. ~8 receipts/*.md + 20kB db at handoff.
 - **Optional auth integration** (demo complete, end-to-end tested): `tools/dawsos_auth_client.py` (register-device, token, verify against :8081). `sim_api.py` has `require_govern_token` dependency + `/governance/protected_advance` (requires valid "govern" scope token from the separate prototype). Prototype itself has full flows (device/agent register, /token, /verify, JWT, seeds from ~/.openclaw, receipt logging, tests passing).
 - **Drivers**:
-  - `tools/civforge_cli.py` (status, advance, found, propose, gate, recommend, advisor, MCP serve, Nexus poll, auth subcommands).
+  - `tools/civforge_cli.py` (status, advance, found, propose, gate, recommend, advisor, mcp-stub).
   - `bridge/civforge_http_bridge.py` (get_state, advance_cycle, propose_work, gate_proposal, get_gravity_recommendation — HTTP to :8080; used by Cursor local executor).
   - `tools/gravity_advisor.py` — safe_recommend_deploy (advisory only; explicitly refuses to touch gravity; points to deploy.sh).
 - **Gravity deploy (sacred)**: `tools/deploy-gravity-mosaic/deploy.sh` + README (hardcoded paths noted as production caveat; literal verifs + git).
-- **Godot MVP**: Fully removed and archived in `_archive/godot-mvp-deprecated/` (trimmed of .godot/ caches / shader caches during hygiene). Never referenced in active flow.
+- **Godot MVP**: Removed from active tree (2026-06-16 hygiene). FastAPI + `core/` only; no Godot references in active code.
 - **Docs & planning** (coherent post-auth extension): `SEPARATION.md` (canonical), `IMPLEMENTATION_STATUS.md` (locked canon), `ROADMAP.md` (Phases 0/1 complete; Phase 2 production items), `docs/REPO_HYGIENE.md`, `docs/patterns/borrowable-governance-patterns.md`, `ORCHESTRATION_PATTERNS.md`, `AGENTS.md`, `planning/production_deployment_assessment.md` (WP-PRODUCTION-ACCESS-ASSESSMENT-001 locked), `planning/extension_roadmap_v2.md`.
-- **.gitignore**: Enhanced for local state (no .db, logs, pyc, _archive bloat, etc. in commits).
+- **.gitignore**: Covers local state (no .db, logs, pyc, runtime receipt dumps in commits).
 - **Live at handoff snapshot**: CivForge backend typically on 8080 (one process confirmed listening). Auth proto 8081 started on-demand for tests (not always running). Many duplicate long-running background verification/e2e scripts from the "execute optional steps" phase (harmless but noisy — see "Previous tasks hung" below).
 
 **Git hygiene at handoff**: Clean on CivForge main after pushes including auth integration + docs coherence. Receipts and db are intentional (gitignore protects runtime copies).
@@ -79,7 +79,7 @@ Key non-negotiables:
 
 ## 4. Core Mechanics — The "Game" / Governance Rules (precise functions + ticks)
 
-This is **not** a traditional 4X game anymore (Godot MVP archived). The delivered value is a **receipt-first governed orchestration workspace** for safe, low-waste, auditable work on the separate gravity-mosaic project (and future targets). "Civ" / "city" / "territory" / "fun_score" / "resources" are internal metaphors for workstreams, attention budgets, quality, and founded governed items.
+This is **not** a traditional 4X Godot game. The delivered value is a **receipt-first governed orchestration workspace** for safe, low-waste, auditable work on the separate gravity-mosaic project (and future targets). "Civ" / "city" / "territory" / "fun_score" / "resources" are internal metaphors for workstreams, attention budgets, quality, and founded governed items.
 
 ### Primary Tick: `core/orchestrator.py:35` — `GovernanceOrchestrator.advance_cycle(player_actions: int = 0)`
 
@@ -216,11 +216,18 @@ python3 bridge/civforge_http_bridge.py   # or tools/civforge_cli.py
 **Stop servers**: `pkill -f 'uvicorn.*sim_api'` and `pkill -f 'uvicorn.*auth_api'`.
 
 
-The auth prototype repo exists as a separate sibling checkout. Use that checkout directly; CivForge does not vendor clone/start scripts.
+Now that the prototype repo exists on GitHub, use the dedicated CivForge bridge to create the local clone and turn on auth.
+
+From CivForge root (after literal review of this handoff + tools/auth-prototype/README.md):
 
 ```bash
-cd /Users/michaeldawson/Documents/GitHub/dawsos-auth-prototype
-python3 -m uvicorn backend.auth_api:app --reload --host 0.0.0.0 --port 8081
+cd /Users/michaeldawson/CivForge
+
+# Create or update the local clone at the canonical separate location
+./tools/auth-prototype/clone.sh
+
+# Enable the auth function (starts the separate prototype on 8081)
+./tools/auth-prototype/start.sh     # run in background / another terminal
 ```
 
 Verification after start:
@@ -241,9 +248,12 @@ curl -H "Authorization: Bearer $TOKEN" -X POST http://localhost:8080/governance/
 
 Without a valid "govern" token the protected endpoint returns 401/403.
 
+The new bridge lives at `tools/auth-prototype/` (README.md + clone.sh + start.sh). It follows the same separation + literal verification philosophy as `tools/deploy-gravity-mosaic/`.
+
 See also:
 - `tools/dawsos_auth_client.py` (direct client)
 - `backend/sim_api.py` (the require_govern_token dependency + protected_advance)
+- `tools/auth-prototype/README.md` (full docs)
 - Updated `tools/civforge_cli.py auth ...` subcommands
 
 This completes the "create the local clone and steps to enable this function" request. The auth function is now first-class and documented for any workspace using the handoff package.
@@ -295,7 +305,7 @@ This completes the "create the local clone and steps to enable this function" re
 
 ## 7. Known History / Pitfalls to Avoid
 
-- **Godot pivot**: User explicitly chose FastAPI + core/ over the MVP after the duplicate parser bug + "remove the MVP" directive. Archive is the source of truth for history; active code has zero Godot references outside _archive/.
+- **Godot pivot**: User chose FastAPI + core/ over the MVP. Pre-pivot code removed from active tree; history in git only.
 - **Duplicate bug root cause + governance lesson**: Bulk execution without static/symbol scans before edits. Now mitigated by hygiene docs, pre-edit greps, and the governance gate itself.
 - **Strict literal push rule**: User repeatedly requires full disk reads (`read_file` or terminal equivalents) + wc/grep verification + user-executed git for gravity (and now auth proto). Never bypass. The deploy.sh embodies it.
 - **Background tasks**: Long-running ones from early "run in terminal" + background:true + pivot era. Clean them; prefer short/foreground or explicit monitoring.
