@@ -54,4 +54,8 @@ def test_http_epilogue_blocks_advance_turn():
 
     reset = client.post("/game/reset")
     assert reset.status_code == 200
+    body = reset.json()
+    assert body["session_phase"] == "active"
+    assert body["victory_progress"].get("outcome") is None
+    assert body["summary"]["prior_session"]["outcome"] == "victory"
     assert client.get("/state").json()["session_phase"] == "active"

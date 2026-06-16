@@ -281,6 +281,7 @@ async def get_state() -> Dict[str, Any]:
         "civstudy_sim": civstudy_sim_summary(game_state),
         "session_phase": session_phase(game_state),
         "action_catalog": action_catalog(game_state),
+        "session_history": game_state.get("session_history", [])[-5:],
         "note": "CivForge governance workspace with multi-agent map, alliances, negotiations, mechanics lanes, and joint victory.",
     }
 
@@ -481,9 +482,9 @@ async def game_reset(_claims: Dict[str, Any] = Depends(require_public_mode_token
         "turn": game_state["turn"],
         "action": "game_reset",
         "status": "SUCCESS",
-        "prior_turn": summary["prior_turn"],
-        "prior_outcome": summary.get("prior_outcome"),
-        "claim": "New game session started from canonical initial state.",
+        "prior_session": summary.get("prior_session", {}),
+        "sessions_logged": summary.get("sessions_logged", 0),
+        "claim": "New game session started; prior run stats logged.",
     }
     game_state["receipts"].append(reset_receipt)
     receipt_store.append(reset_receipt, filename_hint="game-reset")
@@ -498,6 +499,8 @@ async def game_reset(_claims: Dict[str, Any] = Depends(require_public_mode_token
     return {
         "message": "Game reset to turn 1.",
         "summary": summary,
+        "session_phase": session_phase(game_state),
+        "session_history": game_state.get("session_history", []),
         "victory_progress": game_state["victory_progress"],
         "receipt": reset_receipt,
     }

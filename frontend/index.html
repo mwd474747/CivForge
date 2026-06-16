@@ -427,6 +427,8 @@
           document.querySelector(".outcome-card").style.borderColor = "var(--ok)";
           text.textContent = "All milestones complete. Governance quorum achieved across factions.";
           overlay.classList.remove("hidden");
+        } else {
+          overlay.classList.add("hidden");
         }
       }
 
@@ -569,8 +571,16 @@
       document.getElementById("refresh-btn").onclick = loadState;
       async function resetGame() {
         if (!confirm("Reset to a fresh game? Progress and alliances will be cleared.")) return;
-        await fetch(apiBase + "/game/reset", { method: "POST" });
+        const r = await fetch(apiBase + "/game/reset", { method: "POST" });
+        const d = await r.json();
         document.getElementById("outcome-overlay").classList.add("hidden");
+        const ps = d.summary && d.summary.prior_session;
+        if (ps) {
+          document.getElementById("player-action-result").textContent =
+            "Prior run logged: turn " + ps.turn +
+            (ps.outcome ? " (" + ps.outcome + ")" : "") +
+            ", progress " + (ps.joint_progress || 0) + "/" + (ps.target || 100) + ".";
+        }
         await loadState();
       }
       document.getElementById("reset-btn").onclick = resetGame;

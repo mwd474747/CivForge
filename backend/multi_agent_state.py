@@ -105,15 +105,24 @@ def default_negotiations() -> List[Dict[str, Any]]:
 
 def default_victory_progress() -> Dict[str, Any]:
     return {
-        "joint_progress": 18,
+        "joint_progress": 0,
         "target": 100,
         "milestones": [
-            {"name": "First alliance", "done": True},
+            {"name": "First alliance", "done": False},
             {"name": "Shared map control", "done": False},
             {"name": "Governance quorum", "done": False},
             {"name": "Joint victory", "done": False},
         ],
     }
+
+
+def fresh_victory_progress(game_state: Dict[str, Any]) -> Dict[str, Any]:
+    """Victory tracker for a new session — no outcome/defeat residue."""
+    vp = default_victory_progress()
+    vp.pop("outcome", None)
+    vp.pop("defeat_reason", None)
+    sync_victory_milestones(vp, turn=game_state.get("turn", 1), game_state=game_state)
+    return vp
 
 
 def default_extra_ai_civs() -> List[Dict[str, Any]]:
@@ -226,6 +235,8 @@ def sync_victory_milestones(
     if progress >= target and vp.get("outcome") != "defeat":
         vp["outcome"] = "victory"
     elif vp.get("outcome") == "victory" and progress < target:
+        vp.pop("outcome", None)
+    elif vp.get("outcome") == "defeat" and not vp.get("defeat_reason"):
         vp.pop("outcome", None)
     return events
 
