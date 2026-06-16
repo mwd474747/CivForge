@@ -37,6 +37,9 @@ def enrich_cycle_receipt(receipt: Dict[str, Any], game_state: Dict[str, Any]) ->
         "defeat_reason": vp.get("defeat_reason"),
         "milestones_done": sum(1 for m in vp.get("milestones", []) if m.get("done")),
     }
+    from backend.player_agent import player_agent_summary
+
+    receipt["player_agent"] = player_agent_summary(game_state)
     return receipt
 
 

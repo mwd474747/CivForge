@@ -140,23 +140,24 @@
           <h3 style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--accent)">Unlock Policy</h3>
           <select id="policy-select" style="width:100%;margin-bottom:0.4rem"></select>
           <button id="policy-btn" type="button">Spend Influence</button>
-          <h3 style="margin:0.75rem 0 0.5rem;font-size:0.9rem;color:var(--accent)">Policy Branch</h3>
-          <select id="policy-branch-select" style="width:100%;margin-bottom:0.4rem">
-            <option value="tradition">Tradition (culture)</option>
-            <option value="liberty">Liberty (diplomacy)</option>
-          </select>
-          <button id="policy-branch-btn" type="button">Set Branch Focus</button>
-        </div>
-        <div>
-          <h3 style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--accent)">Commission Wonder</h3>
-          <select id="wonder-select" style="width:100%;margin-bottom:0.4rem"></select>
-          <button id="wonder-btn" type="button">Commission Wonder</button>
         </div>
       </div>
       <div id="envoy-panel" class="hidden" style="margin-top:0.75rem">
         <h3 style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--accent)">Send Envoy (6 influence)</h3>
         <select id="envoy-alliance-select" style="width:100%;margin-bottom:0.4rem"></select>
         <button id="envoy-btn" type="button">Dispatch Envoy</button>
+      </div>
+      <div style="margin-top:0.75rem">
+        <h3 style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--accent)">Player Strategy (cycle receipt)</h3>
+        <select id="player-strategy" style="width:100%;margin-bottom:0.4rem">
+          <option value="expand">Territorial Expansion</option>
+          <option value="diplomacy">Diplomatic League</option>
+          <option value="culture">Cultural Prestige</option>
+          <option value="science">Research Priority</option>
+          <option value="observe">Council Observation</option>
+        </select>
+        <button id="player-strategy-btn" type="button">Set Strategy</button>
+        <p id="player-strategy-status" class="sub" style="margin-top:0.35rem"></p>
       </div>
       <p id="player-action-result" class="sub" style="margin-top:0.5rem"></p>
     </div>
@@ -186,6 +187,18 @@
         </select>
         <button id="competition-set-btn" type="button">Set Mode</button>
         <p id="competition-status" class="sub" style="margin-top:0.5rem"></p>
+        <div style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.35rem;align-items:center">
+          <button id="competition-autoplay-start" type="button">Autoplay Start</button>
+          <button id="competition-autoplay-pause" type="button">Pause</button>
+          <label>Speed</label>
+          <select id="competition-autoplay-speed" style="width:4rem">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+          <button id="competition-autoplay-speed-btn" type="button">Set Speed</button>
+        </div>
+        <p id="competition-autoplay-status" class="sub" style="margin-top:0.35rem"></p>
         <h3 style="margin-top:0.75rem;font-size:0.9rem;color:var(--accent)">Spectator Log</h3>
         <ul class="events" id="spectator-log"></ul>
       </div>
@@ -420,19 +433,9 @@
         pSel.innerHTML = unlockable.length ? unlockable.map(p =>
           "<option value='" + p.id + "'>" + p.id + " (tier " + p.tier + ", " + p.influence_cost + " inf)</option>"
         ).join("") : "<option value=''>— none unlockable —</option>";
-        const wSel = document.getElementById("wonder-select");
-        const commissionable = (cat.wonders || []).filter(w => w.commissionable);
-        wSel.innerHTML = commissionable.length ? commissionable.map(w =>
-          "<option value='" + w.id + "'>" + w.name + " (" + w.influence_cost + " inf)</option>"
-        ).join("") : "<option value=''>— none commissionable —</option>";
-        const branchFocus = (cat.policy_tree_checklist && cat.policy_tree_checklist.branch_focus) || "";
-        const branchSel = document.getElementById("policy-branch-select");
-        if (branchFocus) branchSel.value = branchFocus;
         const ended = data.session_phase === "epilogue" || data.session_phase === "defeat";
         document.getElementById("district-btn").disabled = ended;
         document.getElementById("policy-btn").disabled = ended || !unlockable.length;
-        document.getElementById("policy-branch-btn").disabled = ended;
-        document.getElementById("wonder-btn").disabled = ended || !commissionable.length;
         const envoy = cat.send_envoy || {};
         const envoyPanel = document.getElementById("envoy-panel");
         const eSel = document.getElementById("envoy-alliance-select");
@@ -540,14 +543,10 @@
           "Joint progress: " + (vp.joint_progress || 0) + " / " + (vp.target || 100) + " (" + pct + "%)" +
           " · milestones " + (hud.milestones_done != null ? hud.milestones_done : "?") + "/" + (hud.milestones_total || 4);
         const cp = hud.cultural_path || {};
-        const cm = (cp.milestones || []).map(m =>
-          (m.done ? "✅" : "⬜") + " " + (m.label || m.id)
-        ).join(" · ");
         document.getElementById("cultural-path").innerHTML =
           "Cultural path: chains <strong>" + (cp.event_chains || 0) + "</strong>, spread <strong>" +
-          (cp.influence_spread || 0) + "</strong>, wonders <strong>" + (cp.commissioned_wonders || 0) +
-          "</strong>, progress <strong>" + (cp.progress_pct || 0) + "%</strong>" +
-          (cm ? "<br/><small>" + cm + "</small>" : "");
+          (cp.influence_spread || 0) + "</strong>, cadence <strong>" + (cp.tick_cadence || "—") +
+          "</strong>, active <strong>" + (cp.active_chain_count || 0) + "</strong>";
         const warn = document.getElementById("victory-defeat-warning");
         if (hud.defeat_warning) {
           warn.classList.remove("hidden");
@@ -644,14 +643,38 @@
           (ac.player_override ? " · player override" : " · autonomous court");
       }
 
+      function renderPlayerAgent(data) {
+        const pa = data.player_agent || {};
+        const sel = document.getElementById("player-strategy");
+        if (sel && pa.strategy) sel.value = pa.strategy;
+        const status = document.getElementById("player-strategy-status");
+        if (status) {
+          status.textContent =
+            (pa.label || "Territorial Expansion") +
+            (pa.last_decision ? " · last: " + pa.last_decision.slice(0, 72) + "…" : "") +
+            (pa.cycles_active ? " · cycles " + pa.cycles_active : "");
+        }
+      }
+
       function renderCompetition(data) {
         const cm = data.competition_mode || {};
         const modeEl = document.getElementById("competition-mode");
         if (modeEl && cm.mode) modeEl.value = cm.mode;
-        document.getElementById("competition-status").textContent =
-          (cm.label || "Standard") +
+        let statusLine = (cm.label || "Standard") +
           (cm.win_condition_broadcast ? " — " + cm.win_condition_broadcast : "") +
           " · scores: " + JSON.stringify(cm.scores || {});
+        if (cm.resolved) {
+          statusLine += " · RESOLVED — winner: " + (cm.winner || "?");
+        }
+        document.getElementById("competition-status").textContent = statusLine;
+        const ap = cm.autoplay || {};
+        const speedEl = document.getElementById("competition-autoplay-speed");
+        if (speedEl && ap.speed) speedEl.value = String(ap.speed);
+        document.getElementById("competition-autoplay-status").textContent =
+          ap.active ?
+            ("Autoplay " + (ap.paused ? "paused" : "running") + " · speed " + (ap.speed || 1) +
+             " · cooldown " + (ap.cooldown_turns || 0) + " turns") :
+            "Autoplay idle";
         const log = document.getElementById("spectator-log");
         const entries = cm.spectator_log_tail || [];
         log.innerHTML = entries.length ?
@@ -765,21 +788,9 @@
         const liveFlags = Object.entries(sim.policy_flags || {}).filter(([, v]) => v).map(([k]) =>
           "<li><code>" + k + "</code></li>"
         ).join("");
-        const checklist = (sim.policy_tree && sim.policy_tree.checklist) || {};
-        const branchRows = (checklist.branches || []).map(b =>
-          "<li><strong>" + b.label + "</strong><ul>" + (b.policies || []).map(p =>
-            "<li>" + (p.unlocked ? "✅" : (p.unlockable ? "🔓" : "🔒")) + " " + p.id +
-            (p.prereq ? " <small>(" + p.prereq + ")</small>" : "") + "</li>"
-          ).join("") + "</ul></li>"
-        ).join("");
-        const wonderRows = (sim.commissioned_wonders || []).map(w =>
-          "<li><strong>" + (w.name || w.wonder_id) + "</strong> turn " + w.turn + "</li>"
-        ).join("");
-        const liveSection = (livePolicies || liveFlags || branchRows || wonderRows) ?
+        const liveSection = (livePolicies || liveFlags) ?
           "<h3>Live sim (this session)</h3>" +
           "<p>District: <strong>" + (sim.active_district || "—") + "</strong></p>" +
-          "<h4>Policy branch checklist</h4><ul>" + (branchRows || "<li><em>—</em></li>") + "</ul>" +
-          "<h4>Commissioned wonders</h4><ul>" + (wonderRows || "<li><em>None yet</em></li>") + "</ul>" +
           "<h4>Unlocked policies</h4><ul>" + (livePolicies || "<li><em>None yet — advance turns to unlock via policy tree.</em></li>") + "</ul>" +
           "<h4>Active policy flags</h4><ul>" + (liveFlags || "<li><em>—</em></li>") + "</ul>" +
           (sim.recent && sim.recent.length ? "<h4>Recent CivStudy events</h4><ul>" + sim.recent.map(r => "<li>" + r + "</li>").join("") + "</ul>" : "") :
@@ -854,6 +865,7 @@
         renderAgents(data);
         renderMap(data);
         renderPlayerActions(data);
+        renderPlayerAgent(data);
         renderAgentControl(data);
         renderCompetition(data);
         renderNegotiations(data);
@@ -928,6 +940,17 @@
         document.getElementById("player-action-result").textContent = d.error || ("District: " + d.district_id);
         await loadState();
       };
+      document.getElementById("player-strategy-btn").onclick = async () => {
+        const r = await fetch(apiBase + "/game/player/strategy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ strategy: document.getElementById("player-strategy").value }),
+        });
+        const d = await r.json();
+        document.getElementById("player-strategy-status").textContent =
+          d.error || ("Strategy: " + (d.player_agent && d.player_agent.label));
+        await loadState();
+      };
       document.getElementById("policy-btn").onclick = async () => {
         const pid = document.getElementById("policy-select").value;
         if (!pid) return;
@@ -938,28 +961,6 @@
         });
         const d = await r.json();
         document.getElementById("player-action-result").textContent = d.error || ("Unlocked: " + d.policy_id);
-        await loadState();
-      };
-      document.getElementById("policy-branch-btn").onclick = async () => {
-        const r = await fetch(apiBase + "/game/policy/branch", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ branch_id: document.getElementById("policy-branch-select").value }),
-        });
-        const d = await r.json();
-        document.getElementById("player-action-result").textContent = d.error || ("Branch focus: " + d.branch_focus);
-        await loadState();
-      };
-      document.getElementById("wonder-btn").onclick = async () => {
-        const wid = document.getElementById("wonder-select").value;
-        if (!wid) return;
-        const r = await fetch(apiBase + "/game/wonder/commission", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ wonder_id: wid }),
-        });
-        const d = await r.json();
-        document.getElementById("player-action-result").textContent = d.error || ("Wonder commissioned: " + d.wonder_id);
         await loadState();
       };
       document.getElementById("envoy-btn").onclick = async () => {
@@ -1029,6 +1030,31 @@
         });
         const d = await r.json();
         document.getElementById("competition-status").textContent = d.error || ("Mode: " + (d.competition_mode && d.competition_mode.label));
+        await loadState();
+      };
+      document.getElementById("competition-autoplay-start").onclick = async () => {
+        const r = await fetch(apiBase + "/game/competition/autoplay/start", { method: "POST" });
+        const d = await r.json();
+        document.getElementById("competition-autoplay-status").textContent =
+          d.error || ("Autoplay started (speed " + ((d.autoplay && d.autoplay.speed) || 1) + ")");
+        await loadState();
+      };
+      document.getElementById("competition-autoplay-pause").onclick = async () => {
+        const r = await fetch(apiBase + "/game/competition/autoplay/pause", { method: "POST" });
+        const d = await r.json();
+        document.getElementById("competition-autoplay-status").textContent = d.error || "Autoplay paused.";
+        await loadState();
+      };
+      document.getElementById("competition-autoplay-speed-btn").onclick = async () => {
+        const speed = parseInt(document.getElementById("competition-autoplay-speed").value, 10) || 1;
+        const r = await fetch(apiBase + "/game/competition/autoplay/speed", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ speed }),
+        });
+        const d = await r.json();
+        document.getElementById("competition-autoplay-status").textContent =
+          d.error || ("Speed " + speed + " · cooldown " + ((d.autoplay && d.autoplay.cooldown_turns) || 0));
         await loadState();
       };
 

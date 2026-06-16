@@ -17,12 +17,14 @@ Closure doc: `receipts/BLOCK-A-CLOSURE-20260616.md`
 
 ---
 
-## Planning — Block B
+## Closed — Block B
 
-| WP | Scope |
-|----|-------|
-| WP-GROK-COMPETITION-DEPTH-001 | `HANDOFF-GROK-CONSOLIDATED-20260616.md` §5 |
-| WP-GROK-PLAYER-AGENT-001 | same |
+| WP | Receipt |
+|----|---------|
+| WP-GROK-COMPETITION-DEPTH-001 | `receipts/cursor-execution-wp-grok-competition-depth-001-20260616.md` |
+| WP-GROK-PLAYER-AGENT-001 | `receipts/cursor-execution-wp-grok-player-agent-001-20260616.md` |
+
+Closure doc: `receipts/BLOCK-B-CLOSURE-20260616.md`
 
 ---
 

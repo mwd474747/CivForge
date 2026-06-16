@@ -22,7 +22,7 @@
 | D-M1 | Policy branch metadata split | `policy_branch_extensions()` in metadata; checklist in `policy_branching.py` — intentional, document in wiring inventory |
 | D-M2 | Wonder effects are soft lane bumps | Not full card-text simulation |
 | D-M3 | `validate-game.sh` subset pytest | Full suite run via `verify-truth-anchor.sh` / CI habit |
-| D-M4 | Block B not started | COMPETITION-DEPTH + PLAYER-AGENT per consolidated handoff |
+| D-M4 | ~~Block B not started~~ | **Closed** — Block B @ BLOCK-B-CLOSURE-20260616 |
 
 ---
 

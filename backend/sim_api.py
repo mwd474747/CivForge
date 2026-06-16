@@ -17,7 +17,17 @@ from core.swarm_join import FORGE_COORDINATOR_ID
 from core.mechanics_registry import build_default_registry, default_mechanics_lanes
 from backend.civstudy_flavor import game_state_note
 from backend.agent_control import agent_controls_summary, issue_directive, select_agent, toggle_autonomy
-from backend.competition_modes import competition_summary, set_competition_mode, spectator_log, COMPETITION_MODES
+from backend.competition_modes import (
+    COMPETITION_MODES,
+    competition_blocks_advance,
+    competition_status,
+    competition_summary,
+    pause_autoplay,
+    set_autoplay_speed,
+    set_competition_mode,
+    spectator_log,
+    start_autoplay,
+)
 from backend.dashboard_components import get_dashboard_registry
 from backend.simulation_boundary import boundary_summary
 from backend.telemetry_enrich import enrich_telemetry_payload
@@ -36,6 +46,7 @@ from backend.game_actions import (
     unlock_policy,
 )
 from backend.policy_branching import select_policy_branch
+from backend.player_agent import player_agent_summary, set_player_strategy
 from backend.trust_erosion import trust_summary
 from backend.victory_hud import victory_hud_summary
 from backend.work_pack_status import work_pack_status_summary
@@ -317,6 +328,7 @@ async def get_state() -> Dict[str, Any]:
         "mechanics_overrides": game_state.get("mechanics_overrides", {}),
         "note": game_state_note(),
         "agent_controls": agent_controls_summary(game_state),
+        "player_agent": player_agent_summary(game_state),
         "competition_mode": competition_summary(game_state),
         "simulation_boundary": boundary_summary(game_state),
         "dashboard_components": get_dashboard_registry().all_components(),
@@ -410,6 +422,9 @@ async def advance_turn(_claims: Dict[str, Any] = Depends(require_public_mode_tok
     if phase == "defeat":
         reason = game_state.get("victory_progress", {}).get("defeat_reason", "defeat")
         raise HTTPException(409, f"Game ended in defeat ({reason}) — POST /game/reset to retry")
+    comp_block = competition_blocks_advance(game_state)
+    if comp_block:
+        raise HTTPException(409, comp_block)
     result = orchestrator.advance_cycle(player_actions=1)
     player_line = player_cycle_decision(game_state, 1)
     result["receipt"].setdefault("decisions", {})["player"] = player_line
@@ -520,6 +535,15 @@ class AgentAutonomyRequest(BaseModel):
 
 class CompetitionModeRequest(BaseModel):
     mode: str = "none"
+
+
+class AutoplaySpeedRequest(BaseModel):
+    speed: int = 1
+
+
+class PlayerStrategyRequest(BaseModel):
+    strategy: str = "expand"
+
 
 class MechanicsApplyRequest(BaseModel):
     proposal_id: str
@@ -656,6 +680,54 @@ async def game_competition_mode(req: CompetitionModeRequest, _claims: Dict[str, 
 @app.get("/game/competition/spectator")
 async def game_competition_spectator(limit: int = 20) -> Dict[str, Any]:
     return {"spectator_log": spectator_log(game_state, limit=limit), "modes": list(COMPETITION_MODES)}
+
+
+@app.post("/game/competition/autoplay/start")
+async def game_competition_autoplay_start(
+    _claims: Dict[str, Any] = Depends(require_public_mode_token),
+) -> Dict[str, Any]:
+    result = start_autoplay(game_state)
+    if result.get("ok"):
+        receipt_store.save_state("game_state", game_state)
+    return result
+
+
+@app.post("/game/competition/autoplay/pause")
+async def game_competition_autoplay_pause(
+    _claims: Dict[str, Any] = Depends(require_public_mode_token),
+) -> Dict[str, Any]:
+    result = pause_autoplay(game_state)
+    if result.get("ok"):
+        receipt_store.save_state("game_state", game_state)
+    return result
+
+
+@app.post("/game/competition/autoplay/speed")
+async def game_competition_autoplay_speed(
+    req: AutoplaySpeedRequest,
+    _claims: Dict[str, Any] = Depends(require_public_mode_token),
+) -> Dict[str, Any]:
+    result = set_autoplay_speed(game_state, req.speed)
+    if result.get("ok"):
+        receipt_store.save_state("game_state", game_state)
+    return result
+
+
+@app.get("/game/competition/status")
+async def game_competition_status() -> Dict[str, Any]:
+    return competition_status(game_state)
+
+
+@app.post("/game/player/strategy")
+async def game_player_strategy(
+    req: PlayerStrategyRequest,
+    _claims: Dict[str, Any] = Depends(require_public_mode_token),
+) -> Dict[str, Any]:
+    result = set_player_strategy(game_state, req.strategy)
+    if result.get("ok"):
+        receipt_store.save_state("game_state", game_state)
+    return result
+
 
 @app.get("/game/dashboard/components")
 async def game_dashboard_components() -> Dict[str, Any]:

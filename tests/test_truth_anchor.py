@@ -14,12 +14,14 @@ from backend.work_pack_status import work_pack_status_summary  # noqa: E402
 def test_work_pack_status_summary_block_a_closed():
     summary = work_pack_status_summary()
     assert summary["closed_block_a"] is True
-    assert "WP-GROK-COMPETITION-DEPTH-001" in summary["next_planning"]
+    assert summary["blocks"]["block_b"]["status"] == "closed"
+    assert "WP-GROK-PLAYER-AGENT-001" not in summary["next_planning"]
+    assert "WP-GROK-COMPETITION-DEPTH-001" not in summary["next_planning"]
 
 
 def test_registry_pytest_total_is_documented():
     summary = work_pack_status_summary()
-    assert summary["pytest_total_expected"] >= 117
+    assert summary["pytest_total_expected"] >= 129
 
 
 def test_policy_branch_extensions_in_metadata():

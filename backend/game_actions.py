@@ -405,11 +405,7 @@ def send_envoy(game_state: Dict[str, Any], alliance_id: str) -> Dict[str, Any]:
 
 
 def player_cycle_decision(game_state: Dict[str, Any], player_actions: int) -> str:
-    """Lightweight player agent hook for orchestrator receipts."""
-    if player_actions <= 0:
-        return "Observing governance cycle"
-    sim = game_state.get("civstudy_sim", {})
-    district = sim.get("active_district_id", "governance-quarter")
-    policies = len(sim.get("policy_tree", {}).get("unlocked", []))
-    tiles = sum(1 for t in game_state.get("map_tiles", []) if t.get("owner") == "player")
-    return f"Player agency ({player_actions}): district={district}, policies={policies}, tiles={tiles}"
+    """Re-export — implementation in backend.player_agent."""
+    from backend.player_agent import player_cycle_decision as _decide
+
+    return _decide(game_state, player_actions)

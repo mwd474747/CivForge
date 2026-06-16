@@ -26,7 +26,7 @@ WP lifecycle: `docs/WORK_PACK_LIFECYCLE.md`
 4. If discussing landed work: open matching `receipts/cursor-execution-*.md` — **not** stale Grok PRIMEs
 
 **Block A (closed @ `1037950`):** `receipts/BLOCK-A-CLOSURE-20260616.md` — do not re-ignite.  
-**Block B (open):** `WP-GROK-COMPETITION-DEPTH-001`, `WP-GROK-PLAYER-AGENT-001` — planning only until Mike ignites.
+**Block B (closed):** `receipts/BLOCK-B-CLOSURE-20260616.md` — COMPETITION-DEPTH + PLAYER-AGENT landed; Grok emits closure PRIMEs only.
 
 ---
 

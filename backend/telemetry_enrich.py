@@ -19,5 +19,13 @@ def enrich_telemetry_payload(game_state: Dict[str, Any], base: Dict[str, Any]) -
     comp = competition_summary(game_state)
     enriched["competitionMode"] = comp.get("mode")
     enriched["competitionLabel"] = comp.get("label")
+    enriched["competitionResolved"] = comp.get("resolved")
+    enriched["competitionWinner"] = comp.get("winner")
+    enriched["competitionAutoplayActive"] = (comp.get("autoplay") or {}).get("active")
+    from backend.player_agent import player_agent_summary
+
+    pa = player_agent_summary(game_state)
+    enriched["playerStrategy"] = pa.get("strategy")
+    enriched["playerStrategyLabel"] = pa.get("label")
     enriched["simulationBoundary"] = boundary_summary(game_state)
     return enriched

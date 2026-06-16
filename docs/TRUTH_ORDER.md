@@ -51,7 +51,7 @@ bash tools/validate-game.sh --read-only   # or --restart after code change
 | Commit | `1037950` (+ receipt doc `b3f3eb3`) |
 | Receipt | `receipts/cursor-execution-wp-grok-block-a-20260616.md` |
 | Index | `receipts/BLOCK-A-CLOSURE-20260616.md` |
-| pytest | 113 (includes 12 Block A tests) |
+| pytest | 129 (Block A: 12, Block B: 12) |
 
 **Do not re-ignite Block A.** Grok RESUBMIT-FINAL-ALIGNED PRIMEs are **superseded**.
 
@@ -59,12 +59,9 @@ bash tools/validate-game.sh --read-only   # or --restart after code change
 
 ## 5. Next open work
 
-Block B only — one WP at a time, Mike ignition:
+Block A and Block B are **closed** — see `receipts/BLOCK-A-CLOSURE-20260616.md` and `receipts/BLOCK-B-CLOSURE-20260616.md`.
 
-1. `WP-GROK-COMPETITION-DEPTH-001`
-2. `WP-GROK-PLAYER-AGENT-001`
-
-Scope: consolidated handoff §5 (verbatim envelopes).
+Grok: emit closure PRIMEs only; next planning is post-Block-B roadmap (mechanics debt, `:8081` JWT) — no duplicate subsystems.
 
 ---
 

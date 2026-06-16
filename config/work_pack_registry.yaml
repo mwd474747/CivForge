@@ -7,8 +7,8 @@
 anchor:
   repo: mwd474747/CivForge
   branch: main
-  head: 8190868
-  pytest_total: 117
+  head: a7bb165
+  pytest_total: 129
   kernel_port: 8080
   updated_at: "2026-06-16"
 
@@ -27,8 +27,11 @@ blocks:
     landed_commit: 1037950
   block_b:
     title: Competition depth + player agent
-    status: planning
-    scope_authority: receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md#wp-grok-competition-depth-001
+    status: closed
+    closure_receipt: receipts/BLOCK-B-CLOSURE-20260616.md
+    execution_receipts:
+      - receipts/cursor-execution-wp-grok-competition-depth-001-20260616.md
+      - receipts/cursor-execution-wp-grok-player-agent-001-20260616.md
 
 work_packs:
   WP-GROK-WONDER-PLACE-001:
@@ -74,16 +77,29 @@ work_packs:
     do_not_execute: true
 
   WP-GROK-COMPETITION-DEPTH-001:
-    lifecycle: planning
+    lifecycle: closed
     block: block_b
     execution_authority: cursor
     scope_authority: receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md
+    execution_receipt: receipts/cursor-execution-wp-grok-competition-depth-001-20260616.md
+    tests:
+      - tests/test_wp_grok_competition_depth_001.py
+    routes:
+      - POST /game/competition/autoplay/start
+      - POST /game/competition/autoplay/pause
+      - POST /game/competition/autoplay/speed
+      - GET /game/competition/status
 
   WP-GROK-PLAYER-AGENT-001:
-    lifecycle: planning
+    lifecycle: closed
     block: block_b
     execution_authority: cursor
     scope_authority: receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md
+    execution_receipt: receipts/cursor-execution-wp-grok-player-agent-001-20260616.md
+    tests:
+      - tests/test_wp_grok_player_agent_001.py
+    routes:
+      - POST /game/player/strategy
 
   WP-BIAS-ROOT-CAUSE-ANALYSIS-041:
     lifecycle: superseded

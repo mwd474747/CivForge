@@ -7,7 +7,7 @@ There is **no local Grok terminal** on the Mac Studio. Cursor executes; you plan
 
 ## Lane model (locked)
 
-Read `docs/TRUTH_ORDER.md`, `config/work_pack_registry.yaml`, `docs/AGENT_CLAIMS_POLICY.md`.
+Read `docs/EXECUTION_LANE_V2.md` and `receipts/HANDOFF-GROK-SWARM-20260615.md`.
 
 | Lane | You? |
 |------|------|
@@ -18,7 +18,7 @@ Read `docs/TRUTH_ORDER.md`, `config/work_pack_registry.yaml`, `docs/AGENT_CLAIMS
 ## CivForge state (verify via Cursor receipt, not your terminal)
 
 - Repo: `~/CivForge` / https://github.com/mwd474747/CivForge
-- HEAD + WP lifecycle: read `config/work_pack_registry.yaml` (do not guess)
+- HEAD: ask Cursor for latest `git rev-parse --short HEAD`
 - Play: http://127.0.0.1:8080/dashboard or https://civforge.vercel.app?api_base=
 - Verify command (Cursor runs): `bash tools/turnkey-cursor-local.sh`
 
@@ -55,25 +55,24 @@ Keep these connected in grok.com project settings:
 | trivium | Governance health, predictions (read-only planning) |
 | grok_com_github | CivForge repo read (not local git claims) |
 
-**CivForge kernel MCP** (`tools/mcp_server.py`, 16 tools): runs on Mac `:8080`. grok.com does not call it directly unless you add a remote MCP bridge/tunnel in grok.com settings. Default: assign work packs → Cursor executes → paste `turnkey-cursor-local.sh` output.
+**CivForge kernel MCP** (`tools/mcp_server.py`, 8 tools): runs on Mac `:8080`. grok.com does not call it directly unless you add a remote MCP bridge/tunnel in grok.com settings. Default: assign work packs → Cursor executes → paste `turnkey-cursor-local.sh` output.
 
 **Removed (do not reference):** CivForge `.grok/config.toml`, `Bash(*)` local terminal approval, `grok_macstudio_bridge.py`.
 
-## Default next work
+## Block B closed (2026-06-16)
 
-See `receipts/work-pack-grok-mechanics-propose-001.md` for **mechanics proposal** (not just simulation).
-See `receipts/work-pack-grok-mechanics-sim-001.md` for CivStudy sim wiring.
+**Do not re-plan Block B execution.** Cite:
 
-Before closing any PRIME receipt, require a linked **Cursor execution receipt** with probe literals.
+- `receipts/BLOCK-B-CLOSURE-20260616.md`
+- `receipts/cursor-execution-wp-grok-competition-depth-001-20260616.md`
+- `receipts/cursor-execution-wp-grok-player-agent-001-20260616.md`
+
+Emit **closure PRIMEs** with `closure_class: planning_validated_against_cursor_execution`.
+
+## Default next work (post Block B)
+
+See `docs/DEBT_REGISTER_V1.md`: `:8081` JWT, full cultural win epilogue, mechanics debt — **planning only** until Mike ignites a new WP.
 
 ---
 
 _End of swarm handoff seed._
-
-## Block A
-
-**Closed** @ `1037950`. Do not re-plan. Cite `receipts/BLOCK-A-CLOSURE-20260616.md` for closure PRIMEs.
-
-## Block B (open)
-
-`WP-GROK-COMPETITION-DEPTH-001`, `WP-GROK-PLAYER-AGENT-001` — §5 envelopes verbatim only.
