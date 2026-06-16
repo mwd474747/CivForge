@@ -6,7 +6,7 @@
 **Handoff seed:** `prompts/grok_swarm_handoff_seed.md`  
 **Cursor execution:** `receipts/cursor-execution-mechanics-proposal-lane-20260616.md`  
 **Work pack:** `receipts/work-pack-grok-mechanics-propose-001.md`  
-**CivForge HEAD:** `df5e8b7` on `main` — verify with `git rev-parse --short HEAD` after pull (feature `956d251`)
+**CivForge HEAD:** `7452f57` on `main` (verify: `git pull && git rev-parse --short HEAD`; feature `956d251`)
 
 ---
 
