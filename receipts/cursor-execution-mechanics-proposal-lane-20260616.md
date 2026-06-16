@@ -44,7 +44,7 @@ python3 tools/civforge_contract_parity.py
 ```
 
 **HEAD before commit:** `60a8515`  
-**HEAD after commit:** _(filled by commit)_  
+**HEAD after commit:** `956d251`  
 
 ---
 
