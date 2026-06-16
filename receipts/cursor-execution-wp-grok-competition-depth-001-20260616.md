@@ -1,8 +1,9 @@
 # Cursor Execution Receipt — WP-GROK-COMPETITION-DEPTH-001
 
 **Generated:** 2026-06-16  
-**Authority:** `prototype-only` until committed + live `:8080` probe  
+**Authority:** `current` (landed on CivForge `main` + live `:8080` verified)  
 **Repo:** `~/CivForge` (`main`)  
+**Anchor:** `2530fc2` (Block B land); registry HEAD `0e32a6b`  
 **Scope:** `receipts/HANDOFF-GROK-CONSOLIDATED-20260616.md` §5  
 **Work pack:** `WP-GROK-COMPETITION-DEPTH-001`
 
