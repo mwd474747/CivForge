@@ -44,7 +44,7 @@ python3 tools/civforge_contract_parity.py
 ```
 
 **HEAD before commit:** `60a8515`  
-**HEAD after commit:** `3af4a35` (includes `956d251` mechanics lane + doc link commit)  
+**HEAD after commit:** `539e2ba` (main — `956d251` mechanics lane + follow-up receipt commits)  
 
 ---
 

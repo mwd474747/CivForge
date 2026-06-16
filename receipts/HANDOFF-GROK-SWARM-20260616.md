@@ -6,7 +6,7 @@
 **Handoff seed:** `prompts/grok_swarm_handoff_seed.md`  
 **Cursor execution:** `receipts/cursor-execution-mechanics-proposal-lane-20260616.md`  
 **Work pack:** `receipts/work-pack-grok-mechanics-propose-001.md`  
-**CivForge HEAD:** `3af4a35` (main — mechanics proposal lane)
+**CivForge HEAD:** `22f872c` on `main` (feature commit `956d251`)
 
 ---
 
