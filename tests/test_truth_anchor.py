@@ -25,7 +25,7 @@ def test_work_pack_status_summary_block_a_closed():
 
 def test_registry_pytest_total_is_documented():
     summary = work_pack_status_summary()
-    assert summary["pytest_total_expected"] >= 159
+    assert summary["pytest_total_expected"] >= 160
 
 
 def test_registry_head_matches_git_when_committed():
