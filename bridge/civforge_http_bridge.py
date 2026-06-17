@@ -12,27 +12,46 @@ Usage:
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 from typing import Any, Dict, Optional
 
 import requests
 
+from backend.civforge_auth_headers import civforge_auth_headers
+
 BASE = "http://localhost:8080"
 
 
+def _request(method: str, path: str, json_body: Optional[Dict[str, Any]] = None) -> requests.Response:
+    return requests.request(
+        method,
+        f"{BASE}{path}",
+        json=json_body,
+        headers=civforge_auth_headers(),
+        timeout=15,
+    )
+
+
 def get_state() -> Dict[str, Any]:
-    r = requests.get(f"{BASE}/state", timeout=10)
+    r = _request("GET", "/state")
     r.raise_for_status()
     return r.json()
 
 
 def send_work_pack(pack: Dict[str, Any]) -> Dict[str, Any]:
-    r = requests.post(f"{BASE}/integrate/civforge", json=pack, timeout=15)
+    r = _request("POST", "/integrate/civforge", pack)
     r.raise_for_status()
     return r.json()
 
 
 def advance_cycle() -> Dict[str, Any]:
-    r = requests.post(f"{BASE}/advance_turn", timeout=15)
+    r = _request("POST", "/advance_turn")
     r.raise_for_status()
     return r.json()
 
@@ -43,7 +62,7 @@ def propose_work(
     investment: int = 3,
 ) -> Dict[str, Any]:
     payload = {"action": action, "details": details or {}, "investment": investment}
-    r = requests.post(f"{BASE}/governance/propose", json=payload, timeout=10)
+    r = _request("POST", "/governance/propose", payload)
     r.raise_for_status()
     return r.json()
 
@@ -52,13 +71,13 @@ def gate_proposal(proposal_id: str, fun_score_override: Optional[float] = None) 
     payload: Dict[str, Any] = {"proposal_id": proposal_id}
     if fun_score_override is not None:
         payload["fun_score_override"] = fun_score_override
-    r = requests.post(f"{BASE}/governance/gate", json=payload, timeout=10)
+    r = _request("POST", "/governance/gate", payload)
     r.raise_for_status()
     return r.json()
 
 
 def get_gravity_recommendation() -> Dict[str, Any]:
-    r = requests.get(f"{BASE}/governance/gravity_deploy_recommendation", timeout=10)
+    r = _request("GET", "/governance/gravity_deploy_recommendation")
     r.raise_for_status()
     return r.json()
 

@@ -1,4 +1,4 @@
-"""Thin identity plane client — dawsos-auth-prototype (:8081) JWT verify."""
+"""Thin identity plane client — dawsos-auth (:8081) JWT verify."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 import requests
 
 AUTH_BASE = os.environ.get("DAWSOS_AUTH_BASE", "http://127.0.0.1:8081").rstrip("/")
+AUTH_AUDIENCE = os.environ.get("CIVFORGE_AUTH_AUDIENCE", "civforge-kernel").strip()
 MUTATOR_SCOPES = frozenset({"govern", "mutate", "admin"})
 
 
@@ -30,7 +31,7 @@ def verify_identity_token(
     required_scope: str = "govern",
     timeout: float = 4.0,
 ) -> Dict[str, Any]:
-    """Verify JWT via auth-prototype GET /verify."""
+    """Verify JWT via dawsos-auth GET /verify."""
     if not token:
         return {"valid": False, "error": "empty_token"}
     try:
@@ -49,12 +50,16 @@ def verify_identity_token(
         scope = str(claims.get("scope", ""))
         if required_scope == "govern" and scope not in MUTATOR_SCOPES:
             return {"valid": False, "error": "insufficient_scope", "claims": claims}
+        aud = claims.get("aud")
+        if AUTH_AUDIENCE and aud and str(aud) != AUTH_AUDIENCE:
+            return {"valid": False, "error": "audience_mismatch", "claims": claims}
         return {
             "valid": True,
             "claims": claims,
             "identity": claims.get("sub"),
             "scope": scope,
-            "source": "auth-prototype-8081",
+            "audience": aud or AUTH_AUDIENCE,
+            "source": "dawsos-auth-8081",
         }
     except requests.RequestException as exc:
         return {"valid": False, "error": f"auth_unreachable:{exc}"}
@@ -91,6 +96,7 @@ def auth_status_summary() -> Dict[str, Any]:
         "auth_base": AUTH_BASE,
         "auth_reachable": reachable,
         "auth_health": health,
+        "auth_audience": AUTH_AUDIENCE or None,
         "mutator_scopes": sorted(MUTATOR_SCOPES),
         "static_token_envs": [
             name

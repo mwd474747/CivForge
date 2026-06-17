@@ -7,8 +7,8 @@
 anchor:
   repo: mwd474747/CivForge
   branch: main
-  head: 879e700
-  pytest_total: 147
+  head: 92a6360
+  pytest_total: 154
   kernel_port: 8080
   updated_at: "2026-06-16"
 
@@ -44,6 +44,11 @@ blocks:
     status: closed
     closure_receipt: receipts/BLOCK-D-CLOSURE-20260616.md
     execution_receipt: receipts/cursor-execution-wp-grok-block-d-20260616.md
+  block_e:
+    title: Auth consumers + dawsos-auth v1 + turnkey stack
+    status: closed
+    closure_receipt: receipts/BLOCK-E-CLOSURE-20260617.md
+    execution_receipt: receipts/cursor-execution-wp-grok-auth-consumer-20260617.md
 
 work_packs:
   WP-GROK-WONDER-PLACE-001:
@@ -196,6 +201,19 @@ work_packs:
     cli:
       - tools/dawsos_auth_identity_client.py
       - python3 tools/civforge_cli.py auth
+
+  WP-GROK-AUTH-CONSUMER-001:
+    lifecycle: closed
+    block: block_e
+    execution_receipt: receipts/cursor-execution-wp-grok-auth-consumer-20260617.md
+    tests:
+      - tests/test_wp_grok_auth_consumer_001.py
+    docs:
+      - docs/DAWSOS_AUTH_SYSTEM_PLAN_V1.md
+    tooling:
+      - tools/start-auth-8081.sh
+      - tools/turnkey-full-stack.sh
+      - backend/civforge_auth_headers.py
 
 retired_prime_patterns:
   - WP-GROK-BLOCK-A-RESUBMIT-*

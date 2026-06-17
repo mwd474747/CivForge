@@ -137,9 +137,19 @@ auth = get("/game/auth/status")
 assert "auth_base" in auth
 assert auth["auth_base"].endswith("8081")
 assert "identity_auth_enabled" in auth
+assert "auth_audience" in auth or "mutator_scopes" in auth
+
+# Block E auth consumer probes (dashboard + shared headers module)
+from pathlib import Path
+html = Path("frontend/index.html").read_text(encoding="utf-8")
+assert "civforge_auth_token" in html and "authFetch" in html
+assert Path("backend/civforge_auth_headers.py").is_file()
+assert Path("tools/start-auth-8081.sh").is_file()
+
+assert s4["work_pack_registry"].get("closed_block_e") is True
 assert s4["work_pack_registry"].get("closed_block_d") is True
 assert s4["work_pack_registry"].get("grok_handoff_pack") == "receipts/HANDOFF-GROK-EXECUTION-PACK-20260616.md"
-print("  API + MCP + Block A + B + C + D probes OK")
+print("  API + MCP + Block A + B + C + D + E probes OK")
 PY
 
 if $READ_ONLY; then

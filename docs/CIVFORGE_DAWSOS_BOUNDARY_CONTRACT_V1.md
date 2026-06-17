@@ -27,7 +27,7 @@ See also: `SEPARATION.md` (CivForge ↔ gravity-mosaic), dawsOS `STACK_BOUNDARY_
 |-------|----------------|-----------------|---------------|
 | **Execution** | `:8080` `backend/sim_api.py` + `core/` | `:8000` `workflow_dispatch` | None (default) |
 | **Receipts** | `receipts/*.md` + SQLite | `reports/ops/*` | None |
-| **Identity** | Future: thin client → auth-prototype `:8081` | `dawsos-auth-prototype` canon | HTTP verify only |
+| **Identity** | Consumer: `backend/auth_identity.py` → dawsos-auth `:8081` | `dawsos-auth` sister repo | HTTP verify only |
 | **Fleet telemetry** | Push heartbeats | Mirror builders → `reports/ops/nexus-*` | dawsos-nexus `:8082` |
 | **Command intents** | Poll → local `/governance/propose` | `nexus_command_dispatch` (dawsOS satellites only) | Nexus queue only |
 | **Metadata policy** | Read-only: app_id + allowed_actions | `governed-connectors-registry.v1` | Canon row `civforge_kernel` |
@@ -43,7 +43,7 @@ See also: `SEPARATION.md` (CivForge ↔ gravity-mosaic), dawsOS `STACK_BOUNDARY_
 | CivForge kernel | 8080 | `GET /state` → 200 | CivForge |
 | dawsOS API | 8000 | `GET /api/ready` | wt |
 | dawsos-nexus | 8082 | `GET /api/health` (public) | sister |
-| dawsos-auth-prototype | 8081 | `GET /health` | sister |
+| dawsos-auth | 8081 | `GET /health` → `service: dawsos-auth` | sister |
 
 wt HTTP probes include CivForge via canon — that is **liveness only**, not governance import.
 
@@ -66,11 +66,14 @@ wt HTTP probes include CivForge via canon — that is **liveness only**, not gov
 - **Mapping:** Nexus action → `POST /governance/propose` with `action=nexus_<action>` — **never** direct state mutation from poll loop
 - **Forbidden:** calling `/found_city`, `/advance_turn`, or service restarts on command receipt without FunForge gate
 
-### 4.3 CivForge → dawsos-auth-prototype (identity — target steady state)
+### 4.3 CivForge → dawsos-auth (identity — current)
 
-- **Tool:** `tools/dawsos_auth_client.py` (to be realigned to `:8081` for JWT verify)
-- **Use:** `govern` scope for `/governance/protected_advance` and sensitive operator paths
-- **Not a substitute:** Nexus operator token is for Mission Control operator UI, not CivForge product identity
+- **Tool:** `tools/dawsos_auth_identity_client.py` (identity plane `:8081`)
+- **Kernel:** `backend/auth_identity.py` verifies JWT via `GET /verify`
+- **Use:** `govern` / `mutate` / `admin` scope for mutators when `CIVFORGE_REQUIRE_AUTH=1`
+- **Dashboard:** `frontend/index.html` stores JWT in `localStorage.civforge_auth_token`
+- **Agents:** `CIVFORGE_AUTH_TOKEN` or `CIVFORGE_API_KEY` for MCP + HTTP bridge
+- **Not a substitute:** Nexus `:8082` operator token is fleet/Mission Control only
 
 ### 4.4 dawsOS → CivForge (read-only)
 

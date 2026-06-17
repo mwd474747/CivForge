@@ -86,6 +86,16 @@
 
   <div id="main-dashboard" class="hidden">
     <p class="banner">Court seat: <code id="api-base-label"></code> · <span id="conn-status">connected</span></p>
+    <div id="auth-panel" class="panel" style="padding:0.65rem 1rem;margin-bottom:0.75rem">
+      <strong style="color:var(--accent)">Auth</strong>
+      <span id="auth-status-line" class="sub" style="margin-left:0.5rem">local permissive</span>
+      <div style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center">
+        <input id="auth-token-input" type="password" placeholder="Paste govern JWT (from dawsos-auth :8081)" style="min-width:16rem;flex:1" />
+        <button type="button" id="auth-save-btn">Save token</button>
+        <button type="button" id="auth-clear-btn">Clear</button>
+      </div>
+      <p class="sub" style="margin:0.35rem 0 0">When <code>CIVFORGE_REQUIRE_AUTH=1</code>, mutators need <code>Authorization: Bearer</code>. Issue via <code>tools/dawsos_auth_identity_client.py token &lt;id&gt; govern</code>.</p>
+    </div>
     <div class="hud">
       <div class="stat"><span>Turn</span><strong id="hud-turn">—</strong></div>
       <div class="stat"><span>Prosperity</span><strong id="hud-fun">—</strong></div>
@@ -296,6 +306,7 @@
   <script>
     (function () {
       const STORAGE_KEY = "civforge_api_base";
+      const AUTH_STORAGE_KEY = "civforge_auth_token";
       const pageIsHttps = location.protocol === "https:";
       const params = new URLSearchParams(location.search);
       const colors = {};
@@ -323,6 +334,42 @@
       let activeTab = "player";
       let activeView = "overview";
 
+      function authHeaders(extra) {
+        const h = Object.assign({}, extra || {});
+        const token = (localStorage.getItem(AUTH_STORAGE_KEY) || "").trim();
+        if (token) h.Authorization = "Bearer " + token;
+        return h;
+      }
+
+      async function authFetch(url, options) {
+        const opts = options || {};
+        opts.headers = authHeaders(opts.headers);
+        const r = await fetch(url, opts);
+        if (r.status === 401 && opts.method && opts.method !== "GET") {
+          const line = document.getElementById("auth-status-line");
+          if (line) line.textContent = "401 — save a govern JWT in the Auth panel (or unset CIVFORGE_REQUIRE_AUTH).";
+        }
+        return r;
+      }
+
+      async function refreshAuthStatus() {
+        const line = document.getElementById("auth-status-line");
+        if (!line || !apiBase) return;
+        try {
+          const r = await authFetch(apiBase + "/game/auth/status");
+          if (!r.ok) return;
+          const s = await r.json();
+          const parts = [];
+          if (s.require_auth) parts.push("require_auth");
+          if (s.identity_auth_enabled) parts.push("JWT :8081");
+          if (s.auth_reachable) parts.push("auth reachable");
+          else if (s.identity_auth_enabled) parts.push("auth unreachable");
+          line.textContent = parts.length ? parts.join(" · ") : "local permissive";
+        } catch (_) {
+          line.textContent = "auth status unknown";
+        }
+      }
+
       document.getElementById("view-tabs").onclick = (e) => {
         const btn = e.target.closest("[data-view]");
         if (!btn) return;
@@ -349,6 +396,11 @@
         els.setup.classList.add("hidden");
         els.main.classList.remove("hidden");
         els.apiLabel.textContent = apiBase;
+        const saved = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (saved && document.getElementById("auth-token-input")) {
+          document.getElementById("auth-token-input").value = saved;
+        }
+        refreshAuthStatus();
       }
 
       function agentId(civ, player) {
@@ -402,7 +454,7 @@
           div.textContent = t.type === "city" ? "⬤" : "·";
           if (claimable) {
             div.onclick = async () => {
-              const r = await fetch(apiBase + "/game/map/claim", {
+              const r = await authFetch(apiBase + "/game/map/claim", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ x: t.x, y: t.y }),
@@ -483,7 +535,7 @@
         ).join("") : "<em>No pending offers.</em>";
         log.querySelectorAll("button[data-neg]").forEach(btn => {
           btn.onclick = async () => {
-            await fetch(apiBase + "/game/negotiate/respond", {
+            await authFetch(apiBase + "/game/negotiate/respond", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ negotiation_id: btn.dataset.neg, accept: btn.dataset.acc === "1" }),
@@ -571,12 +623,10 @@
           }
           overlay.classList.remove("hidden");
         } else if (vp.outcome === "victory" || pct >= 100 || data.session_phase === "epilogue") {
-          const hud = data.victory_hud || {};
-          const vlabel = hud.victory_type_label || "Joint Victory";
-          title.textContent = vlabel;
+          title.textContent = "Joint Victory";
           title.style.color = "var(--ok)";
           document.querySelector(".outcome-card").style.borderColor = "var(--ok)";
-          text.textContent = hud.epilogue_message || vp.epilogue_message || "All milestones complete. Governance quorum achieved across factions.";
+          text.textContent = "All milestones complete. Governance quorum achieved across factions.";
           overlay.classList.remove("hidden");
         } else {
           overlay.classList.add("hidden");
@@ -697,7 +747,7 @@
         const listEl = document.getElementById("mech-list");
         if (!listEl || !apiBase) return;
         try {
-          const r = await fetch(apiBase + "/game/mechanics/proposals");
+          const r = await authFetch(apiBase + "/game/mechanics/proposals");
           const d = await r.json();
           const items = (d.proposals || []).slice().reverse();
           if (!items.length) {
@@ -732,7 +782,7 @@
 
       async function mechGate(proposalId) {
         const fun = parseFloat(document.getElementById("mech-fun-override").value) || 85;
-        const r = await fetch(apiBase + "/game/mechanics/gate", {
+        const r = await authFetch(apiBase + "/game/mechanics/gate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ proposal_id: proposalId, fun_score_override: fun }),
@@ -744,7 +794,7 @@
       }
 
       async function mechApply(proposalId) {
-        const r = await fetch(apiBase + "/game/mechanics/apply", {
+        const r = await authFetch(apiBase + "/game/mechanics/apply", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ proposal_id: proposalId }),
@@ -852,7 +902,7 @@
 
       async function renderFounding() {
         try {
-          const r = await fetch(apiBase + "/game/founding-session");
+          const r = await authFetch(apiBase + "/game/founding-session");
           const fs = await r.json();
           document.getElementById("founding-session").innerHTML =
             "<p>Cities: " + fs.cities + " · Available prod: <strong>" + fs.available_prod + "</strong></p>" +
@@ -885,7 +935,7 @@
       async function loadState() {
         if (!apiBase) { showSetup(); return; }
         try {
-          const r = await fetch(apiBase + "/state");
+          const r = await authFetch(apiBase + "/state");
           if (!r.ok) throw new Error("HTTP " + r.status);
           renderAll(await r.json());
           showMain();
@@ -907,10 +957,22 @@
       };
 
       document.getElementById("change-base-btn").onclick = () => showSetup();
+      document.getElementById("auth-save-btn").onclick = () => {
+        const token = (document.getElementById("auth-token-input").value || "").trim();
+        if (!token) { alert("Paste a JWT first"); return; }
+        localStorage.setItem(AUTH_STORAGE_KEY, token);
+        refreshAuthStatus();
+        document.getElementById("auth-status-line").textContent = "token saved";
+      };
+      document.getElementById("auth-clear-btn").onclick = () => {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        document.getElementById("auth-token-input").value = "";
+        refreshAuthStatus();
+      };
       document.getElementById("refresh-btn").onclick = loadState;
       async function resetGame() {
         if (!confirm("Reset to a fresh game? Progress and alliances will be cleared.")) return;
-        const r = await fetch(apiBase + "/game/reset", { method: "POST" });
+        const r = await authFetch(apiBase + "/game/reset", { method: "POST" });
         const d = await r.json();
         document.getElementById("outcome-overlay").classList.add("hidden");
         const ps = d.summary && d.summary.prior_session;
@@ -929,11 +991,11 @@
           alert(state.session_phase === "defeat" ? "Defeat — use Reset Game." : "Victory epilogue — use Reset Game.");
           return;
         }
-        await fetch(apiBase + "/advance_turn", { method: "POST" });
+        await authFetch(apiBase + "/advance_turn", { method: "POST" });
         await loadState();
       };
       document.getElementById("district-btn").onclick = async () => {
-        const r = await fetch(apiBase + "/game/district/select", {
+        const r = await authFetch(apiBase + "/game/district/select", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ district_id: document.getElementById("district-select").value }),
@@ -943,7 +1005,7 @@
         await loadState();
       };
       document.getElementById("player-strategy-btn").onclick = async () => {
-        const r = await fetch(apiBase + "/game/player/strategy", {
+        const r = await authFetch(apiBase + "/game/player/strategy", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ strategy: document.getElementById("player-strategy").value }),
@@ -956,7 +1018,7 @@
       document.getElementById("policy-btn").onclick = async () => {
         const pid = document.getElementById("policy-select").value;
         if (!pid) return;
-        const r = await fetch(apiBase + "/game/policy/unlock", {
+        const r = await authFetch(apiBase + "/game/policy/unlock", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ policy_id: pid }),
@@ -968,7 +1030,7 @@
       document.getElementById("envoy-btn").onclick = async () => {
         const aid = document.getElementById("envoy-alliance-select").value;
         if (!aid) return;
-        const r = await fetch(apiBase + "/game/diplomacy/send_envoy", {
+        const r = await authFetch(apiBase + "/game/diplomacy/send_envoy", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ alliance_id: aid }),
@@ -979,7 +1041,7 @@
         await loadState();
       };
       document.getElementById("neg-send").onclick = async () => {
-        await fetch(apiBase + "/game/negotiate", {
+        await authFetch(apiBase + "/game/negotiate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ to: document.getElementById("neg-to").value, offer: document.getElementById("neg-offer").value }),
@@ -989,7 +1051,7 @@
       };
 
       document.getElementById("agent-select-btn").onclick = async () => {
-        const r = await fetch(apiBase + "/game/agent/select", {
+        const r = await authFetch(apiBase + "/game/agent/select", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ agent_id: document.getElementById("agent-select").value }),
@@ -999,7 +1061,7 @@
         await loadState();
       };
       document.getElementById("agent-directive-btn").onclick = async () => {
-        const r = await fetch(apiBase + "/game/agent/directive", {
+        const r = await authFetch(apiBase + "/game/agent/directive", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1012,7 +1074,7 @@
         await loadState();
       };
       document.getElementById("agent-autonomy-btn").onclick = async () => {
-        const r = await fetch(apiBase + "/game/agent/autonomy", {
+        const r = await authFetch(apiBase + "/game/agent/autonomy", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1025,7 +1087,7 @@
         await loadState();
       };
       document.getElementById("competition-set-btn").onclick = async () => {
-        const r = await fetch(apiBase + "/game/competition/mode", {
+        const r = await authFetch(apiBase + "/game/competition/mode", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mode: document.getElementById("competition-mode").value }),
@@ -1035,21 +1097,21 @@
         await loadState();
       };
       document.getElementById("competition-autoplay-start").onclick = async () => {
-        const r = await fetch(apiBase + "/game/competition/autoplay/start", { method: "POST" });
+        const r = await authFetch(apiBase + "/game/competition/autoplay/start", { method: "POST" });
         const d = await r.json();
         document.getElementById("competition-autoplay-status").textContent =
           d.error || ("Autoplay started (speed " + ((d.autoplay && d.autoplay.speed) || 1) + ")");
         await loadState();
       };
       document.getElementById("competition-autoplay-pause").onclick = async () => {
-        const r = await fetch(apiBase + "/game/competition/autoplay/pause", { method: "POST" });
+        const r = await authFetch(apiBase + "/game/competition/autoplay/pause", { method: "POST" });
         const d = await r.json();
         document.getElementById("competition-autoplay-status").textContent = d.error || "Autoplay paused.";
         await loadState();
       };
       document.getElementById("competition-autoplay-speed-btn").onclick = async () => {
         const speed = parseInt(document.getElementById("competition-autoplay-speed").value, 10) || 1;
-        const r = await fetch(apiBase + "/game/competition/autoplay/speed", {
+        const r = await authFetch(apiBase + "/game/competition/autoplay/speed", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ speed }),
@@ -1061,7 +1123,7 @@
       };
 
       document.getElementById("found-btn").onclick = async () => {
-        const r = await fetch(apiBase + "/found_city", {
+        const r = await authFetch(apiBase + "/found_city", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1083,7 +1145,7 @@
           document.getElementById("mech-result").textContent = "Invalid JSON payload";
           return;
         }
-        const r = await fetch(apiBase + "/game/mechanics/propose", {
+        const r = await authFetch(apiBase + "/game/mechanics/propose", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

@@ -17,6 +17,9 @@ echo "=== CivForge Turnkey Gaps All ==="
 echo "--- Full unit test suite ---"
 python3 -m pytest tests/ -q
 
+echo "--- Full stack (auth + kernel + validate + OpenClaw probe) ---"
+bash tools/turnkey-full-stack.sh --no-start
+
 echo "--- Governance posture (OpenClaw CF-GOV-*, read-only) ---"
 bash tools/turnkey-governance-posture.sh
 

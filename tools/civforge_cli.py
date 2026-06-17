@@ -20,7 +20,7 @@ Commands:
 
 All real changes to the *separate* gravity-mosaic project still require running
 the verified deploy.sh manually after governance receipts.
-Identity plane: sibling repo dawsos-auth-prototype (:8081) via tools/dawsos_auth_client.py.
+Identity plane: dawsos-auth (:8081) via tools/dawsos_auth_identity_client.py.
 """
 
 import argparse
@@ -31,41 +31,22 @@ import json
 import subprocess
 from pathlib import Path
 
-BASE = "http://localhost:8080"
+BASE = os.environ.get("CIVFORGE_KERNEL_URL", "http://localhost:8080").rstrip("/")
 ROOT = Path(__file__).parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from backend.civforge_auth_headers import civforge_auth_headers
 
 def _get(path):
-    return requests.get(f"{BASE}{path}", timeout=10).json()
+    r = requests.get(f"{BASE}{path}", headers=civforge_auth_headers(), timeout=10)
+    r.raise_for_status()
+    return r.json()
 
 def _post(path, json=None):
-    return requests.post(f"{BASE}{path}", json=json, timeout=15).json()
-
-
-def cmd_snapshot():
-    s = _get("/state")
-    mech = _get("/game/mechanics/status")
-    idx_script = ROOT / "tools" / "civforge_receipt_index.py"
-    idx = subprocess.run(
-        [sys.executable, str(idx_script)],
-        capture_output=True,
-        text=True,
-        cwd=str(ROOT),
-    )
-    receipt_index = {}
-    if idx.returncode == 0 and idx.stdout.strip():
-        try:
-            receipt_index = json.loads(idx.stdout)
-        except json.JSONDecodeError:
-            receipt_index = {"raw": idx.stdout[:500]}
-    print(json.dumps({
-        "turn": s.get("current_turn"),
-        "session_phase": s.get("session_phase"),
-        "fun_score": s.get("fun_score"),
-        "victory_hud": s.get("victory_hud"),
-        "mechanics_status": mech,
-        "receipt_index": receipt_index,
-    }, indent=2))
-
+    r = requests.post(f"{BASE}{path}", json=json, headers=civforge_auth_headers(), timeout=15)
+    r.raise_for_status()
+    return r.json()
 
 def cmd_status():
     s = _get("/state")
@@ -113,7 +94,6 @@ def main():
     p = argparse.ArgumentParser(description="CivForge governance CLI (FastAPI workspace)")
     sub = p.add_subparsers(dest="cmd")
 
-    sub.add_parser("snapshot", help="State + mechanics status + receipt index")
     sub.add_parser("status", help="Show current /state (fun, resources, receipts)")
     sub.add_parser("advance", help="Run one full governance cycle (agents + FunForge + gate + receipt)")
     sub.add_parser("recommend", help="Get current gravity-mosaic recommendation from the brains")
@@ -134,7 +114,7 @@ def main():
     sub.add_parser("nexus-poll", help="Poll dawsos-nexus (8082) for pending commands and surface as governed proposals (thin bridge, commands propose not execute). Supports --once/--loop.")
 
     # Auth/control: Nexus 8082 machine satellite (telemetry + proposals, governance_kernel). Identity long-term auth-prototype 8081. No "replaces" per boundary contract.
-    auth_p = sub.add_parser("auth", help="Auth prototype commands (separate identity plane :8081). Nexus 8082 is machine satellite only (telemetry + proposals). See SEPARATION planes.")
+    auth_p = sub.add_parser("auth", help="dawsos-auth identity plane (:8081). Nexus :8082 is machine satellite only.")
     auth_p.add_argument("action", nargs="?", default="status", choices=["status", "start", "register-device", "token", "verify"])
     auth_p.add_argument("arg1", nargs="?", default=None)
     auth_p.add_argument("arg2", nargs="?", default=None)
@@ -142,9 +122,7 @@ def main():
 
     args = p.parse_args()
 
-    if args.cmd == "snapshot":
-        cmd_snapshot()
-    elif args.cmd == "status":
+    if args.cmd == "status":
         cmd_status()
     elif args.cmd == "advance":
         cmd_advance()
@@ -189,35 +167,34 @@ def main():
 
     elif args.cmd == "auth":
         identity_script = str(ROOT / "tools" / "dawsos_auth_identity_client.py")
-        if args.action in ("register-device", "register-agent", "token", "verify", "health"):
-            cmd = ["python3", identity_script, args.action]
-            if args.arg1:
-                cmd.append(args.arg1)
-            if args.arg2:
-                cmd.append(args.arg2)
-            if args.arg3:
-                cmd.append(args.arg3)
-            subprocess.run(cmd)
+        if args.action in ("register-device", "token", "verify"):
+            cmd = ["python3", identity_script]
+            if args.action == "register-device":
+                cmd.extend(["register-device", args.arg1 or "civforge-player"])
+                if args.arg2:
+                    cmd.append(args.arg2)
+            elif args.action == "token":
+                cmd.extend(["token", args.arg1 or "civforge-player", args.arg2 or "govern"])
+            elif args.action == "verify":
+                cmd.extend(["verify", args.arg1 or ""])
+            subprocess.run(cmd, check=False)
         elif args.action == "start":
-            print("=== Enabling identity auth (dawsos-auth-prototype on :8081) ===")
-            print("  cd ~/Documents/GitHub/dawsos-auth-prototype")
-            print("  python3 -m uvicorn backend.auth_api:app --reload --host 127.0.0.1 --port 8081")
-            print("")
-            print("Then: python3 tools/civforge_cli.py auth register-device <id> [pk]")
-            print("      python3 tools/civforge_cli.py auth token <identity_id> govern")
-            print("      export CIVFORGE_REQUIRE_AUTH=1")
-            print("  Nexus satellite (:8082) remains separate: tools/dawsos_auth_client.py")
+            subprocess.run(["bash", str(ROOT / "tools" / "start-auth-8081.sh")], check=False)
         elif args.action == "status":
             try:
                 s = _get("/game/auth/status")
                 print(json.dumps(s, indent=2))
+            except Exception as exc:
+                print("Kernel :8080 not live or /game/auth/status unavailable:", exc)
+                print("Start: bash tools/turnkey-full-stack.sh")
+            try:
+                subprocess.run(["python3", identity_script, "health"], check=False)
             except Exception:
-                print("Auth identity plane (:8081):")
-                print("  Client: tools/dawsos_auth_identity_client.py")
-                print("  Kernel route: GET /game/auth/status (when :8080 live)")
-                print("  See SEPARATION.md and docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md")
+                pass
+            print("Client: tools/dawsos_auth_identity_client.py")
+            print("Turnkey: bash tools/turnkey-full-stack.sh [--auth-on]")
         else:
-            print("Unknown auth action. Try: status, start, health, register-device, register-agent, token, verify")
+            print("Unknown auth action. Try: status, start, register-device, token, verify")
     else:
         p.print_help()
 

@@ -82,5 +82,6 @@ def work_pack_status_summary() -> Dict[str, Any]:
         "closed_block_b": blocks.get("block_b", {}).get("status") == "closed",
         "closed_block_c": blocks.get("block_c", {}).get("status") == "closed",
         "closed_block_d": blocks.get("block_d", {}).get("status") == "closed",
+        "closed_block_e": blocks.get("block_e", {}).get("status") == "closed",
         "grok_handoff_pack": reg.get("truth_docs", {}).get("grok_handoff_pack"),
     }

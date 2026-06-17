@@ -16,7 +16,12 @@ import os
 import sys
 import urllib.error
 import urllib.request
+from pathlib import Path
 from typing import Any, Dict, Optional
+
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 KERNEL = os.environ.get("CIVFORGE_KERNEL_URL", "http://127.0.0.1:8080").rstrip("/")
 
@@ -115,11 +120,14 @@ TOOLS = [
 
 
 def _http(method: str, path: str, body: Optional[Dict[str, Any]] = None) -> Any:
+    from backend.civforge_auth_headers import civforge_auth_headers
+
     data = json.dumps(body).encode() if body is not None else None
+    headers = civforge_auth_headers({"Content-Type": "application/json"} if data else {})
     req = urllib.request.Request(
         f"{KERNEL}{path}",
         data=data,
-        headers={"Content-Type": "application/json"} if data else {},
+        headers=headers,
         method=method,
     )
     try:

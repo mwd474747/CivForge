@@ -21,6 +21,7 @@ bash tools/start-kernel-8080.sh
 open http://127.0.0.1:8080/dashboard
 bash tools/verify-truth-anchor.sh       # read-only truth plane
 bash tools/validate-game.sh --read-only # pytest + API probes (no turn advances)
+bash tools/turnkey-full-stack.sh         # auth :8081 + kernel :8080 + validate + OpenClaw probe
 bash tools/turnkey-cursor-local.sh       # Cursor local verify (primary)
 bash tools/turnkey-gaps-all.sh           # tests + cursor + openclaw escalation probe
 ```

@@ -25,7 +25,16 @@ sim = d.get("civstudy_sim") or {}
 print("  civstudy_sim:", sim.get("active_district"), "forks:", len(sim.get("unlocked_forks", [])))
 '
 
-echo "2. Nexus :8082 health..."
+echo "2. dawsos-auth :8081..."
+if curl -sf http://127.0.0.1:8081/health >/tmp/dawsos-auth-health.json 2>/dev/null; then
+  python3 -c 'import json; d=json.load(open("/tmp/dawsos-auth-health.json")); print("  auth:", d.get("service", d.get("status")), d.get("version", ""))'
+  AUTH_OK=true
+else
+  echo "  WARN: 8081 not live — bash tools/start-auth-8081.sh"
+  AUTH_OK=false
+fi
+
+echo "3. Nexus :8082 health..."
 if curl -sf http://127.0.0.1:8082/api/health >/tmp/nexus-health.json; then
   python3 -c 'import json; d=json.load(open("/tmp/nexus-health.json")); print("  nexus:", d.get("status", d))'
   NEXUS_OK=true
@@ -34,7 +43,7 @@ else
   NEXUS_OK=false
 fi
 
-echo "3. Satellite API key..."
+echo "4. Satellite API key..."
 if [[ -f "$KEY_FILE" ]]; then
   python3 -c "
 import json
@@ -47,7 +56,7 @@ else
   KEY_OK=false
 fi
 
-echo "4. Poller..."
+echo "5. Poller..."
 if $KEY_OK && $NEXUS_OK; then
   export NEXUS_URL="${NEXUS_URL:-http://127.0.0.1:8082}"
   export NEXUS_API_KEY
@@ -63,7 +72,7 @@ else
   POLLER_OK=false
 fi
 
-echo "5. wt probe pointers (read-only)..."
+echo "6. wt probe pointers (read-only)..."
 for f in \
   "reports/ops/dawsos-projection-pipeline-receipt-latest.json" \
   "reports/ops/workflow-dispatch-health-probe-latest.json" \
@@ -92,7 +101,7 @@ else
   echo "  MISSING engine-src/active/config/ops/governed-connectors-registry.v1.json"
 fi
 
-echo "6. Boundary contract mirror check..."
+echo "7. Boundary contract mirror check..."
 if [[ -f "$WT_ROOT/engine-src/active/docs/planning/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md" ]]; then
   echo "  wt mirror present"
 else
@@ -107,6 +116,7 @@ cat >"$RECEIPT_OUT" <<EOF
 
 ## Probes
 - kernel_8080: ok
+- auth_8081: $($AUTH_OK && echo ok || echo blocked)
 - nexus_8082: $($NEXUS_OK && echo ok || echo blocked)
 - api_key: $($KEY_OK && echo ok || echo blocked)
 - poller: $($POLLER_OK && echo exercised || echo skipped)
@@ -123,5 +133,5 @@ cat >"$RECEIPT_OUT" <<EOF
 - receipts/work-pack-openclaw-civforge-ops-001.md
 EOF
 
-echo "7. Receipt scaffold: $RECEIPT_OUT"
+echo "8. Receipt scaffold: $RECEIPT_OUT"
 echo "=== OpenClaw ops turnkey complete ==="

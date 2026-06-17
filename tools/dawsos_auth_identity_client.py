@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CivForge thin client for dawsos-auth-prototype identity plane (:8081).
+"""CivForge thin client for dawsos-auth identity plane (:8081).
 
 Separate from tools/dawsos_auth_client.py (Nexus :8082 machine satellite).
 
@@ -56,7 +56,7 @@ def cmd_verify(token: str) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="dawsos-auth-prototype client (:8081)")
+    parser = argparse.ArgumentParser(description="dawsos-auth client (:8081)")
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("health")
     reg = sub.add_parser("register-device")
