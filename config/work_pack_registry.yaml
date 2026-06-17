@@ -7,10 +7,10 @@
 anchor:
   repo: mwd474747/CivForge
   branch: main
-  head: 92a6360
+  head: 4cd0f88
   pytest_total: 154
   kernel_port: 8080
-  updated_at: "2026-06-16"
+  updated_at: "2026-06-17"
 
 truth_docs:
   order: docs/TRUTH_ORDER.md
