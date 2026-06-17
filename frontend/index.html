@@ -58,6 +58,8 @@
     .events { font-size: 0.8rem; color: var(--muted); max-height: 8rem; overflow: auto; }
     .events li { margin-bottom: 0.25rem; }
     .hidden { display: none !important; }
+    .grok-view-panel { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+    .grok-view-panel pre { margin: 0; font-size: 0.75rem; line-height: 1.35; max-height: 70vh; overflow: auto; white-space: pre-wrap; word-break: break-word; }
     .outcome-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.92); display: flex; align-items: center; justify-content: center; z-index: 100; }
     .outcome-card { background: var(--panel); border: 2px solid var(--ok); border-radius: 12px; padding: 2rem; max-width: 28rem; text-align: center; }
     .outcome-card h2 { color: var(--ok); margin: 0 0 0.5rem; }
@@ -75,6 +77,14 @@
       <button type="button" id="outcome-reset-btn">Start New Game</button>
       <button type="button" onclick="document.getElementById('outcome-overlay').classList.add('hidden')">Continue governing</button>
     </div>
+  </div>
+
+  <div id="grok-awareness-panel" class="grok-view-panel hidden">
+    <h2 style="margin:0 0 0.5rem;font-size:1rem;color:var(--accent)">Grok Awareness View</h2>
+    <p class="sub" style="margin:0 0 0.75rem">Machine-readable summary from <code>GET /game/awareness/summary</code> — add <code>?grok_view=true</code> to enable.</p>
+    <button type="button" id="grok-refresh-btn">Refresh summary</button>
+    <button type="button" id="grok-copy-btn" style="margin-left:0.4rem">Copy JSON</button>
+    <pre id="grok-awareness-json">Loading…</pre>
   </div>
 
   <div id="setup-panel" class="setup hidden">
@@ -368,6 +378,34 @@
         } catch (_) {
           line.textContent = "auth status unknown";
         }
+      }
+
+      const grokView = params.get("grok_view") === "true";
+
+      async function loadGrokAwareness() {
+        const pre = document.getElementById("grok-awareness-json");
+        if (!pre || !apiBase) return;
+        try {
+          const r = await authFetch(apiBase + "/game/awareness/summary");
+          const data = await r.json();
+          pre.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          pre.textContent = "Failed to load awareness summary: " + e;
+        }
+      }
+
+      function applyGrokViewMode() {
+        const panel = document.getElementById("grok-awareness-panel");
+        const main = document.getElementById("main-dashboard");
+        if (!grokView || !panel) return;
+        panel.classList.remove("hidden");
+        if (main) main.classList.add("hidden");
+        document.getElementById("grok-refresh-btn").onclick = loadGrokAwareness;
+        document.getElementById("grok-copy-btn").onclick = async () => {
+          const text = document.getElementById("grok-awareness-json").textContent || "";
+          try { await navigator.clipboard.writeText(text); } catch (_) {}
+        };
+        loadGrokAwareness();
       }
 
       document.getElementById("view-tabs").onclick = (e) => {
@@ -1163,7 +1201,10 @@
       };
       syncMechPayloadPreset();
 
-      if (apiBase) { showMain(); loadState(); } else { showSetup(); }
+      if (apiBase) {
+        if (grokView) { showMain(); applyGrokViewMode(); }
+        else { showMain(); loadState(); }
+      } else { showSetup(); }
     })();
   </script>
 </body>

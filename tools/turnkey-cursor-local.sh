@@ -42,7 +42,7 @@ proc = subprocess.run(
 )
 tools = json.loads(proc.stdout.strip().splitlines()[0])["result"]["tools"]
 print("  tools:", len(tools))
-assert len(tools) == 17, "expected 17 MCP tools"
+assert len(tools) == 18, "expected 18 MCP tools"
 '
 
 echo "4. Advance $ADVANCES turns..."

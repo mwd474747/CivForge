@@ -26,6 +26,7 @@ if str(_ROOT) not in sys.path:
 KERNEL = os.environ.get("CIVFORGE_KERNEL_URL", "http://127.0.0.1:8080").rstrip("/")
 
 TOOLS = [
+    {"name": "civforge_state_summary", "description": "Compact AI-oriented awareness summary (state + mechanics + receipts)", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "civforge_status", "description": "Get live governance + multi-agent state", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "civforge_advance_turn", "description": "Advance one governance cycle", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "civforge_reset_game", "description": "Reset to a fresh game session (turn 1, cleared victory progress)", "inputSchema": {"type": "object", "properties": {}}},
@@ -139,7 +140,9 @@ def _http(method: str, path: str, body: Optional[Dict[str, Any]] = None) -> Any:
 
 
 def _call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
-    if name == "civforge_status":
+    if name == "civforge_state_summary":
+        result = _http("GET", "/game/awareness/summary")
+    elif name == "civforge_status":
         result = _http("GET", "/state")
     elif name == "civforge_advance_turn":
         result = _http("POST", "/advance_turn")

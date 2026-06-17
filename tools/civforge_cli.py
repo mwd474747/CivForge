@@ -13,6 +13,7 @@ Commands:
   python tools/civforge_cli.py propose-deploy
   python tools/civforge_cli.py gate <proposal-id>
   python tools/civforge_cli.py run-deploy   # shows the strict command (does not auto-execute)
+  python tools/civforge_cli.py snapshot
   python tools/civforge_cli.py auth status
   python tools/civforge_cli.py auth start
   python tools/civforge_cli.py auth register-device my-device pk123
@@ -47,6 +48,10 @@ def _post(path, json=None):
     r = requests.post(f"{BASE}{path}", json=json, headers=civforge_auth_headers(), timeout=15)
     r.raise_for_status()
     return r.json()
+
+def cmd_snapshot():
+    print(json.dumps(_get("/game/awareness/summary"), indent=2))
+
 
 def cmd_status():
     s = _get("/state")
@@ -94,6 +99,7 @@ def main():
     p = argparse.ArgumentParser(description="CivForge governance CLI (FastAPI workspace)")
     sub = p.add_subparsers(dest="cmd")
 
+    sub.add_parser("snapshot", help="Awareness summary: state + mechanics + receipt index")
     sub.add_parser("status", help="Show current /state (fun, resources, receipts)")
     sub.add_parser("advance", help="Run one full governance cycle (agents + FunForge + gate + receipt)")
     sub.add_parser("recommend", help="Get current gravity-mosaic recommendation from the brains")
@@ -122,7 +128,9 @@ def main():
 
     args = p.parse_args()
 
-    if args.cmd == "status":
+    if args.cmd == "snapshot":
+        cmd_snapshot()
+    elif args.cmd == "status":
         cmd_status()
     elif args.cmd == "advance":
         cmd_advance()

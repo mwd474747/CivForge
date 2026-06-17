@@ -7,10 +7,10 @@
 anchor:
   repo: mwd474747/CivForge
   branch: main
-  head: 4cd0f88
-  pytest_total: 154
+  head: a7bb165
+  pytest_total: 159
   kernel_port: 8080
-  updated_at: "2026-06-17"
+  updated_at: "2026-06-16"
 
 truth_docs:
   order: docs/TRUTH_ORDER.md
@@ -135,8 +135,10 @@ work_packs:
     reason: Orphan inventory report-only — do not resurrect Godot or agent-vs-agent monolith
 
   WP-TOOLING-AWARENESS-PROPOSAL-001:
-    lifecycle: superseded
-    reason: Narrow slice landed as WP-TOOLING-AWARENESS-001 (mechanics status + cli snapshot)
+    lifecycle: closed
+    block: block_c
+    reason: Full closure — awareness summary, snapshot CLI, MCP state_summary, grok_view
+    execution_receipt: receipts/cursor-execution-wp-tooling-awareness-proposal-20260617.md
 
   WP-GROK-CULTURAL-EPILOGUE-001:
     lifecycle: closed
@@ -173,8 +175,14 @@ work_packs:
     execution_receipt: receipts/cursor-execution-wp-grok-block-c-20260616.md
     routes:
       - GET /game/mechanics/status
+      - GET /game/awareness/summary
     cli:
       - python3 tools/civforge_cli.py snapshot
+    mcp:
+      - civforge_state_summary
+      - tools/mcp_state_summary.py
+    ui:
+      - frontend/index.html?grok_view=true
 
   WP-GROK-DOC-SYNC-001:
     lifecycle: closed

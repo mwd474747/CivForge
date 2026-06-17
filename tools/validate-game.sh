@@ -101,7 +101,8 @@ for mech in (
 ):
     assert mech in names, f"missing MCP tool {mech}"
 assert "civforge_send_envoy" in names
-assert len(names) == 17, f"expected 17 MCP tools, got {len(names)}"
+assert "civforge_state_summary" in names
+assert len(names) == 18, f"expected 18 MCP tools, got {len(names)}"
 
 # Block A route smoke (deterministic on fresh reset session)
 post("/game/policy/branch", {"branch_id": "tradition"})
@@ -132,7 +133,10 @@ s4 = get("/state")
 assert "domination_path" in s4.get("victory_progress", {}), "missing victory_progress.domination_path (Block C)"
 assert s4["work_pack_registry"].get("closed_block_c") is True, "Block C should be closed in registry"
 
-# Block D auth probes
+# Tooling awareness closure (WP-TOOLING-AWARENESS-PROPOSAL-001)
+aware = get("/game/awareness/summary")
+assert aware.get("schema") == "civforge.awareness_summary.v1"
+assert "mechanics_status" in aware
 auth = get("/game/auth/status")
 assert "auth_base" in auth
 assert auth["auth_base"].endswith("8081")

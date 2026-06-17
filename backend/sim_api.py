@@ -641,6 +641,23 @@ async def game_mechanics_status() -> Dict[str, Any]:
     """Registry module list + tick order (machine-readable tooling surface)."""
     return mechanics_status_summary(game_state, mechanics_registry)
 
+
+@app.get("/game/awareness/summary")
+async def game_awareness_summary(receipt_index: str = "1") -> Dict[str, Any]:
+    """Compact AI-oriented state snapshot (WP-TOOLING-AWARENESS-PROPOSAL-001)."""
+    from backend.awareness_summary import build_awareness_summary
+
+    idx: Optional[Dict[str, Any]] = None
+    if receipt_index.strip().lower() not in {"0", "false", "no", "off"}:
+        try:
+            from tools.civforge_receipt_index import build_report
+
+            idx = build_report(write_files=False)
+        except Exception:
+            idx = {"error": "receipt_index_unavailable"}
+    return build_awareness_summary(game_state, mechanics_registry, receipt_index=idx)
+
+
 @app.get("/game/mechanics/proposals")
 async def game_mechanics_proposals_list(status: Optional[str] = None) -> Dict[str, Any]:
     """List mechanics proposals (Grok swarm proposal lane — not simulation-only)."""
