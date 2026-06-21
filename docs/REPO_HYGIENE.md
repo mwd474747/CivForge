@@ -72,13 +72,13 @@ Verify accepts `anchor.head == HEAD` **or** `anchor.head == HEAD~1` when the lat
 Default verify mode is **read-only** — it does not mutate the registry (2026-06-16 hygiene fix).
 
 - No `_archive/` or Godot paths in active docs
-- No `tools/auth-prototype/` references (identity → sibling `dawsos-auth-prototype` repo)
+- No removed `tools/auth-prototype/` bridge references (identity → sibling `dawsos-auth` repo)
 - `docs/EXECUTION_LANE_V2.md` lane model unchanged unless intentional
 
 ---
 
 ## Separation (unchanged)
 
-CivForge governs; **gravity-mosaic** and **dawsos-auth-prototype** are separate repos. Deploy only via `tools/deploy-gravity-mosaic/deploy.sh`.
+CivForge governs; **gravity-mosaic** and **dawsos-auth** are separate repos. Deploy only via `tools/deploy-gravity-mosaic/deploy.sh`.
 
 See `SEPARATION.md`, `docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md`.

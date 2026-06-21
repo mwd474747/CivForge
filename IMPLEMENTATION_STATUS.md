@@ -16,7 +16,7 @@ CivForge = **local Python FastAPI governance backend** running on `0.0.0.0:8080`
 - tools/civforge_cli.py + tools/gravity_advisor.py + tools/dawsos_auth_client.py — terminal drivers + thin auth client
 - receipts/ — growing set of real governance-cycle and work-pack markdown artifacts (including auth-prototype-push, git-tools, LOCKED-CIV-GAME-PLAN, mechanics-extension-sim receipts)
 - Gravity deploy tool untouched and canonical for the separate project
-- dawsos-auth-prototype (separate repo https://github.com/mwd474747/dawsos-auth-prototype) — pushed after literal verification; only thin client integration in CivForge/tools/dawsos_auth_client.py + optional protected_advance demo
+- dawsos-auth (separate repo https://github.com/mwd474747/dawsos-auth) — pushed after literal verification; only thin client integration in CivForge/tools/dawsos_auth_client.py + optional protected_advance demo
 - **Civ Game Layer**: **Blocks A–D closed**. **147 pytest.** Grok handoff: `receipts/HANDOFF-GROK-EXECUTION-PACK-20260616.md`. JWT identity: `GET /game/auth/status`, `tools/dawsos_auth_identity_client.py`.
 
 **Persistence**: Enabled (ReceiptStore now supports db_path). State snapshots + receipts load on startup.

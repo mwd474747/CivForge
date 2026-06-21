@@ -2,7 +2,7 @@
 
 **Status:** `current` — CivForge planning + consumer contract  
 **Label:** planning evidence — not dawsOS wt promotion truth  
-**Sister service:** `~/Documents/GitHub/dawsos-auth-prototype` → branded **dawsos-auth** v1.0  
+**Sister service:** `~/Documents/GitHub/dawsos-auth` — **dawsos-auth** v1.0  
 **CivForge consumer:** Block D (kernel verify) + Block E (dashboard/MCP/bridge)
 
 ---
@@ -14,7 +14,7 @@ CivForge mutators on `:8080` need a **separate identity plane** from:
 - **dawsOS wt** (`:8000`) — workflow dispatch, promotion truth
 - **dawsos-nexus** (`:8082`) — fleet telemetry + Mission Control operator UI
 
-The auth prototype on `:8081` proved JWT issuance + verify. Block D wired kernel-side verify. Block E finishes **clients** (dashboard, MCP, HTTP bridge) and promotes the sister repo from prototype to **dawsos-auth v1**.
+**dawsos-auth** on `:8081` provides JWT issuance + verify. Block D wired kernel-side verify. Block E finishes **clients** (dashboard, MCP, HTTP bridge).
 
 ---
 
@@ -153,4 +153,4 @@ export CIVFORGE_AUTH_TOKEN="$(python3 tools/dawsos_auth_identity_client.py token
 - `docs/CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md` §4.3
 - `backend/auth_identity.py`
 - `tools/dawsos_auth_identity_client.py` (not `dawsos_auth_client.py` — Nexus `:8082`)
-- Sister: `~/Documents/GitHub/dawsos-auth-prototype/README.md`
+- Sister: `~/Documents/GitHub/dawsos-auth/README.md`

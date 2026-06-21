@@ -209,7 +209,7 @@ def build_report(write_files: bool = True) -> Dict[str, Any]:
         findings.append({
             "id": f"stale_auth_bridge_ref:{rel}",
             "severity": "warn",
-            "detail": "active docs/tooling should point to sibling dawsos-auth-prototype, not removed tools/auth-prototype bridge scripts",
+            "detail": "active docs/tooling should point to sibling dawsos-auth, not removed tools/auth-prototype bridge scripts",
         })
 
     fail_count = sum(1 for f in findings if f["severity"] == "fail")

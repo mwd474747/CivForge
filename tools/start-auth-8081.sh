@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-AUTH_REPO="${DAWSOS_AUTH_REPO:-$HOME/Documents/GitHub/dawsos-auth-prototype}"
+AUTH_REPO="${DAWSOS_AUTH_REPO:-$HOME/Documents/GitHub/dawsos-auth}"
 
 LOG_FILE="/tmp/dawsos-auth-8081.log"
 PID_FILE="/tmp/dawsos-auth-8081.pid"

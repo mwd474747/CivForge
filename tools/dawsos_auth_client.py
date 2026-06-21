@@ -6,8 +6,8 @@ Per boundary contract:
 - Nexus = telemetry (heartbeats with customMetrics/agentState) + command queue (proposals).
 - Register app (governance_kernel type) + x-nexus-api-key for heartbeats/poll.
 - **Not** product identity. Scoped "govern" here is machine context only.
-- Identity / JWT / user scopes long-term via dawsos-auth-prototype :8081.
-- Does not replace auth-prototype. Machine satellite key (x-nexus-api-key) only for Nexus paths. No dev bypass.
+- Identity / JWT / user scopes via dawsos-auth `:8081`.
+- Does not replace dawsos-auth. Machine satellite key (x-nexus-api-key) only for Nexus paths. No dev bypass.
 
 Usage (machine only):
   python tools/dawsos_auth_client.py register-device civforge-kernel
@@ -44,7 +44,7 @@ def get_token(identity_id: str, scope: str = "govern"):
         return {"error": "NEXUS_API_KEY required"}
     headers = {"x-nexus-api-key": api_key}
     r = requests.post(f"{NEXUS_BASE}/api/telemetry/heartbeat", json={"appId": identity_id, "status": "active"}, headers=headers)
-    # Machine context only; real identity via 8081 auth-prototype long-term.
+    # Machine context only; real identity via 8081 dawsos-auth.
     token = api_key
     print(json.dumps({"token": token, "scope": scope, "claims": {"identity": identity_id, "note": "machine satellite key only"}}, indent=2))
     return {"token": token, "scope": scope}
