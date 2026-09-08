@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-import requests, os
+import os
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import uvicorn
@@ -31,12 +31,10 @@ from backend.competition_modes import (
 )
 from backend.dashboard_components import get_dashboard_registry
 from backend.simulation_boundary import boundary_summary
-from backend.telemetry_enrich import enrich_telemetry_payload
-
 from backend.civstudy_metadata import civstudy_reference_panel
 from backend.civstudy_mechanics_bridge import civstudy_sim_summary, ensure_civstudy_sim_state
 from backend.game_reset import apply_defeat_cascade_seed, apply_game_reset
-from backend.game_session import apply_defeat, check_defeat_conditions, policy_flags, session_phase
+from backend.game_session import apply_defeat, check_defeat_conditions, session_phase
 from backend.game_actions import (
     action_catalog,
     claim_map_tile,
@@ -78,8 +76,6 @@ from backend.multi_agent_state import (
     respond_negotiation,
 )
 
-NEXUS_URL = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
-
 def _truthy_env(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
 
@@ -91,9 +87,8 @@ def _constant_time_match(candidate: str, allowed: list[str]) -> bool:
 def _extract_auth_candidates(
     authorization: Optional[str],
     x_civforge_token: Optional[str],
-    x_nexus_api_key: Optional[str],
 ) -> list:
-    candidates = [x for x in (x_civforge_token, x_nexus_api_key) if isinstance(x, str) and x]
+    candidates = [x_civforge_token] if isinstance(x_civforge_token, str) and x_civforge_token else []
     if isinstance(authorization, str) and authorization:
         candidates.append(authorization.split(" ", 1)[1] if authorization.lower().startswith("bearer ") else authorization)
     return candidates
@@ -102,7 +97,6 @@ def _extract_auth_candidates(
 def require_public_mode_token(
     authorization: Optional[str] = Header(None),
     x_civforge_token: Optional[str] = Header(None, alias="X-CivForge-Token"),
-    x_nexus_api_key: Optional[str] = Header(None, alias="x-nexus-api-key"),
 ) -> Dict[str, Any]:
     """Optional exposure guard for mutating routes.
 
@@ -115,9 +109,8 @@ def require_public_mode_token(
     allowed = [
         os.environ.get("CIVFORGE_OPERATOR_TOKEN", ""),
         os.environ.get("CIVFORGE_API_KEY", ""),
-        os.environ.get("NEXUS_API_KEY", ""),
     ]
-    candidates = _extract_auth_candidates(authorization, x_civforge_token, x_nexus_api_key)
+    candidates = _extract_auth_candidates(authorization, x_civforge_token)
     if any(_constant_time_match(candidate, allowed) for candidate in candidates):
         return {"public_mode": True, "scope": "mutate", "source": "static_token"}
 
@@ -135,41 +128,9 @@ def require_public_mode_token(
 
     raise HTTPException(
         401,
-        "Mutating routes require static token or govern JWT from dawsos-auth-prototype :8081 "
+        "Mutating routes require a CivForge static token or govern JWT from dawsos-auth-prototype :8081 "
         "(CIVFORGE_PUBLIC_MODE or CIVFORGE_REQUIRE_AUTH)",
     )
-
-
-def send_telemetry_to_nexus(turn: int, fun_score: float, resources: dict, extra: dict = None):
-    """Send heartbeat to dawsos-nexus (8082) as CivForge satellite.
-    Includes agentState, customMetrics (turn, fun, resources, events, territories) for control/telemetry/simulation.
-    Thin HTTP bridge only per SEPARATION.md. Commands from nexus are proposals (not direct exec).
-    """
-    try:
-        payload = {
-            "appId": "civforge-kernel",
-            "status": "active",
-            "agentState": "thinking",
-            "customMetrics": {
-                "turn": turn,
-                "funScore": fun_score,
-                "resources": resources,
-                "territories": extra.get("territories", 0) if extra else 0,
-                "events": extra.get("events", [])[-3:] if extra else [],
-                "cities": extra.get("cities", 0) if extra else 0,
-            }
-        }
-        if extra and "fun_components" in extra:
-            payload["customMetrics"]["funComponents"] = extra["fun_components"]
-        if extra:
-            for key in ("alliancesCount", "negotiationsPending", "victoryProgress", "victoryOutcome", "sessionPhase", "policyFlags", "mapPlayerTiles", "mechanicsSummary"):
-                if key in extra:
-                    payload["customMetrics"][key] = extra[key]
-        api_key = os.environ.get("NEXUS_API_KEY", "")
-        headers = {"x-nexus-api-key": api_key} if api_key else None
-        requests.post(f"{NEXUS_URL}/api/telemetry/heartbeat", json=payload, headers=headers, timeout=5)
-    except Exception:
-        pass  # never block game on telemetry
 
 app = FastAPI(
     title="CivForge Governance Backend",
@@ -268,32 +229,6 @@ def _persist_governance_event(receipt: Dict[str, Any], filename_hint: str) -> No
     _sync_governance_proposals_to_state()
     receipt_store.append(receipt, filename_hint=filename_hint)
     receipt_store.save_state("game_state", game_state)
-
-def telemetry_extra_from_state() -> Dict[str, Any]:
-    ensure_multi_agent_state(game_state)
-    if "mechanics_lanes" not in game_state:
-        game_state["mechanics_lanes"] = default_mechanics_lanes()
-    player_tiles = sum(1 for t in game_state.get("map_tiles", []) if t.get("owner") == "player")
-    pending_neg = sum(1 for n in game_state.get("negotiations", []) if n.get("status") == "pending")
-    ml = game_state.get("mechanics_lanes", {})
-    base = {
-        "territories": game_state["player"].get("territories", 0),
-        "cities": game_state["player"].get("cities", 0),
-        "events": game_state.get("events", []),
-        "alliancesCount": len(game_state.get("alliances", [])),
-        "negotiationsPending": pending_neg,
-        "victoryProgress": game_state.get("victory_progress", {}).get("joint_progress", 0),
-        "victoryOutcome": game_state.get("victory_progress", {}).get("outcome"),
-        "sessionPhase": session_phase(game_state),
-        "policyFlags": policy_flags(game_state),
-        "mapPlayerTiles": player_tiles,
-        "mechanicsSummary": {
-            "military_strength": ml.get("military", {}).get("strength"),
-            "economic_institutions": ml.get("economic", {}).get("institutions"),
-            "cultural_chains": ml.get("cultural", {}).get("event_chains"),
-        },
-    }
-    return enrich_telemetry_payload(game_state, base)
 
 forge_coordinator = orchestrator.register_agent(
     FORGE_COORDINATOR_ID, "Forge Coordinator (in-kernel)"
@@ -422,10 +357,6 @@ async def found_city(req: FoundCityRequest, _claims: Dict[str, Any] = Depends(re
     # Also log via core ReceiptStore (disk + memory)
     receipt_store.append(receipt, filename_hint="work-pack")
 
-    # Telemetry to dawsos-nexus on work pack / found action
-    extra = telemetry_extra_from_state()
-    send_telemetry_to_nexus(game_state["turn"], game_state["player"]["fun_score"], game_state["player"]["resources"], extra)
-
     return {
         "message": f"Work pack '{req.city_name}' initiated successfully!",
         "updated_state": game_state["player"],
@@ -480,10 +411,6 @@ async def advance_turn(_claims: Dict[str, Any] = Depends(require_public_mode_tok
     # Persist the important ones + snapshot full state for restart survival
     receipt_store.append(receipt, filename_hint="governance-cycle")
     receipt_store.save_state("game_state", game_state)
-
-    # Send telemetry to dawsos-nexus (8082) - primary for control, telemetry, simulation input, audit mirror
-    extra = telemetry_extra_from_state()
-    send_telemetry_to_nexus(game_state["turn"], game_state["player"]["fun_score"], game_state["player"]["resources"], extra)
 
     return {
         "message": f"Governance cycle {game_state['turn']} advanced.",
@@ -817,13 +744,6 @@ async def game_reset(
     game_state["receipts"].append(reset_receipt)
     receipt_store.append(reset_receipt, filename_hint="game-reset")
     receipt_store.save_state("game_state", game_state)
-    extra = telemetry_extra_from_state()
-    send_telemetry_to_nexus(
-        game_state["turn"],
-        game_state["player"]["fun_score"],
-        game_state["player"]["resources"],
-        extra,
-    )
     return {
         "message": (
             f"Game reset with defeat-cascade seed (turn {game_state['turn']}, defeat={session_phase(game_state) == 'defeat'})."
@@ -937,64 +857,24 @@ async def gravity_deploy_recommendation() -> Dict[str, Any]:
 
 @app.post("/simulation/what_if")
 async def what_if_simulation(scenario: dict, _claims: Dict[str, Any] = Depends(require_public_mode_token)):
-    """What-if simulation for Civ Game mechanics, driven by live dawsos-nexus telemetry (customMetrics, agentState).
-    Projects resource yields + fun impact. Uses nexus as source of truth for fleet/agent context (thin bridge).
-    """
-    nexus_data = {}
-    try:
-        nexus = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
-        # Try specific app, then fleet list, then health as fallback (nexus schema: apps may be list or keyed)
-        for ep in [f"{nexus}/api/apps/civforge-kernel", f"{nexus}/api/apps", f"{nexus}/api/health"]:
-            resp = requests.get(ep, timeout=4)
-            if resp.status_code == 200:
-                data = resp.json()
-                if isinstance(data, dict) and (data.get("latestMetrics") or data.get("customMetrics") or data.get("agentState")):
-                    nexus_data = data
-                    break
-                if isinstance(data, list) and data:
-                    # pick civforge or first
-                    for a in data:
-                        if isinstance(a, dict) and a.get("appId") == "civforge-kernel":
-                            nexus_data = a
-                            break
-                    if not nexus_data:
-                        nexus_data = data[0]
-                else:
-                    nexus_data = data
-                break
-    except Exception:
-        nexus_data = {}
-    # Project resources + fun using scenario investment (simple model extensible via more nexus customMetrics)
+    """Project Civ Game resources and fun from the local governed game state."""
     current = dict(game_state["player"]["resources"])
     invest = int(scenario.get("investment", 0))
     projected = {k: v + invest for k, v in current.items()}
-    # Fun impact estimate from nexus context if present, else local
     fun_base = game_state["player"].get("fun_score", 0)
-    nexus_fun = 0
-    if isinstance(nexus_data, dict):
-        cm = nexus_data.get("customMetrics") or nexus_data.get("latestMetrics") or {}
-        nexus_fun = cm.get("funScore", 0) or 0
-    fun_impact = max(fun_base, nexus_fun) + 3 + (invest // 2)
+    fun_impact = fun_base + 3 + (invest // 2)
     return {
         "current": current,
         "projected": projected,
-        "nexus_context": nexus_data if nexus_data else {"note": "no telemetry yet or nexus down"},
+        "context_source": "local_game_state",
         "fun_impact_estimate": round(fun_impact, 1),
-        "note": "Simulation using dawsos-nexus telemetry/customMetrics for Civ Game what-if (governed, receipt-first)."
+        "note": "Simulation uses the local governed CivForge game state (receipt-first).",
     }
 
-# Thin bridge to dawsos-nexus (8082) — machine satellite only (telemetry heartbeats + command proposals).
-# Per boundary contract (wt governed-connectors-registry.v1 + CIVFORGE_DAWSOS_BOUNDARY_CONTRACT_V1.md) + dawsOS agent feedback:
-#   - governance_kernel type, allowed_actions=["sync_config"] only (strict per registry + user Q1).
-#   - x-nexus-api-key (satellite key) for machine auth. Operator token path dropped for CivForge (per Q2 "remove entirely").
-#   - Identity / JWT long-term via dawsos-auth-prototype :8081. No hybrid bypass.
-# register-device / machine heartbeat via client or /api/apps (satellite key). Commands propose (not execute). See SEPARATION.md planes.
-NEXUS_AUTH_BASE = os.environ.get("NEXUS_URL", "http://127.0.0.1:8082")
-
 def require_govern_token(authorization: str = Header(None)):
-    """Protected governance path: prefer identity JWT (:8081), fallback Nexus satellite health."""
+    """Protected governance path: require an identity JWT verified by dawsos-auth (:8081)."""
     if not authorization:
-        raise HTTPException(401, "Auth token required (govern JWT from :8081 or Nexus satellite key)")
+        raise HTTPException(401, "Auth token required (govern JWT from :8081)")
     token = authorization.split(" ")[-1] if " " in authorization else authorization
     if looks_like_jwt(token):
         verified = verify_identity_token(token, required_scope="govern")
@@ -1004,30 +884,16 @@ def require_govern_token(authorization: str = Header(None)):
                 "identity": verified.get("identity"),
                 "source": verified.get("source"),
             }
-    try:
-        r = requests.get(
-            f"{NEXUS_AUTH_BASE}/api/health",
-            headers={"Authorization": f"Bearer {token}", "x-nexus-api-key": token},
-            timeout=4,
-        )
-        if r.status_code == 200:
-            return {"scope": "govern", "identity": "nexus-auth", "source": "nexus-verify"}
-    except Exception:
-        pass
-    raise HTTPException(401, "Invalid govern credential — use :8081 JWT or Nexus satellite key")
+    raise HTTPException(401, "Invalid govern credential — use a :8081 govern JWT")
 
 @app.post("/governance/protected_advance")
 async def protected_advance(claims: dict = Depends(require_govern_token)):
-    # Protected path: requires valid govern credential from dawsos-nexus.
-    # In real use: register CivForge as app via client, issue scoped token, use for sensitive turns.
-    # Telemetry still sent on success.
-    extra = telemetry_extra_from_state()
-    send_telemetry_to_nexus(game_state["turn"], game_state["player"]["fun_score"], game_state["player"]["resources"], extra)
+    # Protected path: requires a valid govern credential from dawsos-auth.
     return {
         "status": "advanced with auth",
         "claims": claims,
         "turn": game_state["turn"],
-        "note": "Protected via dawsos-nexus (8082) thin bridge. Commands from nexus treated as proposals per sister contract."
+        "note": "Protected via the dawsos-auth identity plane on :8081.",
     }
 
 

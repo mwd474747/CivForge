@@ -2,7 +2,7 @@
 """CivForge contract parity lint.
 
 Report-only governance surface for checking that docs, routes, MCP tools, and
-Nexus command policy describe the same CivForge contract.
+the retired Nexus boundary describe the same CivForge contract.
 """
 
 from __future__ import annotations
@@ -63,6 +63,37 @@ def stale_auth_bridge_refs() -> List[str]:
         if "tools/auth-prototype/" in text or "./tools/auth-prototype" in text:
             refs.append(rel)
     return refs
+
+
+def retired_nexus_artifacts() -> List[str]:
+    """Return obsolete executable poller/client artifacts that still exist."""
+    paths = (
+        "tools/nexus_command_poller.py",
+        "tools/start-poller-daemon.sh",
+        "tools/civforge_poller_posture.py",
+        "tools/dawsos_auth_client.py",
+    )
+    return [rel for rel in paths if (ROOT / rel).exists()]
+
+
+def retired_nexus_consumers() -> List[str]:
+    """Find active source/config consumers of the retired Nexus credential path."""
+    checks = {
+        "backend/sim_api.py": ("NEXUS_API_KEY", "x-nexus-api-key", "NEXUS_URL", "send_telemetry_to_nexus"),
+        "backend/auth_identity.py": ("NEXUS_API_KEY",),
+        "Dockerfile": ("NEXUS_URL", "nexus_command_poller"),
+        "docker-compose.yml": ("NEXUS_API_KEY", "NEXUS_URL", "civforge-poller", "nexus_command_poller"),
+        "tools/civforge_cli.py": ("nexus-poll", "nexus_command_poller"),
+        "tools/turnkey-governance-posture.sh": ("civforge_poller_posture", "civforge-poller-posture"),
+        "tools/turnkey-multi-ui-full.sh": ("NEXUS_API_KEY", "nexus_command_poller", "start-poller-daemon"),
+        "tools/turnkey-openclaw-ops.sh": ("NEXUS_API_KEY", "nexus_command_poller", "start-poller-daemon"),
+    }
+    consumers = []
+    for rel, tokens in checks.items():
+        text = read_text(ROOT / rel)
+        if any(token in text for token in tokens):
+            consumers.append(rel)
+    return consumers
 
 
 def bridge_expectations() -> Dict[str, Any]:
@@ -180,7 +211,8 @@ def build_report(write_files: bool = True) -> Dict[str, Any]:
     routes = route_methods()
     bridge = bridge_expectations()
     allowed = allowed_actions_from_boundary()
-    poller_text = read_text(ROOT / "tools" / "nexus_command_poller.py")
+    obsolete_artifacts = retired_nexus_artifacts()
+    obsolete_consumers = retired_nexus_consumers()
     swarm_checks = swarm_alignment_checks()
 
     findings: List[Dict[str, str]] = []
@@ -199,11 +231,17 @@ def build_report(write_files: bool = True) -> Dict[str, Any]:
             "severity": "fail",
             "detail": f"expected ['sync_config'], found {allowed}",
         })
-    if 'action != "sync_config"' not in poller_text and "action != 'sync_config'" not in poller_text:
+    if obsolete_artifacts:
         findings.append({
-            "id": "poller_allowed_actions_not_strict",
+            "id": "retired_nexus_artifacts_present",
             "severity": "fail",
-            "detail": "poller must block every Nexus action except sync_config",
+            "detail": ", ".join(obsolete_artifacts),
+        })
+    if obsolete_consumers:
+        findings.append({
+            "id": "retired_nexus_consumers_present",
+            "severity": "fail",
+            "detail": ", ".join(obsolete_consumers),
         })
     for rel in stale_auth_bridge_refs():
         findings.append({
@@ -231,6 +269,8 @@ def build_report(write_files: bool = True) -> Dict[str, Any]:
         "mcp_tools": sorted(actual_tools),
         "documented_mcp_tools": sorted(guide_tools),
         "nexus_allowed_actions": allowed,
+        "retired_nexus_artifacts": obsolete_artifacts,
+        "retired_nexus_consumers": obsolete_consumers,
         "bridge": bridge,
         "swarm_alignment": swarm_checks,
         "findings": findings,

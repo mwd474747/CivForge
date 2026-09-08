@@ -100,7 +100,7 @@ def auth_status_summary() -> Dict[str, Any]:
         "mutator_scopes": sorted(MUTATOR_SCOPES),
         "static_token_envs": [
             name
-            for name in ("CIVFORGE_OPERATOR_TOKEN", "CIVFORGE_API_KEY", "NEXUS_API_KEY")
+            for name in ("CIVFORGE_OPERATOR_TOKEN", "CIVFORGE_API_KEY")
             if os.environ.get(name)
         ],
     }

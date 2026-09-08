@@ -3,7 +3,7 @@
 #
 # Implements the validated OpenClaw proposal:
 #   CF-GOV-POSTURE-001, CF-CONTRACT-PARITY-002, CF-GOV-RECEIPTS-003,
-#   CF-POLLER-POSTURE-004, CF-EXPOSURE-GUARD-005
+#   CF-POLLER-POSTURE-004 (retired), CF-EXPOSURE-GUARD-005
 #
 # Default: no turn advances. Use --with-gameplay to run full validate-game.
 #
@@ -49,20 +49,17 @@ python3 -m pytest tests/test_civforge_governance_tools.py -q
 echo "3. Contract parity..."
 python3 tools/civforge_contract_parity.py
 
-echo "4. Poller posture..."
-python3 tools/civforge_poller_posture.py
-
-echo "5. Receipt index..."
+echo "4. Receipt index..."
 python3 tools/civforge_receipt_index.py
 
-echo "6. Composite governance posture..."
+echo "5. Composite governance posture..."
 python3 tools/civforge_governance_posture.py
 
 if $WITH_GAMEPLAY; then
-  echo "7. Full validate-game (stateful — advances turns)..."
+  echo "6. Full validate-game (stateful — advances turns)..."
   bash tools/validate-game.sh
 else
-  echo "7. Read-only validate-game (no turn advances)..."
+  echo "6. Read-only validate-game (no turn advances)..."
   bash tools/validate-game.sh --read-only
 fi
 
@@ -83,13 +80,12 @@ cat >"$RECEIPT" <<EOF
 ## Posture artifacts
 - receipts/civforge-governance-posture-latest.json
 - receipts/civforge-contract-parity-latest.json
-- receipts/civforge-poller-posture-latest.json
 - receipts/civforge-receipt-index-latest.json
 
 ## Turnkey
 \`bash tools/turnkey-governance-posture.sh\` (default read-only)
 EOF
 
-echo "8. Receipt: $RECEIPT"
+echo "7. Receipt: $RECEIPT"
 echo "=== Governance posture turnkey PASSED ==="
 echo "HEAD: $HEAD"

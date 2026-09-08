@@ -25,7 +25,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools.civforge_contract_parity import build_report as build_contract_report  # noqa: E402
-from tools.civforge_poller_posture import build_report as build_poller_report  # noqa: E402
 from tools.civforge_receipt_index import build_report as build_receipt_index  # noqa: E402
 from tools.mcp_server import TOOLS  # noqa: E402
 
@@ -66,7 +65,6 @@ def source_feature_checks() -> Dict[str, bool]:
 
 def build_report(write_files: bool = True, probe_live: bool = True) -> Dict[str, Any]:
     contract = build_contract_report(write_files=False)
-    poller = build_poller_report(write_files=False)
     receipt_index = build_receipt_index(write_files=False)
     kernel = get_json(f"{KERNEL}/state") if probe_live else {"ok": None, "skipped": True}
     nexus = get_json(f"{NEXUS}/api/health") if probe_live else {"ok": None, "skipped": True}
@@ -78,15 +76,14 @@ def build_report(write_files: bool = True, probe_live: bool = True) -> Dict[str,
     elif contract["status"] == "warn":
         findings.append({"severity": "warn", "id": "contract_parity_warn", "detail": "contract parity has warning findings"})
 
-    if poller["status"] == "fail":
-        findings.append({"severity": "fail", "id": "poller_posture_fail", "detail": "poller posture has fail findings"})
-    elif poller["status"] == "warn":
-        findings.append({"severity": "warn", "id": "poller_posture_warn", "detail": "poller posture has warning findings"})
-
     if probe_live and not kernel.get("ok"):
         findings.append({"severity": "warn", "id": "kernel_state_unreachable", "detail": kernel.get("error", "")})
-    if probe_live and not nexus.get("ok"):
-        findings.append({"severity": "warn", "id": "nexus_health_unreachable", "detail": nexus.get("error", "")})
+    if probe_live and nexus.get("ok"):
+        findings.append({
+            "severity": "fail",
+            "id": "retired_nexus_endpoint_unexpectedly_live",
+            "detail": "retired dawsos-nexus endpoint on :8082 responded",
+        })
 
     for key, ok in features.items():
         if not ok:
@@ -110,10 +107,9 @@ def build_report(write_files: bool = True, probe_live: bool = True) -> Dict[str,
         },
         "git": git_status_count(),
         "kernel": kernel,
-        "nexus": nexus,
+        "retired_nexus_endpoint": {**nexus, "expected": "dark"},
         "features": features,
         "contract_parity": contract,
-        "poller_posture": poller,
         "receipt_index": receipt_index,
         "findings": findings,
     }

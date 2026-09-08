@@ -2,7 +2,7 @@
 # turnkey-multi-ui-full.sh
 # Executes the turnkey ready work from swarm WP-UI-MULTI-AGENT-EXTENSION-20260614 to completion.
 # Builds, improves, deploys/tests the multi-agent dashboard.
-# Integrates with live 8080 kernel multi-state, 8082, CLI.
+# Integrates with live 8080 kernel multi-state and CLI.
 # Run: bash tools/turnkey-multi-ui-full.sh
 
 set -euo pipefail
@@ -19,9 +19,8 @@ FUN=$(python3 -c 'import sys,json; d=json.load(open("/tmp/state.json")); print(d
 AICIVS=$(python3 -c 'import sys,json; d=json.load(open("/tmp/state.json")); print(len(d.get("ai_civs",[])))')
 echo "  Turn: $TURN Fun: $FUN AI Civs: $AICIVS"
 
-echo "2. Test 8082 integration..."
-curl -sf http://127.0.0.1:8082/api/health > /dev/null || { echo "8082 not live"; exit 1; }
-WHATIF=$(curl -s -X POST http://127.0.0.1:8080/simulation/what_if -H 'Content-Type: application/json' -d '{"investment":5}' | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d.get("fun_impact_estimate",0), "nexus" if "note" not in str(d.get("nexus_context","")) else "fallback")')
+echo "2. Test local what-if simulation..."
+WHATIF=$(curl -s -X POST http://127.0.0.1:8080/simulation/what_if -H 'Content-Type: application/json' -d '{"investment":5}' | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d.get("fun_impact_estimate",0), d.get("context_source"))')
 echo "  what_if: $WHATIF"
 
 echo "3. Run CLI advances for multi play..."
@@ -40,20 +39,7 @@ print('  /state multi fields OK:', len(d.get('map_tiles',[])), 'tiles', len(d.ge
 "
 ls -l frontend/index.html vercel.json .vercelignore 2>/dev/null && echo "  Vercel static multi-ready"
 
-echo "5. Test poller (if key) and receipts..."
-if [ -f "$HOME/.openclaw/runtime/nexus-satellite-api-keys.json" ]; then
-  KEY=$(python3 -c "
-import json, os
-p = os.path.expanduser('~/.openclaw/runtime/nexus-satellite-api-keys.json')
-print(json.load(open(p))['civforge-kernel']['apiKey'])
-" 2>/dev/null || echo "")
-  if [ -n "$KEY" ]; then
-    NEXUS_API_KEY="$KEY" NEXUS_URL=http://127.0.0.1:8082 python3 tools/nexus_command_poller.py --once || true
-    echo "  Poller tested with key"
-  fi
-fi
-
-echo "6. Multi-agent UI test (via state)..."
+echo "5. Multi-agent UI test (via state)..."
 python3 -c '
 import json, sys
 d = json.load(open("/tmp/state.json"))
@@ -62,11 +48,11 @@ print("  Events sample:", d.get("recent_events", [])[:2])
 print("  Receipts count:", len(d.get("receipts", [])))
 ' 
 
-echo "7. Improvement: add simple multi visual test (if serving)"
+echo "6. Improvement: add simple multi visual test (if serving)"
 # For local: the /dashboard or frontend can be "improved" by noting the setup supports it.
 echo "  Improvement loop: visuals/juice via current Tailwind/setup, backend bound."
 
-echo "8. Turnkey complete. Local play:"
+echo "7. Turnkey complete. Local play:"
 echo "   - CLI: python3 tools/civforge_cli.py status / advance"
 echo "   - Local: http://127.0.0.1:8080/dashboard"
 echo "   - Vercel: https://civforge.vercel.app (use ?api_base=... for live kernel)"
