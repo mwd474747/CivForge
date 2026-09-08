@@ -3,4 +3,4 @@ on: [push]
 jobs:
   test: 
     runs-on: ubuntu-latest
-    steps: [{run: 'echo Fun 96 | Dynamics confirmed'}]
+    steps: [{run: 'echo "Fun 96 | Dynamics confirmed"'}]
