@@ -117,10 +117,7 @@ def main():
     # === New commands added per Mac Studio backend lock-in receipt (swarm execution) ===
     sub.add_parser("mcp-serve", help="Start stdio MCP tool server (forwards to kernel :8080)")
     sub.add_parser("advisor", help="Safe gravity advisor (proposal-only, never auto-executes deploy.sh)")
-    sub.add_parser("nexus-poll", help="Poll dawsos-nexus (8082) for pending commands and surface as governed proposals (thin bridge, commands propose not execute). Supports --once/--loop.")
-
-    # Auth/control: Nexus 8082 machine satellite (telemetry + proposals, governance_kernel). Identity long-term auth-prototype 8081. No "replaces" per boundary contract.
-    auth_p = sub.add_parser("auth", help="dawsos-auth identity plane (:8081). Nexus :8082 is machine satellite only.")
+    auth_p = sub.add_parser("auth", help="dawsos-auth identity plane (:8081).")
     auth_p.add_argument("action", nargs="?", default="status", choices=["status", "start", "register-device", "token", "verify"])
     auth_p.add_argument("arg1", nargs="?", default=None)
     auth_p.add_argument("arg2", nargs="?", default=None)
@@ -165,13 +162,6 @@ def main():
         print("  3. Make literal changes ONLY in the separate gravity-mosaic repo")
         print("  4. Then (and only then) run: ./tools/deploy-gravity-mosaic/deploy.sh")
         print("Separation is strictly enforced. CivForge governs; deploy.sh executes under receipts.")
-
-    elif args.cmd == "nexus-poll":
-        poller_script = str(ROOT / "tools" / "nexus_command_poller.py")
-        print("=== dawsos-nexus Command Poller (thin bridge) ===")
-        print("Commands from nexus are surfaced as 8080 proposals (never auto-executed).")
-        print("Run directly with --loop for continuous: python tools/nexus_command_poller.py --loop")
-        subprocess.run(["python3", poller_script, "--once"])
 
     elif args.cmd == "auth":
         identity_script = str(ROOT / "tools" / "dawsos_auth_identity_client.py")

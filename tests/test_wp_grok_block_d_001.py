@@ -83,6 +83,26 @@ def test_mutator_blocked_without_token_when_require_auth(monkeypatch):
     assert blocked.status_code == 401
 
 
+def test_mutator_rejects_retired_nexus_key_when_require_auth(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    import backend.sim_api as api
+
+    monkeypatch.setenv("CIVFORGE_REQUIRE_AUTH", "1")
+    monkeypatch.delenv("CIVFORGE_API_KEY", raising=False)
+    monkeypatch.delenv("CIVFORGE_OPERATOR_TOKEN", raising=False)
+    monkeypatch.setenv("NEXUS_API_KEY", "retired-key-must-not-authorize")
+    api.game_state = build_initial_game_state()
+    api.orchestrator.turn = api.game_state["turn"]
+
+    client = TestClient(api.app)
+    blocked = client.post(
+        "/advance_turn",
+        headers={"X-Nexus-Api-Key": "retired-key-must-not-authorize"},
+    )
+    assert blocked.status_code == 401
+
+
 def test_mutator_accepts_static_api_key_when_require_auth(monkeypatch):
     from fastapi.testclient import TestClient
 
@@ -133,3 +153,22 @@ def test_http_auth_status_route():
     status = client.get("/game/auth/status").json()
     assert status["auth_base"].endswith("8081")
     assert "identity_auth_enabled" in status
+
+
+def test_what_if_uses_only_local_game_state(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    import backend.sim_api as api
+
+    monkeypatch.delenv("CIVFORGE_REQUIRE_AUTH", raising=False)
+    monkeypatch.delenv("CIVFORGE_PUBLIC_MODE", raising=False)
+    api.game_state = build_initial_game_state()
+
+    response = TestClient(api.app).post(
+        "/simulation/what_if",
+        json={"investment": 5},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["context_source"] == "local_game_state"
+    assert "nexus_context" not in payload
